@@ -1,336 +1,1634 @@
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
-<!-- * * * * * * * to get started with your project! * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-<style>
-  :host {
-    --bright-blue: oklch(51.01% 0.274 263.83);
-    --electric-violet: oklch(53.18% 0.28 296.97);
-    --french-violet: oklch(47.66% 0.246 305.88);
-    --vivid-pink: oklch(69.02% 0.277 332.77);
-    --hot-red: oklch(61.42% 0.238 15.34);
-    --orange-red: oklch(63.32% 0.24 31.68);
-
-    --gray-900: oklch(19.37% 0.006 300.98);
-    --gray-700: oklch(36.98% 0.014 302.71);
-    --gray-400: oklch(70.9% 0.015 304.04);
-
-    --red-to-pink-to-purple-vertical-gradient: linear-gradient(
-      180deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
-
-    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(
-      90deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
-
-    --pill-accent: var(--bright-blue);
-
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  h1 {
-    font-size: 3.125rem;
-    color: var(--gray-900);
-    font-weight: 500;
-    line-height: 100%;
-    letter-spacing: -0.125rem;
-    margin: 0;
-    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
-  }
-
-  p {
-    margin: 0;
-    color: var(--gray-700);
-  }
-
-  main {
-    width: 100%;
-    min-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-    box-sizing: inherit;
-    position: relative;
-  }
-
-  .angular-logo {
-    max-width: 9.2rem;
-  }
-
-  .content {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    max-width: 700px;
-    margin-bottom: 3rem;
-  }
-
-  .content h1 {
-    margin-top: 1.75rem;
-  }
-
-  .content p {
-    margin-top: 1.5rem;
-  }
-
-  .divider {
-    width: 1px;
-    background: var(--red-to-pink-to-purple-vertical-gradient);
-    margin-inline: 0.5rem;
-  }
-
-  .pill-group {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-  }
-
-  .pill {
-    display: flex;
-    align-items: center;
-    --pill-accent: var(--bright-blue);
-    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);
-    color: var(--pill-accent);
-    padding-inline: 0.75rem;
-    padding-block: 0.375rem;
-    border-radius: 2.75rem;
-    border: 0;
-    transition: background 0.3s ease;
-    font-family: var(--inter-font);
-    font-size: 0.875rem;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 1.4rem;
-    letter-spacing: -0.00875rem;
-    text-decoration: none;
-  }
-
-  .pill:hover {
-    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
-  }
-
-  .pill-group .pill:nth-child(6n + 1) {
-    --pill-accent: var(--bright-blue);
-  }
-  .pill-group .pill:nth-child(6n + 2) {
-    --pill-accent: var(--french-violet);
-  }
-  .pill-group .pill:nth-child(6n + 3),
-  .pill-group .pill:nth-child(6n + 4),
-  .pill-group .pill:nth-child(6n + 5) {
-    --pill-accent: var(--hot-red);
-  }
-
-  .pill-group svg {
-    margin-inline-start: 0.25rem;
-  }
-
-  .social-links {
-    display: flex;
-    align-items: center;
-    gap: 0.73rem;
-    margin-top: 1.5rem;
-  }
-
-  .social-links path {
-    transition: fill 0.3s ease;
-    fill: var(--gray-400);
-  }
-
-  .social-links a:hover svg path {
-    fill: var(--gray-900);
-  }
-
-  @media screen and (max-width: 650px) {
-    .content {
-      flex-direction: column;
-      width: max-content;
-    }
-
-    .divider {
-      height: 1px;
-      width: 100%;
-      background: var(--red-to-pink-to-purple-horizontal-gradient);
-      margin-block: 1.5rem;
-    }
-  }
-</style>
-
-<main class="main">
-  <div class="content">
-    <div class="left-side">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 982 239"
-        fill="none"
-        class="angular-logo"
-      >
-        <g clip-path="url(#a)">
-          <path
-            fill="url(#b)"
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"
-          />
-          <path
-            fill="url(#c)"
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"
-          />
-        </g>
-        <defs>
-          <radialGradient
-            id="c"
-            cx="0"
-            cy="0"
-            r="1"
-            gradientTransform="rotate(118.122 171.182 60.81) scale(205.794)"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stop-color="#FF41F8" />
-            <stop offset=".707" stop-color="#FF41F8" stop-opacity=".5" />
-            <stop offset="1" stop-color="#FF41F8" stop-opacity="0" />
-          </radialGradient>
-          <linearGradient
-            id="b"
-            x1="0"
-            x2="982"
-            y1="192"
-            y2="192"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stop-color="#F0060B" />
-            <stop offset="0" stop-color="#F0070C" />
-            <stop offset=".526" stop-color="#CC26D5" />
-            <stop offset="1" stop-color="#7702FF" />
-          </linearGradient>
-          <clipPath id="a"><path fill="#fff" d="M0 0h982v239H0z" /></clipPath>
-        </defs>
-      </svg>
-      <h1>Hello, {{ title }}</h1>
-      <p>Congratulations! Your app is running. 🎉</p>
-    </div>
-    <div class="divider" role="separator" aria-label="Divider"></div>
-    <div class="right-side">
-      <div class="pill-group">
-        @for (item of [
-          { title: 'Explore the Docs', link: 'https://angular.dev' },
-          { title: 'Learn with Tutorials', link: 'https://angular.dev/tutorials' },
-          { title: 'CLI Docs', link: 'https://angular.dev/tools/cli' },
-          { title: 'Angular Language Service', link: 'https://angular.dev/tools/language-service' },
-          { title: 'Angular DevTools', link: 'https://angular.dev/tools/devtools' },
-        ]; track item.title) {
-          <a
-            class="pill"
-            [href]="item.link"
-            target="_blank"
-            rel="noopener"
-          >
-            <span>{{ item.title }}</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="14"
-              viewBox="0 -960 960 960"
-              width="14"
-              fill="currentColor"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
-              />
-            </svg>
-          </a>
-        }
+<!-- Dashboard View -->
+<div class="dashboard-overlay" *ngIf="isDashboardView">
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <h2>Helm<span class="accent">IoT</span></h2>
+        </div>
+        <button class="close-btn" (click)="hideDashboard()">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      <div class="social-links">
-        <a
-          href="https://github.com/angular/angular"
-          aria-label="Github"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="25"
-            height="24"
-            viewBox="0 0 25 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Github"
-          >
-            <path
-              d="M12.3047 0C5.50634 0 0 5.50942 0 12.3047C0 17.7423 3.52529 22.3535 8.41332 23.9787C9.02856 24.0946 9.25414 23.7142 9.25414 23.3871C9.25414 23.0949 9.24389 22.3207 9.23876 21.2953C5.81601 22.0377 5.09414 19.6444 5.09414 19.6444C4.53427 18.2243 3.72524 17.8449 3.72524 17.8449C2.61064 17.082 3.81137 17.0973 3.81137 17.0973C5.04697 17.1835 5.69604 18.3647 5.69604 18.3647C6.79321 20.2463 8.57636 19.7029 9.27978 19.3881C9.39052 18.5924 9.70736 18.0499 10.0591 17.7423C7.32641 17.4347 4.45429 16.3765 4.45429 11.6618C4.45429 10.3185 4.9311 9.22133 5.72065 8.36C5.58222 8.04931 5.16694 6.79833 5.82831 5.10337C5.82831 5.10337 6.85883 4.77319 9.2121 6.36459C10.1965 6.09082 11.2424 5.95546 12.2883 5.94931C13.3342 5.95546 14.3801 6.09082 15.3644 6.36459C17.7023 4.77319 18.7328 5.10337 18.7328 5.10337C19.3942 6.79833 18.9789 8.04931 18.8559 8.36C19.6403 9.22133 20.1171 10.3185 20.1171 11.6618C20.1171 16.3888 17.2409 17.4296 14.5031 17.7321C14.9338 18.1012 15.3337 18.8559 15.3337 20.0084C15.3337 21.6552 15.3183 22.978 15.3183 23.3779C15.3183 23.7009 15.5336 24.0854 16.1642 23.9623C21.0871 22.3484 24.6094 17.7341 24.6094 12.3047C24.6094 5.50942 19.0999 0 12.3047 0Z"
-            />
-          </svg>
-        </a>
-        <a
-          href="https://twitter.com/angular"
-          aria-label="Twitter"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Twitter"
-          >
-            <path
-              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-            />
-          </svg>
-        </a>
-        <a
-          href="https://www.youtube.com/channel/UCbn1OgGei-DV7aSRo_HaAiw"
-          aria-label="Youtube"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="29"
-            height="20"
-            viewBox="0 0 29 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Youtube"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M27.4896 1.52422C27.9301 1.96749 28.2463 2.51866 28.4068 3.12258C29.0004 5.35161 29.0004 10 29.0004 10C29.0004 10 29.0004 14.6484 28.4068 16.8774C28.2463 17.4813 27.9301 18.0325 27.4896 18.4758C27.0492 18.9191 26.5 19.2389 25.8972 19.4032C23.6778 20 14.8068 20 14.8068 20C14.8068 20 5.93586 20 3.71651 19.4032C3.11363 19.2389 2.56449 18.9191 2.12405 18.4758C1.68361 18.0325 1.36732 17.4813 1.20683 16.8774C0.613281 14.6484 0.613281 10 0.613281 10C0.613281 10 0.613281 5.35161 1.20683 3.12258C1.36732 2.51866 1.68361 1.96749 2.12405 1.52422C2.56449 1.08095 3.11363 0.76113 3.71651 0.596774C5.93586 0 14.8068 0 14.8068 0C14.8068 0 23.6778 0 25.8972 0.596774C26.5 0.76113 27.0492 1.08095 27.4896 1.52422ZM19.3229 10L11.9036 5.77905V14.221L19.3229 10Z"
-            />
-          </svg>
-        </a>
+      
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item" [class.active]="activeSidebarItem === 'dashboard'">
+            <a (click)="setActiveSidebarItem('dashboard')">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item" [class.active]="activeSidebarItem === 'equipments'">
+            <a (click)="setActiveSidebarItem('equipments')">
+              <i class="fas fa-hard-hat"></i>
+              <span>Equipos</span>
+            </a>
+          </li>
+          <li class="nav-item" [class.active]="activeSidebarItem === 'helmets'">
+            <a (click)="setActiveSidebarItem('helmets')">
+              <i class="fas fa-shield-alt"></i>
+              <span>Cascos</span>
+            </a>
+          </li>
+          <li class="nav-item" [class.active]="activeSidebarItem === 'alerts'">
+            <a (click)="setActiveSidebarItem('alerts')">
+              <i class="fas fa-bell"></i>
+              <span>Alertas</span>
+              <span class="alert-badge" *ngIf="getTotalStats().totalAlerts > 0">{{ getTotalStats().totalAlerts }}</span>
+            </a>
+          </li>
+          <li class="nav-item" [class.active]="activeSidebarItem === 'reports'">
+            <a (click)="setActiveSidebarItem('reports')">
+              <i class="fas fa-chart-bar"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+          <li class="nav-item" [class.active]="activeSidebarItem === 'settings'">
+            <a (click)="setActiveSidebarItem('settings')">
+              <i class="fas fa-cog"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Admin User</span>
+            <span class="user-role">Supervisor</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="dashboard-header">
+        <div class="header-left">
+          <div class="breadcrumbs">
+            <span class="breadcrumb-item">Dashboard</span>
+            <i class="fas fa-chevron-right"></i>
+            <span class="breadcrumb-item active">General</span>
+          </div>
+          <h1>Dashboard General</h1>
+        </div>
+        
+        <div class="header-right">
+          <button class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Crear Nuevo Equipo
+          </button>
+          
+          <div class="header-actions">
+            <button class="action-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge" *ngIf="getTotalStats().totalAlerts > 0">{{ getTotalStats().totalAlerts }}</span>
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-user-circle"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Stats Cards -->
+      <section class="stats-section">
+        <div class="stats-grid">
+          <div class="stat-card glass">
+            <div class="stat-icon">
+              <i class="fas fa-hard-hat"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ getTotalStats().totalEquipments }}</h3>
+              <p>Total Equipos</p>
+            </div>
+          </div>
+          
+          <div class="stat-card glass">
+            <div class="stat-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ getTotalStats().totalHelmets }}</h3>
+              <p>Total Cascos</p>
+            </div>
+          </div>
+          
+          <div class="stat-card glass">
+            <div class="stat-icon active">
+              <i class="fas fa-wifi"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ getTotalStats().activeHelmets }}</h3>
+              <p>Cascos Activos</p>
+            </div>
+          </div>
+          
+          <div class="stat-card glass">
+            <div class="stat-icon warning">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ getTotalStats().totalAlerts }}</h3>
+              <p>Alertas Activas</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters and Search -->
+      <section class="filters-section">
+        <div class="filters-container">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input 
+              type="text" 
+              placeholder="Buscar equipos o ubicaciones..."
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange()"
+            >
+          </div>
+          
+          <div class="filter-options">
+            <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+              <option value="all">Todos los estados</option>
+              <option value="active">Activos</option>
+              <option value="warning">Advertencia</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+            
+            <button class="btn btn-secondary">
+              <i class="fas fa-filter"></i>
+              Filtros Avanzados
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Equipment Grid -->
+      <section class="equipment-section">
+        <div class="section-header">
+          <h2>Equipos de Minería</h2>
+          <span class="results-count">{{ filteredEquipments.length }} equipos encontrados</span>
+        </div>
+        
+        <div class="equipment-grid">
+          <div class="equipment-card glass" *ngFor="let equipment of filteredEquipments">
+            <div class="card-header">
+              <div class="equipment-info">
+                <h3>{{ equipment.name }}</h3>
+                <span class="location">
+                  <i class="fas fa-map-marker-alt"></i>
+                  {{ equipment.location }}
+                </span>
+              </div>
+              <div class="status-badge" [style.background-color]="getStatusColor(equipment.status)">
+                {{ getStatusText(equipment.status) }}
+              </div>
+            </div>
+            
+            <div class="card-stats">
+              <div class="stat-item">
+                <span class="stat-label">Cascos</span>
+                <span class="stat-value">{{ equipment.activeHelmets }}/{{ equipment.totalHelmets }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Alertas</span>
+                <span class="stat-value" [class.alert]="equipment.alerts > 0">{{ equipment.alerts }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Última actualización</span>
+                <span class="stat-value">{{ equipment.lastUpdate }}</span>
+              </div>
+            </div>
+            
+            <div class="miners-preview">
+              <h4>Mineros</h4>
+              <div class="miners-list">
+                <div class="miner-avatar" *ngFor="let miner of equipment.miners.slice(0, 3)" 
+                     [style.border-color]="getMinersStatusColor(miner.status)">
+                  <span>{{ miner.avatar }}</span>
+                  <div class="status-dot" [style.background-color]="getMinersStatusColor(miner.status)"></div>
+                </div>
+                <div class="more-miners" *ngIf="equipment.miners.length > 3">
+                  +{{ equipment.miners.length - 3 }}
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-actions">
+              <button class="btn btn-secondary" (click)="showDetail(equipment)">
+                <i class="fas fa-eye"></i>
+                Ver Detalle
+              </button>
+              <button class="btn btn-secondary">
+                <i class="fas fa-edit"></i>
+                Editar
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="filteredEquipments.length === 0">
+          <div class="empty-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>No se encontraron equipos</h3>
+          <p>Intenta ajustar los filtros o términos de búsqueda</p>
+          <button class="btn btn-primary" (click)="searchTerm = ''; statusFilter = 'all'; filterEquipments()">
+            Limpiar Filtros
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Register View -->
+<div class="register-overlay" *ngIf="isRegisterView">
+  <div class="register-container">
+    <!-- Left Side - Form -->
+    <div class="register-form-side">
+      <div class="register-header">
+        <button class="close-btn" (click)="hideRegister()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="logo">
+          <h2>Helm<span class="accent">IoT</span></h2>
+        </div>
+      </div>
+      
+      <div class="register-card glass">
+        <div class="register-content">
+          <h1>Crear Cuenta</h1>
+          <p class="register-subtitle">Únete a la revolución de la seguridad minera</p>
+          
+          <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="register-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">Nombre</label>
+                <div class="input-wrapper" [class]="getFieldStatus('firstName')">
+                  <i class="fas fa-user input-icon"></i>
+                  <input 
+                    type="text" 
+                    id="firstName" 
+                    formControlName="firstName"
+                    placeholder="Tu nombre"
+                  >
+                  <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('firstName') === 'valid'"></i>
+                  <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('firstName') === 'invalid'"></i>
+                </div>
+                <span class="error-message" *ngIf="getRegisterErrorMessage('firstName')">
+                  {{ getRegisterErrorMessage('firstName') }}
+                </span>
+              </div>
+              
+              <div class="form-group">
+                <label for="lastName">Apellido</label>
+                <div class="input-wrapper" [class]="getFieldStatus('lastName')">
+                  <i class="fas fa-user input-icon"></i>
+                  <input 
+                    type="text" 
+                    id="lastName" 
+                    formControlName="lastName"
+                    placeholder="Tu apellido"
+                  >
+                  <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('lastName') === 'valid'"></i>
+                  <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('lastName') === 'invalid'"></i>
+                </div>
+                <span class="error-message" *ngIf="getRegisterErrorMessage('lastName')">
+                  {{ getRegisterErrorMessage('lastName') }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="registerEmail">Email</label>
+              <div class="input-wrapper" [class]="getFieldStatus('email')">
+                <i class="fas fa-envelope input-icon"></i>
+                <input 
+                  type="email" 
+                  id="registerEmail" 
+                  formControlName="email"
+                  placeholder="tu@email.com"
+                >
+                <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('email') === 'valid'"></i>
+                <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('email') === 'invalid'"></i>
+              </div>
+              <span class="error-message" *ngIf="getRegisterErrorMessage('email')">
+                {{ getRegisterErrorMessage('email') }}
+              </span>
+            </div>
+            
+            <div class="form-group">
+              <label for="username">Nombre de Usuario</label>
+              <div class="input-wrapper" [class]="getFieldStatus('username')">
+                <i class="fas fa-at input-icon"></i>
+                <input 
+                  type="text" 
+                  id="username" 
+                  formControlName="username"
+                  placeholder="usuario123"
+                >
+                <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('username') === 'valid'"></i>
+                <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('username') === 'invalid'"></i>
+              </div>
+              <span class="error-message" *ngIf="getRegisterErrorMessage('username')">
+                {{ getRegisterErrorMessage('username') }}
+              </span>
+            </div>
+            
+            <div class="form-group">
+              <label for="registerPassword">Contraseña</label>
+              <div class="input-wrapper" [class]="getFieldStatus('password')">
+                <i class="fas fa-lock input-icon"></i>
+                <input 
+                  type="password" 
+                  id="registerPassword" 
+                  formControlName="password"
+                  placeholder="••••••••"
+                >
+                <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('password') === 'valid'"></i>
+                <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('password') === 'invalid'"></i>
+              </div>
+              
+              <!-- Password Strength Indicator -->
+              <div class="password-strength" *ngIf="registerForm.get('password') && registerForm.get('password')!.value">
+                <div class="strength-bar">
+                  <div class="strength-fill" [class]="getPasswordStrength()"></div>
+                </div>
+                <span class="strength-text" [class]="getPasswordStrength()">
+                  {{ getPasswordStrength() === 'weak' ? 'Débil' : 
+                     getPasswordStrength() === 'medium' ? 'Media' : 
+                     getPasswordStrength() === 'strong' ? 'Fuerte' : '' }}
+                </span>
+              </div>
+              
+              <span class="error-message" *ngIf="getRegisterErrorMessage('password')">
+                {{ getRegisterErrorMessage('password') }}
+              </span>
+            </div>
+            
+            <div class="form-group">
+              <label for="confirmPassword">Confirmar Contraseña</label>
+              <div class="input-wrapper" [class]="getFieldStatus('confirmPassword')">
+                <i class="fas fa-lock input-icon"></i>
+                <input 
+                  type="password" 
+                  id="confirmPassword" 
+                  formControlName="confirmPassword"
+                  placeholder="••••••••"
+                >
+                <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('confirmPassword') === 'valid'"></i>
+                <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('confirmPassword') === 'invalid'"></i>
+              </div>
+              <span class="error-message" *ngIf="getRegisterErrorMessage('confirmPassword')">
+                {{ getRegisterErrorMessage('confirmPassword') }}
+              </span>
+            </div>
+            
+            <div class="form-options">
+              <label class="checkbox-wrapper">
+                <input type="checkbox" required>
+                <span class="checkmark"></span>
+                Acepto los <a href="#" class="accent-link">términos y condiciones</a>
+              </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary register-btn" [disabled]="registerForm.invalid">
+              <i class="fas fa-user-plus"></i>
+              Crear Cuenta
+            </button>
+            
+            <div class="success-alert" *ngIf="registerError && !registerError.includes('incorrectas')">
+              <i class="fas fa-check-circle"></i>
+              {{ registerError }}
+            </div>
+            
+            <div class="error-alert" *ngIf="registerError && registerError.includes('incorrectas')">
+              <i class="fas fa-exclamation-triangle"></i>
+              {{ registerError }}
+            </div>
+          </form>
+          
+          <div class="register-footer">
+            <p>¿Ya tienes cuenta? <a (click)="showLogin()" class="accent-link">Iniciar Sesión</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Side - Visual -->
+    <div class="register-visual-side">
+      <div class="visual-content">
+        <div class="tech-particles">
+          <div class="particle" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"></div>
+        </div>
+        
+        <div class="features-preview glass">
+          <div class="preview-header">
+            <h3>Características Premium</h3>
+            <div class="preview-badge">
+              <i class="fas fa-star"></i>
+              <span>PRO</span>
+            </div>
+          </div>
+          
+          <div class="features-list">
+            <div class="feature-item">
+              <i class="fas fa-shield-alt"></i>
+              <span>Seguridad de nivel empresarial</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-chart-line"></i>
+              <span>Analytics avanzados</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-bell"></i>
+              <span>Alertas personalizadas</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-users"></i>
+              <span>Soporte 24/7</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-mobile-alt"></i>
+              <span>App móvil incluida</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-cloud"></i>
+              <span>Backup automático</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stats-preview glass">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-number">500+</div>
+              <div class="stat-label">Empresas</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">10K+</div>
+              <div class="stat-label">Cascos Activos</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">99.9%</div>
+              <div class="stat-label">Uptime</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tech-quote">
+          <blockquote>
+            "La tecnología que salva vidas hoy, construye el futuro de mañana"
+          </blockquote>
+        </div>
       </div>
     </div>
   </div>
-</main>
+</div>
 
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- Login View -->
+<div class="login-overlay" *ngIf="isLoginView">
+  <div class="login-container">
+    <!-- Left Side - Form -->
+    <div class="login-form-side">
+      <div class="login-header">
+        <button class="close-btn" (click)="hideLogin()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="logo">
+          <h2>Helm<span class="accent">IoT</span></h2>
+        </div>
+      </div>
+      
+      <div class="login-card glass">
+        <div class="login-content">
+          <h1>Bienvenido de vuelta</h1>
+          <p class="login-subtitle">Accede a tu dashboard de monitoreo</p>
+          
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <div class="input-wrapper">
+                <i class="fas fa-envelope input-icon"></i>
+                <input 
+                  type="email" 
+                  id="email" 
+                  formControlName="email"
+                  placeholder="tu@email.com"
+                  [class.error]="getErrorMessage('email')"
+                >
+              </div>
+              <span class="error-message" *ngIf="getErrorMessage('email')">
+                {{ getErrorMessage('email') }}
+              </span>
+            </div>
+            
+            <div class="form-group">
+              <label for="password">Contraseña</label>
+              <div class="input-wrapper">
+                <i class="fas fa-lock input-icon"></i>
+                <input 
+                  type="password" 
+                  id="password" 
+                  formControlName="password"
+                  placeholder="••••••••"
+                  [class.error]="getErrorMessage('password')"
+                >
+              </div>
+              <span class="error-message" *ngIf="getErrorMessage('password')">
+                {{ getErrorMessage('password') }}
+              </span>
+            </div>
+            
+            <div class="form-options">
+              <label class="checkbox-wrapper">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+                Recordarme
+              </label>
+              <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+            </div>
+            
+            <button type="submit" class="btn btn-primary login-btn" [disabled]="loginForm.invalid">
+              <i class="fas fa-sign-in-alt"></i>
+              Iniciar Sesión
+            </button>
+            
+            <div class="error-alert" *ngIf="loginError">
+              <i class="fas fa-exclamation-triangle"></i>
+              {{ loginError }}
+            </div>
+          </form>
+          
+          <div class="login-footer">
+            <p>¿No tienes cuenta? <a (click)="showRegister()" class="accent-link">Crear cuenta</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Side - Visual -->
+    <div class="login-visual-side">
+      <div class="visual-content">
+        <div class="tech-particles">
+          <div class="particle" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]"></div>
+        </div>
+        
+        <div class="dashboard-preview glass">
+          <div class="preview-header">
+            <h3>Dashboard en Tiempo Real</h3>
+            <div class="status-indicators">
+              <span class="status-dot online"></span>
+              <span class="status-dot online"></span>
+              <span class="status-dot offline"></span>
+            </div>
+          </div>
+          
+          <div class="preview-widgets">
+            <div class="widget temp-widget">
+              <div class="widget-header">
+                <i class="fas fa-thermometer-half"></i>
+                <span>Temperatura</span>
+              </div>
+              <div class="widget-value">36.5°C</div>
+              <div class="widget-status normal">Normal</div>
+            </div>
+            
+            <div class="widget movement-widget">
+              <div class="widget-header">
+                <i class="fas fa-running"></i>
+                <span>Movimiento</span>
+              </div>
+              <div class="widget-value">Activo</div>
+              <div class="widget-status active">En línea</div>
+            </div>
+            
+            <div class="widget gps-widget">
+              <div class="widget-header">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Ubicación</span>
+              </div>
+              <div class="widget-value">Zona A-12</div>
+              <div class="widget-status safe">Segura</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tech-quote">
+          <blockquote>
+            "La seguridad no es un gasto, es una inversión en el futuro de tu equipo"
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Landing Page (Original Content) -->
+<div class="landing-page" [class.hidden]="isLoginView || isRegisterView || isDashboardView || isDetailView || isSettingsView">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <div class="logo">
+          <h2>Helm<span class="accent">IoT</span></h2>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#features">Características</a></li>
+          <li><a href="#testimonials">Casos de Éxito</a></li>
+          <li><a href="#contact">Contacto</a></li>
+          <li><a (click)="showLogin()" class="btn btn-secondary">Iniciar Sesión</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
-<router-outlet />
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            Monitoreo Inteligente de 
+            <span class="accent">Cascos IoT</span>
+          </h1>
+          <p class="hero-description">
+            Protege a tus mineros con tecnología de vanguardia. Monitoreo en tiempo real de temperatura, 
+            movimiento, ubicación y más. Seguridad que nunca duerme.
+          </p>
+          <div class="hero-buttons">
+            <a href="#" class="btn btn-primary">
+              <i class="fab fa-apple"></i>
+              App Store
+            </a>
+            <a href="#" class="btn btn-secondary">
+              <i class="fab fa-google-play"></i>
+              Google Play
+            </a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-image glass">
+            <div class="mockup-phone">
+              <div class="phone-screen">
+                <div class="app-preview">
+                  <div class="status-bar">
+                    <span class="status-dot active"></span>
+                    <span class="status-dot active"></span>
+                    <span class="status-dot active"></span>
+                  </div>
+                  <div class="dashboard-preview">
+                    <div class="sensor-widget temp">
+                      <span class="sensor-value">36.5°C</span>
+                      <span class="sensor-label">Temperatura</span>
+                    </div>
+                    <div class="sensor-widget movement">
+                      <span class="sensor-value">Normal</span>
+                      <span class="sensor-label">Movimiento</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Características Principales</h2>
+        <p>Tecnología avanzada para la seguridad minera</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card glass fade-in">
+          <div class="feature-icon temp">
+            <i class="fas fa-thermometer-half"></i>
+          </div>
+          <h3>Monitoreo de Temperatura</h3>
+          <p>Control en tiempo real de la temperatura corporal de cada minero con alertas automáticas.</p>
+        </div>
+        
+        <div class="feature-card glass fade-in">
+          <div class="feature-icon movement">
+            <i class="fas fa-running"></i>
+          </div>
+          <h3>Detección de Movimiento</h3>
+          <p>Sensores de acelerómetro que detectan caídas y movimientos anómalos instantáneamente.</p>
+        </div>
+        
+        <div class="feature-card glass fade-in">
+          <div class="feature-icon gps">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <h3>Rastreo GPS</h3>
+          <p>Ubicación precisa de cada minero en tiempo real con geofencing inteligente.</p>
+        </div>
+        
+        <div class="feature-card glass fade-in">
+          <div class="feature-icon pressure">
+            <i class="fas fa-tachometer-alt"></i>
+          </div>
+          <h3>Monitoreo Ambiental</h3>
+          <p>Control de presión atmosférica y humedad para condiciones óptimas de trabajo.</p>
+        </div>
+        
+        <div class="feature-card glass fade-in">
+          <div class="feature-icon battery">
+            <i class="fas fa-battery-three-quarters"></i>
+          </div>
+          <h3>Batería de Larga Duración</h3>
+          <p>Hasta 48 horas de autonomía con alertas de batería baja y carga rápida.</p>
+        </div>
+        
+        <div class="feature-card glass fade-in">
+          <div class="feature-icon analytics">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Analytics Avanzados</h3>
+          <p>Reportes detallados y análisis predictivo para optimizar la seguridad.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <h2>Casos de Éxito</h2>
+        <p>Empresas que confían en nuestra tecnología</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card glass fade-in">
+          <div class="testimonial-content">
+            <p>"HelmIoT ha reducido nuestros incidentes en un 85%. La detección temprana de problemas de salud ha salvado vidas."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-info">
+              <h4>Carlos Mendoza</h4>
+              <span>Gerente de Seguridad, Minera del Norte</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card glass fade-in">
+          <div class="testimonial-content">
+            <p>"La implementación fue sencilla y el ROI se vio en los primeros 3 meses. Nuestros mineros se sienten más seguros."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-info">
+              <h4>Ana Rodríguez</h4>
+              <span>Directora de Operaciones, CobreMax</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card glass fade-in">
+          <div class="testimonial-content">
+            <p>"El sistema de alertas nos permite responder inmediatamente a emergencias. Es como tener un guardián digital."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-info">
+              <h4>Miguel Torres</h4>
+              <span>Superintendente, OroVerde</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Helm<span class="accent">IoT</span></h3>
+          <p>Seguridad inteligente para la minería del futuro.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Producto</h4>
+          <ul>
+            <li><a href="#features">Características</a></li>
+            <li><a href="#">Precios</a></li>
+            <li><a href="#">Documentación</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Empresa</h4>
+          <ul>
+            <li><a href="#">Acerca de</a></li>
+            <li><a href="#">Contacto</a></li>
+            <li><a href="#">Soporte</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacidad</a></li>
+            <li><a href="#">Términos</a></li>
+            <li><a href="#">Cookies</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 HelmIoT. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- Detail View -->
+<div class="detail-overlay" *ngIf="isDetailView && selectedEquipment">
+  <div class="detail-container">
+    <!-- Header -->
+    <header class="detail-header">
+      <div class="header-left">
+        <button class="back-btn" (click)="hideDetail()">
+          <i class="fas fa-arrow-left"></i>
+          Volver al Dashboard
+        </button>
+        <div class="equipment-info">
+          <h1>{{ selectedEquipment.name }}</h1>
+          <div class="equipment-meta">
+            <span class="location">
+              <i class="fas fa-map-marker-alt"></i>
+              {{ selectedEquipment.location }}
+            </span>
+            <span class="status-badge" [style.background-color]="getStatusColor(selectedEquipment.status)">
+              {{ getStatusText(selectedEquipment.status) }}
+            </span>
+            <span class="last-update">
+              <i class="fas fa-clock"></i>
+              Última actualización: {{ selectedEquipment.lastUpdate }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div class="time-range-selector">
+          <select [(ngModel)]="selectedTimeRange" (change)="onTimeRangeChange()">
+            <option value="1h">Última hora</option>
+            <option value="6h">Últimas 6 horas</option>
+            <option value="24h" selected>Últimas 24 horas</option>
+            <option value="7d">Últimos 7 días</option>
+          </select>
+        </div>
+        
+        <button class="btn btn-primary">
+          <i class="fas fa-download"></i>
+          Exportar Reporte
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="detail-content">
+      <!-- Stats Overview -->
+      <section class="stats-overview">
+        <div class="stats-grid">
+          <div class="stat-card glass">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ selectedEquipment.activeHelmets }}/{{ selectedEquipment.totalHelmets }}</h3>
+              <p>Mineros Activos</p>
+            </div>
+          </div>
+          
+          <div class="stat-card glass">
+            <div class="stat-icon warning">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ selectedEquipment.alerts }}</h3>
+              <p>Alertas Activas</p>
+            </div>
+          </div>
+          
+          <div class="stat-card glass">
+            <div class="stat-icon">
+              <i class="fas fa-thermometer-half"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ (sensorData.length > 0 ? sensorData[sensorData.length - 1].temperature : 0).toFixed(1) }}°C</h3>
+              <p>Temperatura Promedio</p>
+            </div>
+          </div>
+          
+          <div class="stat-card glass">
+            <div class="stat-icon">
+              <i class="fas fa-battery-three-quarters"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ (sensorData.length > 0 ? sensorData[sensorData.length - 1].battery : 0).toFixed(0) }}%</h3>
+              <p>Batería Promedio</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts and Data -->
+      <section class="charts-section">
+        <div class="charts-grid">
+          <!-- Temperature Chart -->
+          <div class="chart-card glass">
+            <div class="chart-header">
+              <h3>Temperatura en Tiempo Real</h3>
+              <div class="chart-legend">
+                <span class="legend-item">
+                  <span class="legend-color normal"></span>
+                  Normal
+                </span>
+                <span class="legend-item">
+                  <span class="legend-color warning"></span>
+                  Advertencia
+                </span>
+                <span class="legend-item">
+                  <span class="legend-color critical"></span>
+                  Crítico
+                </span>
+              </div>
+            </div>
+            <div class="chart-container">
+              <div class="chart-line">
+                <div class="chart-point" 
+                     *ngFor="let data of sensorData; let i = index"
+                     [style.left]="(i / (sensorData.length - 1)) * 100 + '%'"
+                     [style.bottom]="((data.temperature - 30) / 15) * 100 + '%'"
+                     [style.background-color]="getTemperatureColor(data.temperature)">
+                </div>
+              </div>
+              <div class="chart-labels">
+                <span>30°C</span>
+                <span>45°C</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Battery Chart -->
+          <div class="chart-card glass">
+            <div class="chart-header">
+              <h3>Nivel de Batería</h3>
+            </div>
+            <div class="chart-container">
+              <div class="battery-bars">
+                <div class="battery-bar" 
+                     *ngFor="let data of sensorData; let i = index"
+                     [style.height]="data.battery + '%'"
+                     [style.background-color]="getBatteryColor(data.battery)">
+                </div>
+              </div>
+              <div class="chart-labels">
+                <span>0%</span>
+                <span>100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Miners and Alerts -->
+      <section class="miners-alerts-section">
+        <div class="miners-alerts-grid">
+          <!-- Miners List -->
+          <div class="miners-card glass">
+            <div class="card-header">
+              <h3>Mineros Activos</h3>
+              <div class="miner-filter">
+                <select [(ngModel)]="selectedMiner">
+                  <option value="">Todos los mineros</option>
+                  <option *ngFor="let miner of minersDetail" [value]="miner.id">
+                    {{ miner.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="miners-list">
+              <div class="miner-item" 
+                   *ngFor="let miner of getFilteredMiners()"
+                   [class.selected]="selectedMiner === miner.id"
+                   (click)="onMinerSelect(miner.id)">
+                <div class="miner-avatar" [style.border-color]="getMinersStatusColor(miner.status)">
+                  <span>{{ miner.avatar }}</span>
+                  <div class="status-dot" [style.background-color]="getMinersStatusColor(miner.status)"></div>
+                </div>
+                
+                <div class="miner-info">
+                  <h4>{{ miner.name }}</h4>
+                  <span class="miner-location">{{ miner.location }}</span>
+                  <span class="miner-activity">Activo: {{ miner.lastActivity }}</span>
+                </div>
+                
+                <div class="miner-stats">
+                  <div class="stat-item">
+                    <span class="stat-label">Temp</span>
+                    <span class="stat-value" [style.color]="getTemperatureColor(miner.temperature)">
+                      {{ miner.temperature.toFixed(1) }}°C
+                    </span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Batería</span>
+                    <span class="stat-value" [style.color]="getBatteryColor(miner.battery)">
+                      {{ miner.battery }}%
+                    </span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Ritmo Cardíaco</span>
+                    <span class="stat-value" [style.color]="getHeartRateColor(miner.heartRate)">
+                      {{ miner.heartRate }} bpm
+                    </span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">O₂</span>
+                    <span class="stat-value" [style.color]="getOxygenColor(miner.oxygenLevel)">
+                      {{ miner.oxygenLevel }}%
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="miner-alerts" *ngIf="miner.alerts > 0">
+                  <span class="alert-count">{{ miner.alerts }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alerts Panel -->
+          <div class="alerts-card glass">
+            <div class="card-header">
+              <h3>Alertas Activas</h3>
+              <span class="alerts-count">{{ getFilteredAlerts().length }}</span>
+            </div>
+            
+            <div class="alerts-list">
+              <div class="alert-item" *ngFor="let alert of getFilteredAlerts()">
+                <div class="alert-icon" [style.background-color]="getAlertTypeColor(alert.type)">
+                  <i [class]="getAlertTypeIcon(alert.type)"></i>
+                </div>
+                
+                <div class="alert-content">
+                  <h4>{{ alert.title }}</h4>
+                  <p>{{ alert.description }}</p>
+                  <div class="alert-meta">
+                    <span class="alert-time">
+                      <i class="fas fa-clock"></i>
+                      {{ alert.timestamp }}
+                    </span>
+                    <span class="alert-miner" *ngIf="alert.miner">
+                      <i class="fas fa-user"></i>
+                      {{ alert.miner }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="alert-actions">
+                  <button class="btn btn-sm btn-secondary" (click)="resolveAlert(alert.id)">
+                    <i class="fas fa-check"></i>
+                    Resolver
+                  </button>
+                </div>
+              </div>
+              
+              <div class="no-alerts" *ngIf="getFilteredAlerts().length === 0">
+                <i class="fas fa-check-circle"></i>
+                <p>No hay alertas activas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Environmental Data -->
+      <section class="environmental-section">
+        <div class="environmental-grid">
+          <div class="env-card glass">
+            <div class="env-header">
+              <i class="fas fa-tint"></i>
+              <h3>Humedad</h3>
+            </div>
+            <div class="env-value">
+              {{ (sensorData.length > 0 ? sensorData[sensorData.length - 1].humidity : 0).toFixed(1) }}%
+            </div>
+            <div class="env-chart">
+              <div class="env-bar" [style.width]="(sensorData.length > 0 ? sensorData[sensorData.length - 1].humidity : 0) + '%'"></div>
+            </div>
+          </div>
+          
+          <div class="env-card glass">
+            <div class="env-header">
+              <i class="fas fa-tachometer-alt"></i>
+              <h3>Presión Atmosférica</h3>
+            </div>
+            <div class="env-value">
+              {{ (sensorData.length > 0 ? sensorData[sensorData.length - 1].pressure : 0).toFixed(0) }} hPa
+            </div>
+            <div class="env-chart">
+              <div class="env-bar" [style.width]="((sensorData.length > 0 ? sensorData[sensorData.length - 1].pressure : 0) - 1000) / 50 + '%'"></div>
+            </div>
+          </div>
+          
+          <div class="env-card glass">
+            <div class="env-header">
+              <i class="fas fa-running"></i>
+              <h3>Actividad</h3>
+            </div>
+            <div class="env-value">
+              {{ (sensorData.length > 0 ? sensorData[sensorData.length - 1].movement : 0).toFixed(0) }}%
+            </div>
+            <div class="env-chart">
+              <div class="env-bar" [style.width]="(sensorData.length > 0 ? sensorData[sensorData.length - 1].movement : 0) + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Settings View -->
+<div class="settings-overlay" *ngIf="isSettingsView">
+  <div class="settings-container">
+    <!-- Header -->
+    <header class="settings-header">
+      <div class="header-left">
+        <button class="back-btn" (click)="hideSettings()">
+          <i class="fas fa-arrow-left"></i>
+          Volver al Dashboard
+        </button>
+        <div class="settings-info">
+          <h1>Configuración del Sistema</h1>
+          <p>Gestiona usuarios, alertas y configuraciones generales</p>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="onSettingsSubmit()">
+          <i class="fas fa-save"></i>
+          Guardar Cambios
+        </button>
+      </div>
+    </header>
+
+    <!-- Settings Navigation -->
+    <nav class="settings-nav">
+      <ul class="settings-tabs">
+        <li class="tab-item" [class.active]="activeSettingsTab === 'general'">
+          <a (click)="setActiveSettingsTab('general')">
+            <i class="fas fa-cog"></i>
+            <span>General</span>
+          </a>
+        </li>
+        <li class="tab-item" [class.active]="activeSettingsTab === 'users'">
+          <a (click)="setActiveSettingsTab('users')">
+            <i class="fas fa-users"></i>
+            <span>Usuarios</span>
+            <span class="badge">{{ getActiveUsers().length }}</span>
+          </a>
+        </li>
+        <li class="tab-item" [class.active]="activeSettingsTab === 'alerts'">
+          <a (click)="setActiveSettingsTab('alerts')">
+            <i class="fas fa-bell"></i>
+            <span>Reglas de Alerta</span>
+            <span class="badge">{{ getActiveRules().length }}</span>
+          </a>
+        </li>
+        <li class="tab-item" [class.active]="activeSettingsTab === 'equipments'">
+          <a (click)="setActiveSettingsTab('equipments')">
+            <i class="fas fa-hard-hat"></i>
+            <span>Equipos</span>
+            <span class="badge">{{ equipments.length }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Settings Content -->
+    <main class="settings-content">
+      <!-- General Settings -->
+      <div class="settings-tab" *ngIf="activeSettingsTab === 'general'">
+        <div class="settings-section">
+          <h2>Configuración General</h2>
+          <form [formGroup]="settingsForm" class="settings-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="companyName">Nombre de la Empresa</label>
+                <input 
+                  type="text" 
+                  id="companyName" 
+                  formControlName="companyName"
+                  placeholder="Nombre de la empresa"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label for="timezone">Zona Horaria</label>
+                <select id="timezone" formControlName="timezone">
+                  <option value="America/Mexico_City">México (GMT-6)</option>
+                  <option value="America/New_York">Nueva York (GMT-5)</option>
+                  <option value="America/Los_Angeles">Los Ángeles (GMT-8)</option>
+                  <option value="Europe/Madrid">Madrid (GMT+1)</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="language">Idioma</label>
+                <select id="language" formControlName="language">
+                  <option value="es">Español</option>
+                  <option value="en">English</option>
+                  <option value="fr">Français</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="dateFormat">Formato de Fecha</label>
+                <select id="dateFormat" formControlName="dateFormat">
+                  <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="temperatureUnit">Unidad de Temperatura</label>
+                <select id="temperatureUnit" formControlName="temperatureUnit">
+                  <option value="celsius">Celsius (°C)</option>
+                  <option value="fahrenheit">Fahrenheit (°F)</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="settings-section">
+              <h3>Notificaciones</h3>
+              <div class="checkbox-group">
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" formControlName="emailNotifications">
+                  <span class="checkmark"></span>
+                  Notificaciones por Email
+                </label>
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" formControlName="smsNotifications">
+                  <span class="checkmark"></span>
+                  Notificaciones por SMS
+                </label>
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" formControlName="pushNotifications">
+                  <span class="checkmark"></span>
+                  Notificaciones Push
+                </label>
+              </div>
+            </div>
+            
+            <div class="settings-section">
+              <h3>Datos y Respaldo</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="dataRetention">Retención de Datos (días)</label>
+                  <input 
+                    type="number" 
+                    id="dataRetention" 
+                    formControlName="dataRetention"
+                    min="30"
+                    max="365"
+                  >
+                </div>
+                
+                <div class="checkbox-group">
+                  <label class="checkbox-wrapper">
+                    <input type="checkbox" formControlName="autoBackup">
+                    <span class="checkmark"></span>
+                    Respaldo Automático
+                  </label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Users Settings -->
+      <div class="settings-tab" *ngIf="activeSettingsTab === 'users'">
+        <div class="settings-section">
+          <div class="section-header">
+            <h2>Gestión de Usuarios</h2>
+            <button class="btn btn-primary" (click)="showAddUserModal = true">
+              <i class="fas fa-plus"></i>
+              Agregar Usuario
+            </button>
+          </div>
+          
+          <div class="users-table">
+            <div class="table-header">
+              <div class="header-cell">Usuario</div>
+              <div class="header-cell">Email</div>
+              <div class="header-cell">Rol</div>
+              <div class="header-cell">Estado</div>
+              <div class="header-cell">Último Acceso</div>
+              <div class="header-cell">Acciones</div>
+            </div>
+            
+            <div class="table-row" *ngFor="let user of users">
+              <div class="table-cell user-info">
+                <div class="user-avatar">
+                  <span>{{ user.avatar }}</span>
+                </div>
+                <div class="user-details">
+                  <span class="user-name">{{ user.name }}</span>
+                </div>
+              </div>
+              
+              <div class="table-cell">
+                <span class="user-email">{{ user.email }}</span>
+              </div>
+              
+              <div class="table-cell">
+                <span class="role-badge" [style.background-color]="getRoleColor(user.role)">
+                  {{ getRoleText(user.role) }}
+                </span>
+              </div>
+              
+              <div class="table-cell">
+                <span class="status-badge" [class]="user.status">
+                  {{ user.status === 'active' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+              
+              <div class="table-cell">
+                <span class="last-login">{{ user.lastLogin }}</span>
+              </div>
+              
+              <div class="table-cell actions">
+                <button class="action-btn" (click)="toggleUserStatus(user.id)">
+                  <i class="fas" [class]="user.status === 'active' ? 'fa-pause' : 'fa-play'"></i>
+                </button>
+                <button class="action-btn delete" (click)="deleteUser(user.id)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Rules Settings -->
+      <div class="settings-tab" *ngIf="activeSettingsTab === 'alerts'">
+        <div class="settings-section">
+          <div class="section-header">
+            <h2>Reglas de Alerta</h2>
+            <button class="btn btn-primary" (click)="showAddRuleModal = true">
+              <i class="fas fa-plus"></i>
+              Nueva Regla
+            </button>
+          </div>
+          
+          <div class="rules-grid">
+            <div class="rule-card glass" *ngFor="let rule of alertRules">
+              <div class="rule-header">
+                <div class="rule-info">
+                  <h3>{{ rule.name }}</h3>
+                  <span class="rule-type">{{ getAlertTypeText(rule.type) }}</span>
+                </div>
+                <div class="rule-toggle">
+                  <label class="toggle-switch">
+                    <input type="checkbox" [checked]="rule.enabled" (change)="toggleAlertRule(rule.id)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="rule-details">
+                <div class="rule-condition">
+                  <span class="condition-text">
+                    {{ getConditionText(rule.condition) }} {{ rule.value }}
+                    <span *ngIf="rule.type === 'temperature'">°C</span>
+                    <span *ngIf="rule.type === 'battery'">%</span>
+                    <span *ngIf="rule.type === 'heart_rate'">bpm</span>
+                    <span *ngIf="rule.type === 'oxygen'">%</span>
+                  </span>
+                </div>
+                
+                <div class="rule-notification">
+                  <i class="fas fa-bell"></i>
+                  <span>{{ getNotificationText(rule.notification) }}</span>
+                </div>
+              </div>
+              
+              <div class="rule-actions">
+                <button class="btn btn-secondary">
+                  <i class="fas fa-edit"></i>
+                  Editar
+                </button>
+                <button class="btn btn-secondary delete" (click)="deleteAlertRule(rule.id)">
+                  <i class="fas fa-trash"></i>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Equipments Settings -->
+      <div class="settings-tab" *ngIf="activeSettingsTab === 'equipments'">
+        <div class="settings-section">
+          <div class="section-header">
+            <h2>Gestión de Equipos</h2>
+            <button class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              Agregar Equipo
+            </button>
+          </div>
+          
+          <div class="equipments-grid">
+            <div class="equipment-card glass" *ngFor="let equipment of equipments">
+              <div class="equipment-header">
+                <div class="equipment-info">
+                  <h3>{{ equipment.name }}</h3>
+                  <span class="equipment-location">{{ equipment.location }}</span>
+                </div>
+                <div class="equipment-status" [style.background-color]="getStatusColor(equipment.status)">
+                  {{ getStatusText(equipment.status) }}
+                </div>
+              </div>
+              
+              <div class="equipment-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Cascos</span>
+                  <span class="stat-value">{{ equipment.activeHelmets }}/{{ equipment.totalHelmets }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Alertas</span>
+                  <span class="stat-value">{{ equipment.alerts }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Última actualización</span>
+                  <span class="stat-value">{{ equipment.lastUpdate }}</span>
+                </div>
+              </div>
+              
+              <div class="equipment-actions">
+                <button class="btn btn-secondary">
+                  <i class="fas fa-edit"></i>
+                  Editar
+                </button>
+                <button class="btn btn-secondary">
+                  <i class="fas fa-eye"></i>
+                  Ver Detalle
+                </button>
+                <button class="btn btn-secondary delete">
+                  <i class="fas fa-trash"></i>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" *ngIf="showAddUserModal">
+  <div class="modal-container glass">
+    <div class="modal-header">
+      <h3>Agregar Nuevo Usuario</h3>
+      <button class="close-btn" (click)="showAddUserModal = false">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <form [formGroup]="newUserForm" (ngSubmit)="addUser()" class="modal-form">
+      <div class="form-group">
+        <label for="newUserName">Nombre Completo</label>
+        <input 
+          type="text" 
+          id="newUserName" 
+          formControlName="name"
+          placeholder="Nombre y apellido"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="newUserEmail">Email</label>
+        <input 
+          type="email" 
+          id="newUserEmail" 
+          formControlName="email"
+          placeholder="usuario@empresa.com"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="newUserRole">Rol</label>
+        <select id="newUserRole" formControlName="role">
+          <option value="operator">Operador</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="showAddUserModal = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="newUserForm.invalid">
+          Agregar Usuario
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Rule Modal -->
+<div class="modal-overlay" *ngIf="showAddRuleModal">
+  <div class="modal-container glass">
+    <div class="modal-header">
+      <h3>Nueva Regla de Alerta</h3>
+      <button class="close-btn" (click)="showAddRuleModal = false">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <form [formGroup]="newRuleForm" (ngSubmit)="addAlertRule()" class="modal-form">
+      <div class="form-group">
+        <label for="newRuleName">Nombre de la Regla</label>
+        <input 
+          type="text" 
+          id="newRuleName" 
+          formControlName="name"
+          placeholder="Ej: Temperatura Crítica"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="newRuleType">Tipo de Sensor</label>
+        <select id="newRuleType" formControlName="type">
+          <option value="temperature">Temperatura</option>
+          <option value="battery">Batería</option>
+          <option value="movement">Movimiento</option>
+          <option value="heart_rate">Ritmo Cardíaco</option>
+          <option value="oxygen">Oxígeno</option>
+        </select>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="newRuleCondition">Condición</label>
+          <select id="newRuleCondition" formControlName="condition">
+            <option value="above">Mayor que</option>
+            <option value="below">Menor que</option>
+            <option value="equals">Igual a</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="newRuleValue">Valor</label>
+          <input 
+            type="number" 
+            id="newRuleValue" 
+            formControlName="value"
+            placeholder="0"
+          >
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="newRuleNotification">Notificación</label>
+        <select id="newRuleNotification" formControlName="notification">
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="push">Push</option>
+          <option value="all">Todos</option>
+        </select>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="showAddRuleModal = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="newRuleForm.invalid">
+          Crear Regla
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
