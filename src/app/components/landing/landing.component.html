@@ -1,0 +1,229 @@
+<!-- Test Content -->
+ <br><br><br><br><br><br><br><br>
+<div style="padding: 2rem; text-align: center;">
+  <h1 style="color: #3df4f4; font-size: 3rem; margin-bottom: 1rem;"></h1>
+  <p style="color: #ccd6f6; font-size: 1.2rem; margin-bottom: 2rem;">Sistema de Monitoreo de Cascos IoT</p>
+  <button class="btn btn-primary" (click)="showLogin()">
+    <i class="fas fa-sign-in-alt"></i>
+    Iniciar Sesión
+  </button>
+  <button class="btn btn-secondary" (click)="showRegister()" style="margin-left: 1rem;">
+    <i class="fas fa-user-plus"></i>
+    Registrarse
+  </button>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <nav class="nav">
+      <div class="logo">
+        <h2>Helm<span class="accent"></span></h2>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#features">Características</a></li>
+        <li><a href="#testimonials">Casos de Éxito</a></li>
+        <li><a href="#contact">Contacto</a></li>
+        <li><a (click)="showLogin()" class="btn btn-secondary">Iniciar Sesión</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          Monitoreo Inteligente de 
+          <span class="accent">Cascos IoT</span>
+        </h1>
+        <p class="hero-description">
+          Protege a tus mineros con tecnología de vanguardia. Monitoreo en tiempo real de temperatura, 
+          movimiento, ubicación y más. Seguridad que nunca duerme.
+        </p>
+        <div class="hero-buttons">
+          <a href="#" class="btn btn-primary">
+            <i class="fab fa-apple"></i>
+            App Store
+          </a>
+          <a href="#" class="btn btn-secondary">
+            <i class="fab fa-google-play"></i>
+            Google Play
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-image glass">
+          <div class="mockup-phone">
+            <div class="phone-screen">
+              <div class="app-preview">
+                <div class="status-bar">
+                  <span class="status-dot active"></span>
+                  <span class="status-dot active"></span>
+                  <span class="status-dot active"></span>
+                </div>
+                <div class="dashboard-preview">
+                  <div class="sensor-widget temp">
+                    <span class="sensor-value">36.5°C</span>
+                    <span class="sensor-label">Temperatura</span>
+                  </div>
+                  <div class="sensor-widget movement">
+                    <span class="sensor-value">Normal</span>
+                    <span class="sensor-label">Movimiento</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+  <div class="container">
+    <div class="section-header">
+      <h2>Características Principales</h2>
+      <p>Tecnología avanzada para la seguridad minera</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card glass fade-in">
+        <div class="feature-icon temp">
+          <i class="fas fa-thermometer-half"></i>
+        </div>
+        <h3>Monitoreo de Temperatura</h3>
+        <p>Control en tiempo real de la temperatura corporal de cada minero con alertas automáticas.</p>
+      </div>
+      
+      <div class="feature-card glass fade-in">
+        <div class="feature-icon movement">
+          <i class="fas fa-running"></i>
+        </div>
+        <h3>Detección de Movimiento</h3>
+        <p>Sensores de acelerómetro que detectan caídas y movimientos anómalos instantáneamente.</p>
+      </div>
+      
+      <div class="feature-card glass fade-in">
+        <div class="feature-icon gps">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <h3>Rastreo GPS</h3>
+        <p>Ubicación precisa de cada minero en tiempo real con geofencing inteligente.</p>
+      </div>
+      
+      <div class="feature-card glass fade-in">
+        <div class="feature-icon pressure">
+          <i class="fas fa-tachometer-alt"></i>
+        </div>
+        <h3>Monitoreo Ambiental</h3>
+        <p>Control de presión atmosférica y humedad para condiciones óptimas de trabajo.</p>
+      </div>
+      
+      <div class="feature-card glass fade-in">
+        <div class="feature-icon battery">
+          <i class="fas fa-battery-three-quarters"></i>
+        </div>
+        <h3>Batería de Larga Duración</h3>
+        <p>Hasta 48 horas de autonomía con alertas de batería baja y carga rápida.</p>
+      </div>
+      
+      <div class="feature-card glass fade-in">
+        <div class="feature-icon analytics">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3>Analytics Avanzados</h3>
+        <p>Reportes detallados y análisis predictivo para optimizar la seguridad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="testimonials">
+  <div class="container">
+    <div class="section-header">
+      <h2>Casos de Éxito</h2>
+      <p>Empresas que confían en nuestra tecnología</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card glass fade-in">
+        <div class="testimonial-content">
+          <p>" ha reducido nuestros incidentes en un 85%. La detección temprana de problemas de salud ha salvado vidas."</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-info">
+            <h4>Carlos Mendoza</h4>
+            <span>Gerente de Seguridad, Minera del Norte</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="testimonial-card glass fade-in">
+        <div class="testimonial-content">
+          <p>"La implementación fue sencilla y el ROI se vio en los primeros 3 meses. Nuestros mineros se sienten más seguros."</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-info">
+            <h4>Ana Rodríguez</h4>
+            <span>Directora de Operaciones, CobreMax</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="testimonial-card glass fade-in">
+        <div class="testimonial-content">
+          <p>"El sistema de alertas nos permite responder inmediatamente a emergencias. Es como tener un guardián digital."</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-info">
+            <h4>Miguel Torres</h4>
+            <span>Superintendente, OroVerde</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Helm<span class="accent"></span></h3>
+        <p>Seguridad inteligente para la minería del futuro.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="#features">Características</a></li>
+          <li><a href="#">Precios</a></li>
+          <li><a href="#">Documentación</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Acerca de</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Soporte</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 . Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer> 

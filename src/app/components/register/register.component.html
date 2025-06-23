@@ -1,0 +1,241 @@
+<div class="register-container">
+  <!-- Left Side - Form -->
+  <div class="register-form-side">
+    <div class="register-header">
+      <button class="close-btn" (click)="goToLanding()">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="logo">
+        <h2>Helm<span class="accent">IoT</span></h2>
+      </div>
+    </div>
+    
+    <div class="register-card glass">
+      <div class="register-content">
+        <h1>Crear Cuenta</h1>
+        <p class="register-subtitle">Únete a la revolución de la seguridad minera</p>
+        
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">Nombre</label>
+              <div class="input-wrapper" [class]="getFieldStatus('firstName')">
+                <i class="fas fa-user input-icon"></i>
+                <input 
+                  type="text" 
+                  id="firstName" 
+                  formControlName="firstName"
+                  placeholder="Tu nombre"
+                >
+                <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('firstName') === 'valid'"></i>
+                <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('firstName') === 'invalid'"></i>
+              </div>
+              <span class="error-message" *ngIf="getRegisterErrorMessage('firstName')">
+                {{ getRegisterErrorMessage('firstName') }}
+              </span>
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName">Apellido</label>
+              <div class="input-wrapper" [class]="getFieldStatus('lastName')">
+                <i class="fas fa-user input-icon"></i>
+                <input 
+                  type="text" 
+                  id="lastName" 
+                  formControlName="lastName"
+                  placeholder="Tu apellido"
+                >
+                <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('lastName') === 'valid'"></i>
+                <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('lastName') === 'invalid'"></i>
+              </div>
+              <span class="error-message" *ngIf="getRegisterErrorMessage('lastName')">
+                {{ getRegisterErrorMessage('lastName') }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-wrapper" [class]="getFieldStatus('email')">
+              <i class="fas fa-envelope input-icon"></i>
+              <input 
+                type="email" 
+                id="email" 
+                formControlName="email"
+                placeholder="tu@email.com"
+              >
+              <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('email') === 'valid'"></i>
+              <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('email') === 'invalid'"></i>
+            </div>
+            <span class="error-message" *ngIf="getRegisterErrorMessage('email')">
+              {{ getRegisterErrorMessage('email') }}
+            </span>
+          </div>
+          
+          <div class="form-group">
+            <label for="username">Nombre de Usuario</label>
+            <div class="input-wrapper" [class]="getFieldStatus('username')">
+              <i class="fas fa-at input-icon"></i>
+              <input 
+                type="text" 
+                id="username" 
+                formControlName="username"
+                placeholder="usuario123"
+              >
+              <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('username') === 'valid'"></i>
+              <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('username') === 'invalid'"></i>
+            </div>
+            <span class="error-message" *ngIf="getRegisterErrorMessage('username')">
+              {{ getRegisterErrorMessage('username') }}
+            </span>
+          </div>
+          
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <div class="input-wrapper" [class]="getFieldStatus('password')">
+              <i class="fas fa-lock input-icon"></i>
+              <input 
+                type="password" 
+                id="password" 
+                formControlName="password"
+                placeholder="••••••••"
+              >
+              <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('password') === 'valid'"></i>
+              <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('password') === 'invalid'"></i>
+            </div>
+            
+            <!-- Password Strength Indicator -->
+            <div class="password-strength" *ngIf="registerForm.get('password') && registerForm.get('password')!.value">
+              <div class="strength-bar">
+                <div class="strength-fill" [class]="getPasswordStrength()"></div>
+              </div>
+              <span class="strength-text" [class]="getPasswordStrength()">
+                {{ getPasswordStrength() === 'weak' ? 'Débil' : 
+                   getPasswordStrength() === 'medium' ? 'Media' : 
+                   getPasswordStrength() === 'strong' ? 'Fuerte' : '' }}
+              </span>
+            </div>
+            
+            <span class="error-message" *ngIf="getRegisterErrorMessage('password')">
+              {{ getRegisterErrorMessage('password') }}
+            </span>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar Contraseña</label>
+            <div class="input-wrapper" [class]="getFieldStatus('confirmPassword')">
+              <i class="fas fa-lock input-icon"></i>
+              <input 
+                type="password" 
+                id="confirmPassword" 
+                formControlName="confirmPassword"
+                placeholder="••••••••"
+              >
+              <i class="fas fa-check validation-icon valid" *ngIf="getFieldStatus('confirmPassword') === 'valid'"></i>
+              <i class="fas fa-times validation-icon invalid" *ngIf="getFieldStatus('confirmPassword') === 'invalid'"></i>
+            </div>
+            <span class="error-message" *ngIf="getRegisterErrorMessage('confirmPassword')">
+              {{ getRegisterErrorMessage('confirmPassword') }}
+            </span>
+          </div>
+          
+          <div class="form-options">
+            <label class="checkbox-wrapper">
+              <input type="checkbox" required>
+              <span class="checkmark"></span>
+              Acepto los <a href="#" class="accent-link">términos y condiciones</a>
+            </label>
+          </div>
+          
+          <button type="submit" class="btn btn-primary register-btn" [disabled]="registerForm.invalid">
+            <i class="fas fa-user-plus"></i>
+            Crear Cuenta
+          </button>
+          
+          <div class="success-alert" *ngIf="registerError && !registerError.includes('incorrectas')">
+            <i class="fas fa-check-circle"></i>
+            {{ registerError }}
+          </div>
+          
+          <div class="error-alert" *ngIf="registerError && registerError.includes('incorrectas')">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ registerError }}
+          </div>
+        </form>
+        
+        <div class="register-footer">
+          <p>¿Ya tienes cuenta? <a (click)="goToLogin()" class="accent-link">Iniciar Sesión</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Right Side - Visual -->
+  <div class="register-visual-side">
+    <div class="visual-content">
+      <div class="tech-particles">
+        <div class="particle" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"></div>
+      </div>
+      
+      <div class="features-preview glass">
+        <div class="preview-header">
+          <h3>Características Premium</h3>
+          <div class="preview-badge">
+            <i class="fas fa-star"></i>
+            <span>PRO</span>
+          </div>
+        </div>
+        
+        <div class="features-list">
+          <div class="feature-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>Seguridad de nivel empresarial</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics avanzados</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-bell"></i>
+            <span>Alertas personalizadas</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-users"></i>
+            <span>Soporte 24/7</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-mobile-alt"></i>
+            <span>App móvil incluida</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-cloud"></i>
+            <span>Backup automático</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stats-preview glass">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Empresas</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">10K+</div>
+            <div class="stat-label">Cascos Activos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">99.9%</div>
+            <div class="stat-label">Uptime</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tech-quote">
+        <blockquote>
+          "La tecnología que salva vidas hoy, construye el futuro de mañana"
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</div> 

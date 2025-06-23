@@ -1,0 +1,474 @@
+/* Register Component Styles */
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a192f 0%, #172a45 100%);
+}
+
+.register-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+/* Left Side - Form */
+.register-form-side {
+  background: #0a192f;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  position: relative;
+}
+
+.register-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #8892b0;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(61, 244, 244, 0.1);
+  color: #3df4f4;
+}
+
+.logo h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.logo .accent {
+  color: #3df4f4;
+}
+
+.register-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.register-content {
+  width: 100%;
+  max-width: 500px;
+}
+
+.register-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #ccd6f6;
+}
+
+.register-subtitle {
+  color: #8892b0;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+/* Form Styles */
+.register-form {
+  margin-bottom: 2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #8892b0;
+  z-index: 1;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  background: rgba(48, 60, 85, 0.6);
+  border: 1px solid rgba(61, 244, 244, 0.3);
+  border-radius: 8px;
+  color: #ccd6f6;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: #3df4f4;
+  box-shadow: 0 0 0 3px rgba(61, 244, 244, 0.1);
+}
+
+.input-wrapper.valid input {
+  border-color: #64ffda;
+}
+
+.input-wrapper.invalid input {
+  border-color: #ff6b6b;
+}
+
+.validation-icon {
+  position: absolute;
+  right: 1rem;
+  color: #8892b0;
+  z-index: 1;
+}
+
+.validation-icon.valid {
+  color: #64ffda;
+}
+
+.validation-icon.invalid {
+  color: #ff6b6b;
+}
+
+/* Password Strength */
+.password-strength {
+  margin-top: 0.5rem;
+}
+
+.strength-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(48, 60, 85, 0.6);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.strength-fill.weak {
+  width: 33%;
+  background: #ff6b6b;
+}
+
+.strength-fill.medium {
+  width: 66%;
+  background: #ffd93d;
+}
+
+.strength-fill.strong {
+  width: 100%;
+  background: #64ffda;
+}
+
+.strength-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.strength-text.weak {
+  color: #ff6b6b;
+}
+
+.strength-text.medium {
+  color: #ffd93d;
+}
+
+.strength-text.strong {
+  color: #64ffda;
+}
+
+.form-options {
+  margin-bottom: 2rem;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #8892b0;
+  font-size: 0.9rem;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.register-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.success-alert {
+  background: rgba(100, 255, 218, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  color: #64ffda;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-alert {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  color: #ff6b6b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.register-footer {
+  text-align: center;
+  color: #8892b0;
+}
+
+.accent-link {
+  color: #64ffda;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.accent-link:hover {
+  color: #3df4f4;
+}
+
+/* Right Side - Visual */
+.register-visual-side {
+  background: linear-gradient(135deg, #172a45 0%, #064e3b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.visual-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+}
+
+/* Tech Particles */
+.tech-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #3df4f4;
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.particle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { top: 20%; left: 80%; animation-delay: 1s; }
+.particle:nth-child(3) { top: 30%; left: 20%; animation-delay: 2s; }
+.particle:nth-child(4) { top: 40%; left: 90%; animation-delay: 3s; }
+.particle:nth-child(5) { top: 50%; left: 5%; animation-delay: 4s; }
+.particle:nth-child(6) { top: 60%; left: 70%; animation-delay: 5s; }
+.particle:nth-child(7) { top: 70%; left: 15%; animation-delay: 6s; }
+.particle:nth-child(8) { top: 80%; left: 85%; animation-delay: 7s; }
+.particle:nth-child(9) { top: 90%; left: 25%; animation-delay: 8s; }
+.particle:nth-child(10) { top: 15%; left: 60%; animation-delay: 9s; }
+.particle:nth-child(11) { top: 25%; left: 40%; animation-delay: 10s; }
+.particle:nth-child(12) { top: 35%; left: 75%; animation-delay: 11s; }
+.particle:nth-child(13) { top: 45%; left: 30%; animation-delay: 12s; }
+.particle:nth-child(14) { top: 55%; left: 95%; animation-delay: 13s; }
+.particle:nth-child(15) { top: 65%; left: 50%; animation-delay: 14s; }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Features Preview */
+.features-preview {
+  margin-bottom: 2rem;
+  padding: 2rem;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.preview-header h3 {
+  color: #ccd6f6;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.preview-badge {
+  background: linear-gradient(135deg, #ffd93d, #ffe066);
+  color: #0a192f;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.features-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #8892b0;
+}
+
+.feature-item i {
+  color: #3df4f4;
+  width: 20px;
+}
+
+/* Stats Preview */
+.stats-preview {
+  margin-bottom: 2rem;
+  padding: 2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3df4f4;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #8892b0;
+}
+
+/* Tech Quote */
+.tech-quote {
+  text-align: center;
+}
+
+.tech-quote blockquote {
+  font-size: 1.1rem;
+  color: #ccd6f6;
+  font-style: italic;
+  margin: 0;
+  position: relative;
+}
+
+.tech-quote blockquote::before {
+  content: '"';
+  font-size: 3rem;
+  color: #3df4f4;
+  position: absolute;
+  top: -1rem;
+  left: -1rem;
+  opacity: 0.3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .register-visual-side {
+    display: none;
+  }
+  
+  .register-form-side {
+    padding: 1rem;
+  }
+  
+  .register-card {
+    padding: 2rem 1rem;
+  }
+  
+  .register-content h1 {
+    font-size: 2rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .features-preview,
+  .stats-preview {
+    padding: 1.5rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .register-subtitle {
+    font-size: 1rem;
+  }
+  
+  .register-card {
+    padding: 1.5rem 1rem;
+  }
+} 
