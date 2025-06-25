@@ -9,6 +9,7 @@ import { HelmetsComponent } from './components/helmets/helmets.component';
 import { AlertsComponent } from './components/alerts/alerts.component';
 import { ReportsComponent } from './components/reports/reports.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { ProfileComponent } from './components/profile/profile.component';
 import { EquipmentDetailComponent } from './components/equipment-detail/equipment-detail.component';
 import { EquipmentEditComponent } from './components/equipment-edit/equipment-edit.component';
 
@@ -26,6 +27,7 @@ export const routes: Routes = [
       { path: 'alerts', component: AlertsComponent },
       { path: 'reports', component: ReportsComponent },
       { path: 'settings', component: SettingsComponent },
+      { path: 'profile', component: ProfileComponent },
       { path: 'equipment-detail/:id', component: EquipmentDetailComponent },
       { path: 'equipment-edit/:id', component: EquipmentEditComponent },
     ]

@@ -20,6 +20,15 @@ interface Equipment {
   lastUpdate: string;
 }
 
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar: string;
+  department: string;
+}
+
 @Component({
   selector: 'app-layout',
   standalone: true,
@@ -32,9 +41,6 @@ interface Equipment {
           <div class="logo">
             <h2>Helm<span class="accent">IoT</span></h2>
           </div>
-          <button class="close-btn" (click)="logout()">
-            <i class="fas fa-times"></i>
-          </button>
         </div>
         
         <nav class="sidebar-nav">
@@ -80,13 +86,33 @@ interface Equipment {
         </nav>
         
         <div class="sidebar-footer">
-          <div class="user-profile">
+          <div class="user-profile" (click)="toggleProfileDropdown()">
             <div class="user-avatar">
-              <i class="fas fa-user"></i>
+              <span>{{ userProfile.avatar }}</span>
             </div>
             <div class="user-info">
-              <span class="user-name">Admin User</span>
-              <span class="user-role">Supervisor</span>
+              <span class="user-name">{{ userProfile.name }}</span>
+              <span class="user-role">{{ userProfile.role }}</span>
+            </div>
+            <div class="dropdown-arrow" [class.open]="showProfileDropdown">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+          
+          <!-- Profile Dropdown -->
+          <div class="profile-dropdown" *ngIf="showProfileDropdown">
+            <div class="dropdown-item" (click)="goToProfile()">
+              <i class="fas fa-user"></i>
+              <span>Mi Perfil</span>
+            </div>
+            <div class="dropdown-item" (click)="changePassword()">
+              <i class="fas fa-key"></i>
+              <span>Cambiar Contraseña</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item danger" (click)="logout()">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Cerrar Sesión</span>
             </div>
           </div>
         </div>
@@ -96,6 +122,68 @@ interface Equipment {
       <main class="main-content">
         <router-outlet></router-outlet>
       </main>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" *ngIf="showPasswordModal" (click)="closePasswordModal()">
+      <div class="modal-content glass" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Cambiar Contraseña</h3>
+          <button class="close-btn" (click)="closePasswordModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <form (ngSubmit)="updatePassword()">
+            <div class="form-group">
+              <label for="currentPassword">Contraseña Actual</label>
+              <input 
+                type="password" 
+                id="currentPassword"
+                [(ngModel)]="passwordData.currentPassword" 
+                name="currentPassword"
+                placeholder="Ingresa tu contraseña actual"
+                required
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="newPassword">Nueva Contraseña</label>
+              <input 
+                type="password" 
+                id="newPassword"
+                [(ngModel)]="passwordData.newPassword" 
+                name="newPassword"
+                placeholder="Ingresa la nueva contraseña"
+                required
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="confirmPassword">Confirmar Contraseña</label>
+              <input 
+                type="password" 
+                id="confirmPassword"
+                [(ngModel)]="passwordData.confirmPassword" 
+                name="confirmPassword"
+                placeholder="Confirma la nueva contraseña"
+                required
+              >
+            </div>
+            
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Actualizar Contraseña
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
   styleUrls: ['./layout.component.css']
@@ -194,7 +282,23 @@ export class LayoutComponent {
     }
   ];
 
+  userProfile: UserProfile = {
+    id: '1',
+    name: 'Carlos Mendoza',
+    email: 'carlos.mendoza@helmmining.com',
+    role: 'Supervisor',
+    avatar: 'CM',
+    department: 'Seguridad Industrial'
+  };
+
   activeSidebarItem = 'dashboard';
+  showProfileDropdown = false;
+  showPasswordModal = false;
+  passwordData = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
 
   constructor(private router: Router) {
     this.setActiveSidebarItemFromRoute();
@@ -212,6 +316,8 @@ export class LayoutComponent {
       this.activeSidebarItem = 'reports';
     } else if (currentPath.includes('/settings')) {
       this.activeSidebarItem = 'settings';
+    } else if (currentPath.includes('/profile')) {
+      this.activeSidebarItem = 'profile';
     } else {
       this.activeSidebarItem = 'dashboard';
     }
@@ -241,6 +347,40 @@ export class LayoutComponent {
     }
   }
 
+  toggleProfileDropdown() {
+    this.showProfileDropdown = !this.showProfileDropdown;
+  }
+
+  goToProfile() {
+    this.showProfileDropdown = false;
+    this.router.navigate(['/profile']);
+  }
+
+  changePassword() {
+    this.showProfileDropdown = false;
+    this.showPasswordModal = true;
+  }
+
+  closePasswordModal() {
+    this.showPasswordModal = false;
+    this.passwordData = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+  }
+
+  updatePassword() {
+    if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+    
+    // Implementar actualización de contraseña
+    console.log('Actualizando contraseña:', this.passwordData);
+    this.closePasswordModal();
+  }
+
   getTotalStats() {
     return {
       totalEquipments: this.equipments.length,
@@ -251,6 +391,8 @@ export class LayoutComponent {
   }
 
   logout() {
+    this.showProfileDropdown = false;
+    // Implementar logout
     this.router.navigate(['/']);
   }
 } 
