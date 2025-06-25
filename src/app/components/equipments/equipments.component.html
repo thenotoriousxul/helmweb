@@ -1,0 +1,257 @@
+<div class="equipments-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="breadcrumbs">
+          <span class="breadcrumb-item">Dashboard</span>
+          <i class="fas fa-chevron-right"></i>
+          <span class="breadcrumb-item active">Equipos</span>
+        </div>
+        <h1>Gestión de Equipos</h1>
+        <p>Administra los equipos de minería y sus configuraciones</p>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="openCreateModal()">
+          <i class="fas fa-plus"></i>
+          Nuevo Equipo
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <section class="filters-section">
+    <div class="filters-container glass">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          placeholder="Buscar equipos..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        >
+      </div>
+      
+      <div class="filter-controls">
+        <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+          <option value="all">Todos los Estados</option>
+          <option value="active">Activo</option>
+          <option value="warning">Advertencia</option>
+          <option value="inactive">Inactivo</option>
+        </select>
+        
+        <select [(ngModel)]="typeFilter" (change)="onTypeFilterChange()">
+          <option value="all">Todos los Tipos</option>
+          <option *ngFor="let type of getEquipmentTypes()" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Cards -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-hard-hat"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalEquipments }}</h3>
+          <p>Total Equipos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon active">
+          <i class="fas fa-wifi"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ activeEquipments }}</h3>
+          <p>Equipos Activos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ warningEquipments }}</h3>
+          <p>Con Advertencias</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalHelmets }}</h3>
+          <p>Total Cascos</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Equipment Table -->
+  <section class="equipment-table-section">
+    <div class="table-container glass">
+      <div class="table-header">
+        <h2>Lista de Equipos</h2>
+        <span class="results-count">{{ filteredEquipments.length }} equipos encontrados</span>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="equipment-table">
+          <thead>
+            <tr>
+              <th>Equipo</th>
+              <th>Tipo</th>
+              <th>Ubicación</th>
+              <th>Supervisor</th>
+              <th>Estado</th>
+              <th>Cascos</th>
+              <th>Alertas</th>
+              <th>Última Actualización</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let equipment of filteredEquipments" class="equipment-row">
+              <td class="equipment-name">
+                <div class="name-cell">
+                  <h4>{{ equipment.name }}</h4>
+                  <span class="equipment-id">ID: {{ equipment.id }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="type-badge">{{ equipment.type }}</span>
+              </td>
+              <td>
+                <span class="location">
+                  <i class="fas fa-map-marker-alt"></i>
+                  {{ equipment.location }}
+                </span>
+              </td>
+              <td>{{ equipment.supervisor }}</td>
+              <td>
+                <span class="status-badge" [style.background-color]="getStatusColor(equipment.status)">
+                  {{ getStatusText(equipment.status) }}
+                </span>
+              </td>
+              <td>
+                <div class="helmets-info">
+                  <span class="helmets-count">{{ equipment.activeHelmets }}/{{ equipment.totalHelmets }}</span>
+                  <div class="helmets-bar">
+                    <div class="helmets-progress" 
+                         [style.width]="(equipment.activeHelmets / equipment.totalHelmets * 100) + '%'">
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="alerts-count" *ngIf="equipment.alerts > 0">{{ equipment.alerts }}</span>
+                <span class="no-alerts" *ngIf="equipment.alerts === 0">-</span>
+              </td>
+              <td>{{ equipment.lastUpdate }}</td>
+              <td class="actions">
+                <div class="action-buttons">
+                  <button class="btn-icon" (click)="showDetail(equipment)" title="Ver detalle">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn-icon" (click)="editEquipment(equipment)" title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn-icon danger" (click)="deleteEquipment(equipment)" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Equipment Modal -->
+  <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Crear Nuevo Equipo</h3>
+        <button class="close-btn" (click)="closeCreateModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form (ngSubmit)="createEquipment()">
+          <div class="form-group">
+            <label for="name">Nombre del Equipo</label>
+            <input 
+              type="text" 
+              id="name"
+              [(ngModel)]="newEquipment.name" 
+              name="name"
+              placeholder="Ej: Equipo Mina Norte"
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="type">Tipo de Equipo</label>
+            <select 
+              id="type"
+              [(ngModel)]="newEquipment.type" 
+              name="type"
+              required
+            >
+              <option value="">Seleccionar tipo</option>
+              <option value="Excavadora">Excavadora</option>
+              <option value="Cargador">Cargador</option>
+              <option value="Camión">Camión</option>
+              <option value="Perforadora">Perforadora</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="location">Ubicación</label>
+            <input 
+              type="text" 
+              id="location"
+              [(ngModel)]="newEquipment.location" 
+              name="location"
+              placeholder="Ej: Zona A-12"
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="supervisor">Supervisor</label>
+            <input 
+              type="text" 
+              id="supervisor"
+              [(ngModel)]="newEquipment.supervisor" 
+              name="supervisor"
+              placeholder="Nombre del supervisor"
+              required
+            >
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              Crear Equipo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 

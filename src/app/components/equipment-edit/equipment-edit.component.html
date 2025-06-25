@@ -1,0 +1,210 @@
+<div class="equipment-edit-container" *ngIf="equipment">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <button class="back-button" (click)="cancelEdit()">
+        <i class="fas fa-arrow-left"></i>
+        Cancelar Edición
+      </button>
+      <div class="header-actions">
+        <button class="btn btn-danger" (click)="deleteEquipment()">
+          <i class="fas fa-trash"></i>
+          Eliminar Equipo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Form -->
+  <div class="edit-form">
+    <div class="form-header">
+      <h1>Editar Equipo</h1>
+      <span class="status-badge" [style.background-color]="getStatusColor(equipment.status)">
+        {{ getStatusText(equipment.status) }}
+      </span>
+    </div>
+
+    <form (ngSubmit)="saveEquipment()" #equipmentForm="ngForm">
+      <div class="form-grid">
+        <!-- Basic Information -->
+        <div class="form-section">
+          <h3>Información Básica</h3>
+          
+          <div class="form-group">
+            <label for="name">Nombre del Equipo *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              [(ngModel)]="equipment.name" 
+              required
+              class="form-control"
+              placeholder="Ingrese el nombre del equipo">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="type">Tipo de Equipo *</label>
+              <select 
+                id="type" 
+                name="type" 
+                [(ngModel)]="equipment.type" 
+                required
+                class="form-control">
+                <option value="">Seleccione un tipo</option>
+                <option *ngFor="let type of equipmentTypes" [value]="type">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="location">Ubicación *</label>
+              <input 
+                type="text" 
+                id="location" 
+                name="location" 
+                [(ngModel)]="equipment.location" 
+                required
+                class="form-control"
+                placeholder="Ej: Zona A-12">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="supervisor">Supervisor</label>
+              <input 
+                type="text" 
+                id="supervisor" 
+                name="supervisor" 
+                [(ngModel)]="equipment.supervisor" 
+                class="form-control"
+                placeholder="Nombre del supervisor">
+            </div>
+
+            <div class="form-group">
+              <label for="startDate">Fecha de Inicio</label>
+              <input 
+                type="date" 
+                id="startDate" 
+                name="startDate" 
+                [(ngModel)]="equipment.startDate" 
+                class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Descripción</label>
+            <textarea 
+              id="description" 
+              name="description" 
+              [(ngModel)]="equipment.description" 
+              class="form-control"
+              rows="4"
+              placeholder="Descripción detallada del equipo y sus responsabilidades"></textarea>
+          </div>
+        </div>
+
+        <!-- Equipment Configuration -->
+        <div class="form-section">
+          <h3>Configuración del Equipo</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="totalHelmets">Total de Cascos</label>
+              <input 
+                type="number" 
+                id="totalHelmets" 
+                name="totalHelmets" 
+                [(ngModel)]="equipment.totalHelmets" 
+                min="0"
+                class="form-control"
+                placeholder="0">
+            </div>
+
+            <div class="form-group">
+              <label for="capacity">Capacidad Máxima</label>
+              <input 
+                type="number" 
+                id="capacity" 
+                name="capacity" 
+                [(ngModel)]="equipment.capacity" 
+                min="0"
+                class="form-control"
+                placeholder="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Estado del Equipo</label>
+            <select 
+              id="status" 
+              name="status" 
+              [(ngModel)]="equipment.status" 
+              class="form-control">
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
+              <option value="warning">Advertencia</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Current Stats (Read-only) -->
+        <div class="form-section">
+          <h3>Estadísticas Actuales</h3>
+          <div class="stats-display">
+            <div class="stat-item">
+              <span class="stat-label">Cascos Activos:</span>
+              <span class="stat-value">{{ equipment.activeHelmets }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Alertas Activas:</span>
+              <span class="stat-value">{{ equipment.alerts }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Mineros Asignados:</span>
+              <span class="stat-value">{{ equipment.miners.length }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Última Actualización:</span>
+              <span class="stat-value">{{ equipment.lastUpdate }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="!equipmentForm.form.valid || isSaving">
+          <span *ngIf="isSaving">Guardando...</span>
+          <span *ngIf="!isSaving">Guardar Cambios</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirmar Eliminación</h3>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que quieres eliminar el equipo "{{ equipment.name }}"?</p>
+        <p class="warning-text">Esta acción no se puede deshacer y eliminará todos los datos asociados al equipo.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="cancelDelete()">
+          Cancelar
+        </button>
+        <button class="btn btn-danger" (click)="confirmDelete()">
+          Eliminar Definitivamente
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

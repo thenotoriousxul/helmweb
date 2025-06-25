@@ -1,0 +1,258 @@
+<div class="alerts-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Centro de Alertas</h1>
+        <p>Monitorea y gestiona todas las alertas del sistema</p>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary">
+          <i class="fas fa-bell"></i>
+          Configurar Alertas
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-bell"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalAlerts }}</h3>
+          <p>Total Alertas</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ activeAlerts }}</h3>
+          <p>Alertas Activas</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon critical">
+          <i class="fas fa-radiation"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ criticalAlerts }}</h3>
+          <p>Críticas</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon resolved">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ resolvedAlerts }}</h3>
+          <p>Resueltas</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Severity Distribution -->
+  <section class="severity-section">
+    <div class="severity-grid">
+      <div class="severity-card critical glass">
+        <div class="severity-icon">
+          <i class="fas fa-radiation"></i>
+        </div>
+        <div class="severity-content">
+          <h3>{{ criticalSeverityCount }}</h3>
+          <p>Críticas</p>
+        </div>
+      </div>
+      
+      <div class="severity-card high glass">
+        <div class="severity-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="severity-content">
+          <h3>{{ highSeverityCount }}</h3>
+          <p>Altas</p>
+        </div>
+      </div>
+      
+      <div class="severity-card medium glass">
+        <div class="severity-icon">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="severity-content">
+          <h3>{{ mediumSeverityCount }}</h3>
+          <p>Medias</p>
+        </div>
+      </div>
+      
+      <div class="severity-card low glass">
+        <div class="severity-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="severity-content">
+          <h3>{{ lowSeverityCount }}</h3>
+          <p>Bajas</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          placeholder="Buscar alertas por título, minero o casco..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        >
+      </div>
+      
+      <div class="filter-options">
+        <select [(ngModel)]="severityFilter" (change)="onSeverityFilterChange()">
+          <option value="all">Todas las severidades</option>
+          <option value="critical">Crítica</option>
+          <option value="high">Alta</option>
+          <option value="medium">Media</option>
+          <option value="low">Baja</option>
+        </select>
+        
+        <select [(ngModel)]="typeFilter" (change)="onTypeFilterChange()">
+          <option value="all">Todos los tipos</option>
+          <option value="temperature">Temperatura</option>
+          <option value="battery">Batería</option>
+          <option value="movement">Movimiento</option>
+          <option value="location">Ubicación</option>
+          <option value="system">Sistema</option>
+        </select>
+        
+        <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+          <option value="all">Todos los estados</option>
+          <option value="active">Activas</option>
+          <option value="acknowledged">Reconocidas</option>
+          <option value="resolved">Resueltas</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alerts List -->
+  <section class="alerts-section">
+    <div class="section-header">
+      <h2>Lista de Alertas</h2>
+      <span class="results-count">{{ filteredAlerts.length }} alertas encontradas</span>
+    </div>
+    
+    <div class="alerts-list">
+      <div class="alert-card glass" *ngFor="let alert of filteredAlerts" [class.critical]="alert.severity === 'critical'">
+        <div class="alert-header">
+          <div class="alert-type">
+            <div class="type-icon" [style.background-color]="getTypeColor(alert.type)">
+              <i [class]="getTypeIcon(alert.type)"></i>
+            </div>
+            <div class="alert-info">
+              <h3>{{ alert.title }}</h3>
+              <p>{{ alert.description }}</p>
+            </div>
+          </div>
+          
+          <div class="alert-meta">
+            <div class="severity-badge" [style.background-color]="getSeverityColor(alert.severity)">
+              {{ getSeverityText(alert.severity) }}
+            </div>
+            <div class="status-badge" [style.background-color]="getStatusColor(alert.status)">
+              {{ getStatusText(alert.status) }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="alert-body">
+          <div class="alert-details">
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Casco:</span>
+                <span class="detail-value">{{ alert.helmetSerial }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Minero:</span>
+                <span class="detail-value">{{ alert.assignedTo }}</span>
+              </div>
+            </div>
+            
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Equipo:</span>
+                <span class="detail-value">{{ alert.equipment }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Ubicación:</span>
+                <span class="detail-value">{{ alert.location }}</span>
+              </div>
+            </div>
+            
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="detail-label">Fecha:</span>
+                <span class="detail-value">{{ alert.timestamp }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="sensor-data" *ngIf="alert.sensorData">
+            <h4>Datos del Sensor</h4>
+            <div class="sensor-grid">
+              <div class="sensor-item" *ngIf="alert.sensorData.temperature">
+                <span class="sensor-label">Temperatura:</span>
+                <span class="sensor-value">{{ alert.sensorData.temperature }}°C</span>
+              </div>
+              <div class="sensor-item" *ngIf="alert.sensorData.batteryLevel">
+                <span class="sensor-label">Batería:</span>
+                <span class="sensor-value">{{ alert.sensorData.batteryLevel }}%</span>
+              </div>
+              <div class="sensor-item" *ngIf="alert.sensorData.movement">
+                <span class="sensor-label">Movimiento:</span>
+                <span class="sensor-value">{{ alert.sensorData.movement }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="alert-actions">
+          <button class="btn btn-primary" (click)="showDetail(alert)">
+            <i class="fas fa-eye"></i>
+            Ver Detalle
+          </button>
+          
+          <button class="btn btn-secondary" 
+                  *ngIf="alert.status === 'active'"
+                  (click)="acknowledgeAlert(alert)">
+            <i class="fas fa-check"></i>
+            Reconocer
+          </button>
+          
+          <button class="btn btn-success" 
+                  *ngIf="alert.status !== 'resolved'"
+                  (click)="resolveAlert(alert)">
+            <i class="fas fa-check-double"></i>
+            Resolver
+          </button>
+          
+          <button class="btn btn-danger" (click)="deleteAlert(alert)">
+            <i class="fas fa-trash"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div> 

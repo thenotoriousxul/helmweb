@@ -1,0 +1,266 @@
+<div class="helmets-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Gestión de Cascos IoT</h1>
+        <p>Monitorea y administra todos los cascos inteligentes</p>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="openCreateModal()">
+          <i class="fas fa-plus"></i>
+          Nuevo Casco
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-hard-hat"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalHelmets }}</h3>
+          <p>Total Cascos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon active">
+          <i class="fas fa-wifi"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ onlineHelmets }}</h3>
+          <p>En Línea</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ alertHelmets }}</h3>
+          <p>Con Alertas</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-bell"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalAlerts }}</h3>
+          <p>Alertas Activas</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          placeholder="Buscar por número de serie, minero o ubicación..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        >
+      </div>
+      
+      <div class="filter-options">
+        <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+          <option value="all">Todos los estados</option>
+          <option value="online">En línea</option>
+          <option value="alert">Alerta</option>
+          <option value="offline">Desconectado</option>
+          <option value="maintenance">Mantenimiento</option>
+        </select>
+        
+        <select [(ngModel)]="equipmentFilter" (change)="onEquipmentFilterChange()">
+          <option value="all">Todos los equipos</option>
+          <option *ngFor="let equipment of getEquipmentTypes()" [value]="equipment">{{ equipment }}</option>
+        </select>
+        
+        <button class="btn btn-secondary">
+          <i class="fas fa-filter"></i>
+          Filtros Avanzados
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Helmets Grid -->
+  <section class="helmets-section">
+    <div class="section-header">
+      <h2>Lista de Cascos</h2>
+      <span class="results-count">{{ filteredHelmets.length }} cascos encontrados</span>
+    </div>
+    
+    <div class="helmets-grid">
+      <div class="helmet-card glass" *ngFor="let helmet of filteredHelmets">
+        <div class="card-header">
+          <div class="helmet-info">
+            <h3>{{ helmet.serialNumber }}</h3>
+            <span class="assigned-to">{{ helmet.assignedTo }}</span>
+          </div>
+          <div class="status-badge" [style.background-color]="getStatusColor(helmet.status)">
+            {{ getStatusText(helmet.status) }}
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="sensor-readings">
+            <div class="sensor-item">
+              <div class="sensor-icon">
+                <i class="fas fa-thermometer-half"></i>
+              </div>
+              <div class="sensor-data">
+                <span class="sensor-value" [style.color]="getTemperatureColor(helmet.temperature)">
+                  {{ helmet.temperature }}°C
+                </span>
+                <span class="sensor-label">Temperatura</span>
+              </div>
+            </div>
+            
+            <div class="sensor-item">
+              <div class="sensor-icon">
+                <i class="fas fa-battery-three-quarters"></i>
+              </div>
+              <div class="sensor-data">
+                <span class="sensor-value" [style.color]="getBatteryColor(helmet.batteryLevel)">
+                  {{ helmet.batteryLevel }}%
+                </span>
+                <span class="sensor-label">Batería</span>
+              </div>
+            </div>
+            
+            <div class="sensor-item">
+              <div class="sensor-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="sensor-data">
+                <span class="sensor-value">{{ helmet.location }}</span>
+                <span class="sensor-label">Ubicación</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="helmet-details">
+            <div class="detail-item">
+              <span class="detail-label">Equipo:</span>
+              <span class="detail-value">{{ helmet.equipment }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Última señal:</span>
+              <span class="detail-value">{{ helmet.lastHeartbeat }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Movimiento:</span>
+              <span class="detail-value">{{ helmet.sensors.movement }}</span>
+            </div>
+          </div>
+          
+          <div class="alerts-section" *ngIf="helmet.alerts > 0">
+            <div class="alerts-badge">
+              <i class="fas fa-exclamation-triangle"></i>
+              {{ helmet.alerts }} alerta{{ helmet.alerts > 1 ? 's' : '' }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <button class="btn btn-primary" (click)="showDetail(helmet)">
+            <i class="fas fa-eye"></i>
+            Ver Detalle
+          </button>
+          <button class="btn btn-secondary" (click)="editHelmet(helmet)">
+            <i class="fas fa-edit"></i>
+            Editar
+          </button>
+          <button class="btn btn-danger" (click)="deleteHelmet(helmet)">
+            <i class="fas fa-trash"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Helmet Modal -->
+  <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Registrar Nuevo Casco</h3>
+        <button class="close-btn" (click)="closeCreateModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form (ngSubmit)="createHelmet()">
+          <div class="form-group">
+            <label for="serialNumber">Número de Serie</label>
+            <input 
+              type="text" 
+              id="serialNumber"
+              [(ngModel)]="newHelmet.serialNumber" 
+              name="serialNumber"
+              placeholder="Ej: HELM-001"
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="assignedTo">Asignado a</label>
+            <input 
+              type="text" 
+              id="assignedTo"
+              [(ngModel)]="newHelmet.assignedTo" 
+              name="assignedTo"
+              placeholder="Nombre del minero"
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="equipment">Equipo</label>
+            <select id="equipment" [(ngModel)]="newHelmet.equipment" name="equipment" required>
+              <option value="">Seleccionar equipo</option>
+              <option value="Equipo Mina Norte">Equipo Mina Norte</option>
+              <option value="Equipo Mina Sur">Equipo Mina Sur</option>
+              <option value="Equipo Mina Este">Equipo Mina Este</option>
+              <option value="Equipo Mina Oeste">Equipo Mina Oeste</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="location">Ubicación</label>
+            <input 
+              type="text" 
+              id="location"
+              [(ngModel)]="newHelmet.location" 
+              name="location"
+              placeholder="Ej: Zona A-12"
+            >
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              Registrar Casco
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 

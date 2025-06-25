@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 interface Equipment {
   id: string;
@@ -18,16 +18,19 @@ interface Equipment {
   }>;
   location: string;
   lastUpdate: string;
+  type: string;
+  supervisor: string;
+  startDate: string;
 }
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-equipments',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  templateUrl: './equipments.component.html',
+  styleUrls: ['./equipments.component.css']
 })
-export class DashboardComponent {
+export class EquipmentsComponent {
   equipments: Equipment[] = [
     {
       id: '1',
@@ -38,6 +41,9 @@ export class DashboardComponent {
       alerts: 2,
       location: 'Zona A-12',
       lastUpdate: '2 min',
+      type: 'Extracción',
+      supervisor: 'Carlos Mendoza',
+      startDate: '2024-01-15',
       miners: [
         { id: '1', name: 'Carlos M.', avatar: 'CM', status: 'online' },
         { id: '2', name: 'Ana R.', avatar: 'AR', status: 'online' },
@@ -53,6 +59,9 @@ export class DashboardComponent {
       alerts: 1,
       location: 'Zona B-8',
       lastUpdate: '5 min',
+      type: 'Perforación',
+      supervisor: 'Ana Rodríguez',
+      startDate: '2024-01-20',
       miners: [
         { id: '4', name: 'Luis P.', avatar: 'LP', status: 'online' },
         { id: '5', name: 'María G.', avatar: 'MG', status: 'online' },
@@ -68,55 +77,13 @@ export class DashboardComponent {
       alerts: 5,
       location: 'Zona C-15',
       lastUpdate: '1 min',
+      type: 'Carga',
+      supervisor: 'Miguel Torres',
+      startDate: '2024-01-10',
       miners: [
         { id: '7', name: 'Elena V.', avatar: 'EV', status: 'alert' },
         { id: '8', name: 'Diego H.', avatar: 'DH', status: 'online' },
         { id: '9', name: 'Sofia L.', avatar: 'SL', status: 'alert' }
-      ]
-    },
-    {
-      id: '4',
-      name: 'Equipo Mina Oeste',
-      totalHelmets: 29,
-      activeHelmets: 25,
-      status: 'inactive',
-      alerts: 0,
-      location: 'Zona D-3',
-      lastUpdate: '15 min',
-      miners: [
-        { id: '10', name: 'Pedro M.', avatar: 'PM', status: 'offline' },
-        { id: '11', name: 'Carmen F.', avatar: 'CF', status: 'offline' },
-        { id: '12', name: 'Jorge A.', avatar: 'JA', status: 'offline' }
-      ]
-    },
-    {
-      id: '5',
-      name: 'Equipo Mina Central',
-      totalHelmets: 41,
-      activeHelmets: 39,
-      status: 'active',
-      alerts: 1,
-      location: 'Zona E-7',
-      lastUpdate: '3 min',
-      miners: [
-        { id: '13', name: 'Isabel C.', avatar: 'IC', status: 'online' },
-        { id: '14', name: 'Fernando R.', avatar: 'FR', status: 'online' },
-        { id: '15', name: 'Patricia M.', avatar: 'PM', status: 'alert' }
-      ]
-    },
-    {
-      id: '6',
-      name: 'Equipo Mina Profunda',
-      totalHelmets: 33,
-      activeHelmets: 30,
-      status: 'active',
-      alerts: 3,
-      location: 'Zona F-22',
-      lastUpdate: '4 min',
-      miners: [
-        { id: '16', name: 'Ricardo B.', avatar: 'RB', status: 'online' },
-        { id: '17', name: 'Lucía N.', avatar: 'LN', status: 'alert' },
-        { id: '18', name: 'Alberto K.', avatar: 'AK', status: 'online' }
       ]
     }
   ];
@@ -124,9 +91,29 @@ export class DashboardComponent {
   filteredEquipments: Equipment[] = [];
   searchTerm = '';
   statusFilter = 'all';
+  typeFilter = 'all';
+  showCreateModal = false;
+  newEquipment: Partial<Equipment> = {};
 
   constructor(private router: Router) {
     this.filteredEquipments = [...this.equipments];
+  }
+
+  // Propiedades computadas para evitar filtros en el template
+  get totalEquipments(): number {
+    return this.equipments.length;
+  }
+
+  get activeEquipments(): number {
+    return this.equipments.filter(eq => eq.status === 'active').length;
+  }
+
+  get warningEquipments(): number {
+    return this.equipments.filter(eq => eq.status === 'warning').length;
+  }
+
+  get totalHelmets(): number {
+    return this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0);
   }
 
   onSearchChange() {
@@ -137,12 +124,18 @@ export class DashboardComponent {
     this.filterEquipments();
   }
 
+  onTypeFilterChange() {
+    this.filterEquipments();
+  }
+
   filterEquipments() {
     this.filteredEquipments = this.equipments.filter(equipment => {
       const matchesSearch = equipment.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           equipment.location.toLowerCase().includes(this.searchTerm.toLowerCase());
+                           equipment.location.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                           equipment.supervisor.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchesStatus = this.statusFilter === 'all' || equipment.status === this.statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesType = this.typeFilter === 'all' || equipment.type === this.typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
     });
   }
 
@@ -164,25 +157,55 @@ export class DashboardComponent {
     }
   }
 
-  getMinersStatusColor(status: string): string {
-    switch (status) {
-      case 'online': return '#64ffda';
-      case 'alert': return '#ff6b6b';
-      case 'offline': return '#8892b0';
-      default: return '#8892b0';
+  showDetail(equipment: Equipment) {
+    this.router.navigate(['/equipment-detail', equipment.id]);
+  }
+
+  editEquipment(equipment: Equipment) {
+    this.router.navigate(['/equipment-edit', equipment.id]);
+  }
+
+  deleteEquipment(equipment: Equipment) {
+    if (confirm(`¿Estás seguro de que quieres eliminar el equipo "${equipment.name}"?`)) {
+      this.equipments = this.equipments.filter(eq => eq.id !== equipment.id);
+      this.filterEquipments();
     }
   }
 
-  getTotalStats() {
-    return {
-      totalEquipments: this.equipments.length,
-      totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
-      activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
-      totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0)
-    };
+  openCreateModal() {
+    this.showCreateModal = true;
+    this.newEquipment = {};
   }
 
-  showDetail(equipment: Equipment) {
-    this.router.navigate(['/equipment-detail', equipment.id]);
+  closeCreateModal() {
+    this.showCreateModal = false;
+    this.newEquipment = {};
+  }
+
+  createEquipment() {
+    if (this.newEquipment.name && this.newEquipment.location && this.newEquipment.type) {
+      const newEq: Equipment = {
+        id: Date.now().toString(),
+        name: this.newEquipment.name!,
+        totalHelmets: this.newEquipment.totalHelmets || 0,
+        activeHelmets: 0,
+        status: 'inactive',
+        alerts: 0,
+        location: this.newEquipment.location!,
+        lastUpdate: 'Ahora',
+        type: this.newEquipment.type!,
+        supervisor: this.newEquipment.supervisor || 'Sin asignar',
+        startDate: new Date().toISOString().split('T')[0],
+        miners: []
+      };
+      
+      this.equipments.push(newEq);
+      this.filterEquipments();
+      this.closeCreateModal();
+    }
+  }
+
+  getEquipmentTypes(): string[] {
+    return [...new Set(this.equipments.map(eq => eq.type))];
   }
 } 

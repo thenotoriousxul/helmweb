@@ -1,0 +1,221 @@
+<div class="equipment-detail-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <button class="back-button" (click)="backToEquipments()">
+        <i class="fas fa-arrow-left"></i>
+        Volver a Equipos
+      </button>
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="editEquipment()">
+          <i class="fas fa-edit"></i>
+          Editar
+        </button>
+        <button class="btn btn-danger" (click)="deleteEquipment()">
+          <i class="fas fa-trash"></i>
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Equipment Info -->
+  <div class="equipment-info" *ngIf="equipment">
+    <div class="equipment-header">
+      <div class="equipment-title">
+        <h1>{{ equipment.name }}</h1>
+        <span class="status-badge" [style.background-color]="getStatusColor(equipment.status)">
+          {{ getStatusText(equipment.status) }}
+        </span>
+      </div>
+      <div class="equipment-stats">
+        <div class="stat">
+          <span class="stat-value">{{ equipment.activeHelmets }}/{{ equipment.totalHelmets }}</span>
+          <span class="stat-label">Cascos Activos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ equipment.alerts }}</span>
+          <span class="stat-label">Alertas</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ equipment.miners.length }}</span>
+          <span class="stat-label">Mineros</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="equipment-details">
+      <div class="detail-row">
+        <div class="detail-item">
+          <span class="detail-label">Ubicación:</span>
+          <span class="detail-value">{{ equipment.location }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Tipo:</span>
+          <span class="detail-value">{{ equipment.type }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Supervisor:</span>
+          <span class="detail-value">{{ equipment.supervisor }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Fecha de Inicio:</span>
+          <span class="detail-value">{{ equipment.startDate }}</span>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-item full-width">
+          <span class="detail-label">Descripción:</span>
+          <span class="detail-value">{{ equipment.description }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab === 'summary'" (click)="activeTab = 'summary'">
+        <i class="fas fa-chart-pie"></i>
+        Resumen
+      </button>
+      <button class="tab" [class.active]="activeTab === 'miners'" (click)="activeTab = 'miners'">
+        <i class="fas fa-users"></i>
+        Mineros
+      </button>
+      <button class="tab" [class.active]="activeTab === 'helmets'" (click)="activeTab = 'helmets'">
+        <i class="fas fa-hard-hat"></i>
+        Cascos
+      </button>
+      <button class="tab" [class.active]="activeTab === 'alerts'" (click)="activeTab = 'alerts'">
+        <i class="fas fa-exclamation-triangle"></i>
+        Alertas
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Summary Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'summary'">
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h3>Estado General</h3>
+            <div class="summary-stats">
+              <div class="summary-stat">
+                <span class="stat-number">{{ equipment?.activeHelmets }}</span>
+                <span class="stat-text">Cascos Activos</span>
+              </div>
+              <div class="summary-stat">
+                <span class="stat-number">{{ equipment?.alerts }}</span>
+                <span class="stat-text">Alertas Activas</span>
+              </div>
+              <div class="summary-stat">
+                <span class="stat-number">{{ equipment?.miners?.length || 0 }}</span>
+                <span class="stat-text">Mineros Asignados</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <h3>Última Actividad</h3>
+            <div class="activity-list">
+              <div class="activity-item">
+                <span class="activity-time">{{ equipment?.lastUpdate }}</span>
+                <span class="activity-text">Última actualización de datos</span>
+              </div>
+              <div class="activity-item">
+                <span class="activity-time">5 min</span>
+                <span class="activity-text">Última alerta generada</span>
+              </div>
+              <div class="activity-item">
+                <span class="activity-time">10 min</span>
+                <span class="activity-text">Último cambio de turno</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Miners Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'miners'">
+        <div class="miners-grid">
+          <div class="miner-card" *ngFor="let miner of equipment?.miners">
+            <div class="miner-header">
+              <div class="miner-avatar">{{ miner.avatar }}</div>
+              <div class="miner-info">
+                <h4>{{ miner.name }}</h4>
+                <span class="miner-status" [style.color]="getStatusColor(miner.status)">
+                  {{ miner.status === 'online' ? 'En línea' : miner.status === 'alert' ? 'Alerta' : 'Desconectado' }}
+                </span>
+              </div>
+            </div>
+            <div class="miner-details">
+              <div class="miner-detail">
+                <span class="detail-label">Casco:</span>
+                <span class="detail-value">{{ miner.helmetId }}</span>
+              </div>
+              <div class="miner-detail">
+                <span class="detail-label">Última vez:</span>
+                <span class="detail-value">{{ miner.lastSeen }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Helmets Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'helmets'">
+        <div class="helmets-grid">
+          <div class="helmet-card" *ngFor="let helmet of helmets">
+            <div class="helmet-header">
+              <h4>{{ helmet.id }}</h4>
+              <span class="helmet-status" [style.background-color]="getStatusColor(helmet.status)">
+                {{ getStatusText(helmet.status) }}
+              </span>
+            </div>
+            <div class="helmet-info">
+              <div class="helmet-detail">
+                <span class="detail-label">Miner:</span>
+                <span class="detail-value">{{ helmet.minerName }}</span>
+              </div>
+              <div class="helmet-detail">
+                <span class="detail-label">Batería:</span>
+                <span class="detail-value">{{ helmet.batteryLevel }}%</span>
+              </div>
+              <div class="helmet-detail">
+                <span class="detail-label">Última señal:</span>
+                <span class="detail-value">{{ helmet.lastSignal }}</span>
+              </div>
+              <div class="helmet-detail">
+                <span class="detail-label">Alertas:</span>
+                <span class="detail-value">{{ helmet.alerts }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'alerts'">
+        <div class="alerts-list">
+          <div class="alert-item" *ngFor="let alert of alerts">
+            <div class="alert-header">
+              <span class="alert-type">{{ getAlertTypeText(alert.type) }}</span>
+              <span class="alert-severity" [style.background-color]="getSeverityColor(alert.severity)">
+                {{ alert.severity.toUpperCase() }}
+              </span>
+            </div>
+            <div class="alert-content">
+              <p class="alert-message">{{ alert.message }}</p>
+              <div class="alert-meta">
+                <span class="alert-miner">{{ alert.minerName }}</span>
+                <span class="alert-time">{{ alert.timestamp }}</span>
+                <span class="alert-status">{{ alert.status }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
