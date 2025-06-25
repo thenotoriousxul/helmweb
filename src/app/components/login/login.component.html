@@ -1,21 +1,24 @@
 <div class="login-container">
-  <!-- Left Side - Form -->
   <div class="login-form-side">
-    <div class="login-header">
-      <button class="close-btn" (click)="goToLanding()">
-        <i class="fas fa-times"></i>
-      </button>
-      <div class="logo">
-        <h2>Helm<span class="accent"></span></h2>
+    <div class="login-card">
+      <!-- Aquí dentro ponemos el X y el Helm -->
+      <div class="login-header">
+        <button class="close-btn" (click)="goToLanding()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="logo">
+          <h2>Helm<span class="accent">®</span></h2>
+        </div>
       </div>
-    </div>
-    
-    <div class="login-card glass">
+      
       <div class="login-content">
-        <h1>Bienvenido de vuelta</h1>
-        <p class="login-subtitle">Accede a tu dashboard de monitoreo</p>
+        <div class="welcome-section">
+          <h1>Bienvenido de vuelta</h1>
+          <p class="login-subtitle">Accede a tu dashboard de monitoreo</p>
+        </div>
         
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <!-- resto del formulario aquí -->
           <div class="form-group">
             <label for="email">Email</label>
             <div class="input-wrapper">
@@ -53,8 +56,7 @@
           <div class="form-options">
             <label class="checkbox-wrapper">
               <input type="checkbox">
-              <span class="checkmark"></span>
-              Recordarme
+              <span>Recordarme</span>
             </label>
             <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
           </div>
@@ -76,65 +78,4 @@
       </div>
     </div>
   </div>
-  
-  <!-- Right Side - Visual -->
-  <div class="login-visual-side">
-    <div class="visual-content">
-      <div class="tech-particles">
-        <div class="particle" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"></div>
-      </div>
-      
-      <div class="security-preview glass">
-        <div class="preview-header">
-          <h3>Seguridad de Nivel Empresarial</h3>
-          <div class="security-badge">
-            <i class="fas fa-shield-alt"></i>
-            <span>SSL</span>
-          </div>
-        </div>
-        
-        <div class="security-features">
-          <div class="security-item">
-            <i class="fas fa-lock"></i>
-            <span>Encriptación AES-256</span>
-          </div>
-          <div class="security-item">
-            <i class="fas fa-user-shield"></i>
-            <span>Autenticación 2FA</span>
-          </div>
-          <div class="security-item">
-            <i class="fas fa-eye-slash"></i>
-            <span>Datos Privados</span>
-          </div>
-          <div class="security-item">
-            <i class="fas fa-server"></i>
-            <span>Servidores Seguros</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="stats-preview glass">
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-number">99.9%</div>
-            <div class="stat-label">Uptime</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">24/7</div>
-            <div class="stat-label">Soporte</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">500+</div>
-            <div class="stat-label">Empresas</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="tech-quote">
-        <blockquote>
-          "La seguridad no es un producto, es un proceso"
-        </blockquote>
-      </div>
-    </div>
-  </div>
-</div> 
+</div>
