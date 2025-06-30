@@ -1,53 +1,90 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  loginForm: FormGroup;
-  loginError = '';
+  loginData = {
+    email: '',
+    password: ''
+  };
+  
+  isLoading = false;
+  errorMessage = '';
+  showPassword = false;
 
   constructor(
-    private fb: FormBuilder,
-    private router: Router
-  ) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+  onSubmit() {
+    if (!this.loginData.email || !this.loginData.password) {
+      this.errorMessage = 'Por favor completa todos los campos';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.login(this.loginData.email, this.loginData.password).subscribe({
+      next: (user) => {
+        this.isLoading = false;
+        console.log('Usuario logueado:', user);
+        
+        // Redirigir según el rol
+        if (user.role === 'ADMIN') {
+          this.router.navigate(['/dashboard']);
+        } else if (user.role === 'SUPERVISOR') {
+          this.router.navigate(['/dashboard']);
+        } else if (user.role === 'MINERO') {
+          this.router.navigate(['/dashboard']);
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+        console.error('Error de login:', error);
+      }
     });
   }
 
-  onSubmit() {
-    if (this.loginForm.valid) {
-      // Simular login exitoso
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.loginError = 'Por favor, completa todos los campos correctamente.';
-    }
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
-  getErrorMessage(field: string): string {
-    const control = this.loginForm.get(field);
-    if (control?.errors && control.touched) {
-      if (control.errors['required']) return 'Este campo es requerido.';
-      if (control.errors['email']) return 'Ingresa un email válido.';
-      if (control.errors['minlength']) return 'Mínimo 6 caracteres.';
-    }
-    return '';
+  // Métodos para simular diferentes tipos de login
+  loginAsSupervisor() {
+    this.loginData.email = 'supervisor@helmmining.com';
+    this.loginData.password = 'password123';
+    this.onSubmit();
   }
 
-  goToRegister() {
-    this.router.navigate(['/register']);
+  loginAsMinero() {
+    this.loginData.email = 'minero@helmmining.com';
+    this.loginData.password = 'password123';
+    this.onSubmit();
   }
 
-  goToLanding() {
-    this.router.navigate(['/']);
+  loginAsAdmin() {
+    this.loginData.email = 'admin@helmmining.com';
+    this.loginData.password = 'password123';
+    this.onSubmit();
+  }
+
+  clearForm() {
+    this.loginData = {
+      email: '',
+      password: ''
+    };
+    this.errorMessage = '';
   }
 } 

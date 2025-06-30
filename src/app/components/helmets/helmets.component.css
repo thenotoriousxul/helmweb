@@ -81,6 +81,30 @@
   color: #ffd93d;
 }
 
+.stat-icon.inactive {
+  background: linear-gradient(135deg, #6c757d, #495057);
+  color: #ffffff;
+}
+
+.stat-icon.assigned {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: #ffffff;
+}
+
+.uuid-text {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-family: 'Courier New', monospace;
+  display: block;
+  margin-top: 2px;
+}
+
+.not-assigned {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
 .stat-content h3 {
   font-size: 2rem;
   font-weight: 700;
@@ -190,11 +214,29 @@
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid transparent;
 }
 
 .helmet-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.helmet-card[data-status="inactivo"] {
+  border-left-color: #6c757d;
+  opacity: 0.8;
+}
+
+.helmet-card[data-status="activo"] {
+  border-left-color: #28a745;
+}
+
+.helmet-card[data-status="activo-sin-asignar"] {
+  border-left-color: #ffc107;
+}
+
+.helmet-card[data-status="activo-asignado"] {
+  border-left-color: #007bff;
 }
 
 .card-header {
@@ -210,6 +252,22 @@
   font-size: 1.3rem;
   color: #ccd6f6;
   font-weight: 600;
+  position: relative;
+}
+
+.helmet-info h3:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
 }
 
 .assigned-to {
@@ -220,13 +278,13 @@
 }
 
 .status-badge {
-  padding: 0.5rem 1rem;
+  padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #0a192f;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card-body {
@@ -328,6 +386,11 @@
   flex: 1;
   min-width: 120px;
   justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.card-actions .btn:active {
+  transform: scale(0.95);
 }
 
 /* Modal */
@@ -412,18 +475,19 @@
 .form-group select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #233554;
+  border: 2px solid #e9ecef;
   border-radius: 8px;
   background: rgba(35, 53, 84, 0.3);
   color: #ccd6f6;
   font-size: 1rem;
+  transition: border-color 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #64ffda;
-  box-shadow: 0 0 0 2px rgba(100, 255, 218, 0.2);
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .modal-actions {
@@ -479,6 +543,45 @@
   box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
 }
 
+.btn-success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #ffc107, #ffb300);
+  border: none;
+  color: #212529;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #e0a800, #d39e00);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+  background: linear-gradient(135deg, #138496, #117a8b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .helmets-container {
@@ -504,7 +607,8 @@
   }
   
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
   
   .helmets-grid {
@@ -521,9 +625,36 @@
   
   .card-actions {
     flex-direction: column;
+    gap: 0.5rem;
   }
   
   .card-actions .btn {
-    min-width: auto;
+    width: 100%;
+    justify-content: center;
   }
+}
+
+/* Estados de carga */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 } 

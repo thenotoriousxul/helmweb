@@ -1,0 +1,282 @@
+<div class="miners-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Gestión de Mineros</h1>
+        <p *ngIf="authService.isMinero()">Tu información personal y sensores</p>
+        <p *ngIf="!authService.isMinero()">Administra y monitorea todos los mineros</p>
+      </div>
+      <div class="header-right" *ngIf="canCreateMiner()">
+        <button class="btn btn-primary" (click)="openCreateModal()">
+          <i class="fas fa-plus"></i>
+          Nuevo Minero
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <section class="stats-section" *ngIf="!authService.isMinero()">
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalMiners }}</h3>
+          <p>Total Mineros</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon active">
+          <i class="fas fa-wifi"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ onlineMiners }}</h3>
+          <p>En Línea</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ alertMiners }}</h3>
+          <p>Con Alertas</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-hard-hat"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ minersWithHelmet }}</h3>
+          <p>Con Casco</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section class="filters-section" *ngIf="!authService.isMinero()">
+    <div class="filters-container">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          placeholder="Buscar por nombre, correo o RFC..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        >
+      </div>
+      
+      <div class="filter-options">
+        <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+          <option *ngFor="let option of getStatusOptions()" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        
+        <button class="btn btn-secondary">
+          <i class="fas fa-filter"></i>
+          Filtros Avanzados
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Miners Grid -->
+  <section class="miners-section">
+    <div class="section-header" *ngIf="!authService.isMinero()">
+      <h2>Lista de Mineros</h2>
+      <span class="results-count">{{ filteredMiners.length }} mineros encontrados</span>
+    </div>
+    
+    <div class="miners-grid">
+      <div class="miner-card glass" *ngFor="let miner of filteredMiners">
+        <div class="card-header">
+          <div class="miner-info">
+            <div class="miner-avatar">
+              <span>{{ miner.photo }}</span>
+            </div>
+            <div class="miner-details">
+              <h3>{{ miner.name }} {{ miner.lastName }}</h3>
+              <span class="miner-email">{{ miner.email }}</span>
+              <span class="miner-rfc">{{ miner.rfc }}</span>
+            </div>
+          </div>
+          <div class="status-badge" [style.background-color]="getStatusColor(miner.status)">
+            {{ getStatusText(miner.status) }}
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="miner-details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Teléfono:</span>
+              <span class="detail-value">{{ miner.phone }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Fecha Nacimiento:</span>
+              <span class="detail-value">{{ miner.birthDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="detail-item" *ngIf="miner.hireDate">
+              <span class="detail-label">Fecha Contratación:</span>
+              <span class="detail-value">{{ miner.hireDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Casco Asignado:</span>
+              <span class="detail-value" [class.has-helmet]="miner.helmetId">
+                {{ miner.helmetId ? 'HELM-' + miner.helmetId.padStart(3, '0') : 'Sin asignar' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="address-section">
+            <h4>Dirección</h4>
+            <p>{{ getFullAddress(miner) }}</p>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <button class="btn btn-primary" (click)="showDetail(miner)">
+            <i class="fas fa-eye"></i>
+            Ver Detalle
+          </button>
+          
+          <button 
+            class="btn btn-secondary" 
+            *ngIf="canModifyMiner()"
+            (click)="editMiner(miner)"
+          >
+            <i class="fas fa-edit"></i>
+            Editar
+          </button>
+          
+          <button 
+            class="btn btn-danger" 
+            *ngIf="canModifyMiner()"
+            (click)="deleteMiner(miner)"
+          >
+            <i class="fas fa-trash"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Miner Modal -->
+  <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Registrar Nuevo Minero</h3>
+        <button class="close-btn" (click)="closeCreateModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form (ngSubmit)="createMiner()">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Nombre</label>
+              <input 
+                type="text" 
+                id="name"
+                [(ngModel)]="newMiner.name" 
+                name="name"
+                placeholder="Nombre del minero"
+                required
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName">Apellido</label>
+              <input 
+                type="text" 
+                id="lastName"
+                [(ngModel)]="newMiner.lastName" 
+                name="lastName"
+                placeholder="Apellido del minero"
+                required
+              >
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="newMiner.email" 
+              name="email"
+              placeholder="correo@ejemplo.com"
+              required
+            >
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="birthDate">Fecha de Nacimiento</label>
+              <input 
+                type="date" 
+                id="birthDate"
+                [(ngModel)]="newMiner.birthDate" 
+                name="birthDate"
+                required
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="hireDate">Fecha de Contratación</label>
+              <input 
+                type="date" 
+                id="hireDate"
+                [(ngModel)]="newMiner.hireDate" 
+                name="hireDate"
+              >
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Teléfono</label>
+            <input 
+              type="tel" 
+              id="phone"
+              [(ngModel)]="newMiner.phone" 
+              name="phone"
+              placeholder="+52 55 1234 5678"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="rfc">RFC</label>
+            <input 
+              type="text" 
+              id="rfc"
+              [(ngModel)]="newMiner.rfc" 
+              name="rfc"
+              placeholder="RFC del minero"
+              required
+            >
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i>
+              Registrar Minero
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 

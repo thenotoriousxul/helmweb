@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService, User } from '../../services/auth.service';
 
 interface Equipment {
   id: string;
@@ -51,18 +52,37 @@ interface UserProfile {
                 <span>Dashboard</span>
               </a>
             </li>
-            <li class="nav-item" [class.active]="activeSidebarItem === 'equipments'">
+            
+            <!-- Opciones para Supervisor y Admin -->
+            <li class="nav-item" 
+                [class.active]="activeSidebarItem === 'equipments'"
+                *ngIf="authService.canViewAllEquipments()">
               <a (click)="setActiveSidebarItem('equipments')">
                 <i class="fas fa-hard-hat"></i>
                 <span>Equipos</span>
               </a>
             </li>
-            <li class="nav-item" [class.active]="activeSidebarItem === 'helmets'">
+            
+            <!-- Opciones para Admin -->
+            <li class="nav-item" 
+                [class.active]="activeSidebarItem === 'helmets'"
+                *ngIf="authService.canCreateHelmet()">
               <a (click)="setActiveSidebarItem('helmets')">
                 <i class="fas fa-shield-alt"></i>
                 <span>Cascos</span>
               </a>
             </li>
+            
+            <!-- Opciones para Supervisor y Admin -->
+            <li class="nav-item" 
+                [class.active]="activeSidebarItem === 'miners'"
+                *ngIf="authService.canViewAllMiners()">
+              <a (click)="setActiveSidebarItem('miners')">
+                <i class="fas fa-users"></i>
+                <span>Mineros</span>
+              </a>
+            </li>
+            
             <li class="nav-item" [class.active]="activeSidebarItem === 'alerts'">
               <a (click)="setActiveSidebarItem('alerts')">
                 <i class="fas fa-bell"></i>
@@ -70,12 +90,14 @@ interface UserProfile {
                 <span class="alert-badge" *ngIf="getTotalStats().totalAlerts > 0">{{ getTotalStats().totalAlerts }}</span>
               </a>
             </li>
+            
             <li class="nav-item" [class.active]="activeSidebarItem === 'reports'">
               <a (click)="setActiveSidebarItem('reports')">
                 <i class="fas fa-chart-bar"></i>
                 <span>Reportes</span>
               </a>
             </li>
+            
             <li class="nav-item" [class.active]="activeSidebarItem === 'settings'">
               <a (click)="setActiveSidebarItem('settings')">
                 <i class="fas fa-cog"></i>
@@ -92,7 +114,7 @@ interface UserProfile {
             </div>
             <div class="user-info">
               <span class="user-name">{{ userProfile.name }}</span>
-              <span class="user-role">{{ userProfile.role }}</span>
+              <span class="user-role">{{ getRoleDisplayName(userProfile.role) }}</span>
             </div>
             <div class="dropdown-arrow" [class.open]="showProfileDropdown">
               <i class="fas fa-chevron-down"></i>
@@ -188,7 +210,7 @@ interface UserProfile {
   `,
   styleUrls: ['./layout.component.css']
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   equipments: Equipment[] = [
     {
       id: '1',
@@ -198,12 +220,12 @@ export class LayoutComponent {
       status: 'active',
       alerts: 2,
       location: 'Zona A-12',
-      lastUpdate: '2 min',
       miners: [
-        { id: '1', name: 'Carlos M.', avatar: 'CM', status: 'online' },
-        { id: '2', name: 'Ana R.', avatar: 'AR', status: 'online' },
-        { id: '3', name: 'Miguel T.', avatar: 'MT', status: 'alert' }
-      ]
+        { id: '1', name: 'Carlos Mendoza', avatar: 'CM', status: 'online' },
+        { id: '2', name: 'Ana Rodríguez', avatar: 'AR', status: 'online' },
+        { id: '3', name: 'Miguel Torres', avatar: 'MT', status: 'alert' }
+      ],
+      lastUpdate: '2 min'
     },
     {
       id: '2',
@@ -213,82 +235,35 @@ export class LayoutComponent {
       status: 'active',
       alerts: 1,
       location: 'Zona B-8',
-      lastUpdate: '5 min',
       miners: [
-        { id: '4', name: 'Luis P.', avatar: 'LP', status: 'online' },
-        { id: '5', name: 'María G.', avatar: 'MG', status: 'online' },
-        { id: '6', name: 'Roberto S.', avatar: 'RS', status: 'offline' }
-      ]
+        { id: '4', name: 'Luis Pérez', avatar: 'LP', status: 'online' },
+        { id: '5', name: 'María González', avatar: 'MG', status: 'offline' },
+        { id: '6', name: 'Roberto Silva', avatar: 'RS', status: 'online' }
+      ],
+      lastUpdate: '5 min'
     },
     {
       id: '3',
       name: 'Equipo Mina Este',
-      totalHelmets: 52,
-      activeHelmets: 48,
+      totalHelmets: 32,
+      activeHelmets: 28,
       status: 'warning',
-      alerts: 5,
-      location: 'Zona C-15',
-      lastUpdate: '1 min',
-      miners: [
-        { id: '7', name: 'Elena V.', avatar: 'EV', status: 'alert' },
-        { id: '8', name: 'Diego H.', avatar: 'DH', status: 'online' },
-        { id: '9', name: 'Sofia L.', avatar: 'SL', status: 'alert' }
-      ]
-    },
-    {
-      id: '4',
-      name: 'Equipo Mina Oeste',
-      totalHelmets: 29,
-      activeHelmets: 25,
-      status: 'inactive',
-      alerts: 0,
-      location: 'Zona D-3',
-      lastUpdate: '15 min',
-      miners: [
-        { id: '10', name: 'Pedro M.', avatar: 'PM', status: 'offline' },
-        { id: '11', name: 'Carmen F.', avatar: 'CF', status: 'offline' },
-        { id: '12', name: 'Jorge A.', avatar: 'JA', status: 'offline' }
-      ]
-    },
-    {
-      id: '5',
-      name: 'Equipo Mina Central',
-      totalHelmets: 41,
-      activeHelmets: 39,
-      status: 'active',
-      alerts: 1,
-      location: 'Zona E-7',
-      lastUpdate: '3 min',
-      miners: [
-        { id: '13', name: 'Isabel C.', avatar: 'IC', status: 'online' },
-        { id: '14', name: 'Fernando R.', avatar: 'FR', status: 'online' },
-        { id: '15', name: 'Patricia M.', avatar: 'PM', status: 'alert' }
-      ]
-    },
-    {
-      id: '6',
-      name: 'Equipo Mina Profunda',
-      totalHelmets: 33,
-      activeHelmets: 30,
-      status: 'active',
       alerts: 3,
-      location: 'Zona F-22',
-      lastUpdate: '4 min',
+      location: 'Zona C-15',
       miners: [
-        { id: '16', name: 'Ricardo B.', avatar: 'RB', status: 'online' },
-        { id: '17', name: 'Lucía N.', avatar: 'LN', status: 'alert' },
-        { id: '18', name: 'Alberto K.', avatar: 'AK', status: 'online' }
-      ]
+        { id: '7', name: 'Patricia López', avatar: 'PL', status: 'alert' },
+        { id: '8', name: 'Fernando Ruiz', avatar: 'FR', status: 'online' }
+      ],
+      lastUpdate: '1 min'
     }
   ];
 
-  userProfile: UserProfile = {
-    id: '1',
-    name: 'Carlos Mendoza',
-    email: 'carlos.mendoza@helmmining.com',
-    role: 'Supervisor',
-    avatar: 'CM',
-    department: 'Seguridad Industrial'
+  userProfile: User = {
+    id: '',
+    name: '',
+    email: '',
+    role: 'MINERO',
+    avatar: ''
   };
 
   activeSidebarItem = 'dashboard';
@@ -300,31 +275,48 @@ export class LayoutComponent {
     confirmPassword: ''
   };
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    public authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    this.loadUserProfile();
     this.setActiveSidebarItemFromRoute();
   }
 
+  loadUserProfile() {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.userProfile = currentUser;
+    }
+  }
+
   setActiveSidebarItemFromRoute() {
-    const currentPath = this.router.url;
-    if (currentPath.includes('/equipments')) {
-      this.activeSidebarItem = 'equipments';
-    } else if (currentPath.includes('/helmets')) {
-      this.activeSidebarItem = 'helmets';
-    } else if (currentPath.includes('/alerts')) {
-      this.activeSidebarItem = 'alerts';
-    } else if (currentPath.includes('/reports')) {
-      this.activeSidebarItem = 'reports';
-    } else if (currentPath.includes('/settings')) {
-      this.activeSidebarItem = 'settings';
-    } else if (currentPath.includes('/profile')) {
-      this.activeSidebarItem = 'profile';
-    } else {
+    const currentRoute = this.router.url;
+    if (currentRoute.includes('/dashboard')) {
       this.activeSidebarItem = 'dashboard';
+    } else if (currentRoute.includes('/equipments')) {
+      this.activeSidebarItem = 'equipments';
+    } else if (currentRoute.includes('/helmets')) {
+      this.activeSidebarItem = 'helmets';
+    } else if (currentRoute.includes('/miners')) {
+      this.activeSidebarItem = 'miners';
+    } else if (currentRoute.includes('/alerts')) {
+      this.activeSidebarItem = 'alerts';
+    } else if (currentRoute.includes('/reports')) {
+      this.activeSidebarItem = 'reports';
+    } else if (currentRoute.includes('/settings')) {
+      this.activeSidebarItem = 'settings';
+    } else if (currentRoute.includes('/profile')) {
+      this.activeSidebarItem = 'profile';
     }
   }
 
   setActiveSidebarItem(item: string) {
     this.activeSidebarItem = item;
+    
+    // Navegar a la ruta correspondiente
     switch (item) {
       case 'dashboard':
         this.router.navigate(['/dashboard']);
@@ -335,6 +327,9 @@ export class LayoutComponent {
       case 'helmets':
         this.router.navigate(['/helmets']);
         break;
+      case 'miners':
+        this.router.navigate(['/miners']);
+        break;
       case 'alerts':
         this.router.navigate(['/alerts']);
         break;
@@ -344,6 +339,9 @@ export class LayoutComponent {
       case 'settings':
         this.router.navigate(['/settings']);
         break;
+      case 'profile':
+        this.router.navigate(['/profile']);
+        break;
     }
   }
 
@@ -352,13 +350,13 @@ export class LayoutComponent {
   }
 
   goToProfile() {
-    this.showProfileDropdown = false;
     this.router.navigate(['/profile']);
+    this.showProfileDropdown = false;
   }
 
   changePassword() {
-    this.showProfileDropdown = false;
     this.showPasswordModal = true;
+    this.showProfileDropdown = false;
   }
 
   closePasswordModal() {
@@ -371,28 +369,27 @@ export class LayoutComponent {
   }
 
   updatePassword() {
-    if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
-      return;
-    }
-    
-    // Implementar actualización de contraseña
-    console.log('Actualizando contraseña:', this.passwordData);
+    // Implementar lógica de cambio de contraseña
+    console.log('Cambiando contraseña:', this.passwordData);
     this.closePasswordModal();
   }
 
   getTotalStats() {
-    return {
-      totalEquipments: this.equipments.length,
-      totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
-      activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
-      totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0)
-    };
+    const totalAlerts = this.equipments.reduce((sum, eq) => sum + eq.alerts, 0);
+    return { totalAlerts };
+  }
+
+  getRoleDisplayName(role: string): string {
+    switch (role) {
+      case 'SUPERVISOR': return 'Supervisor';
+      case 'MINERO': return 'Minero';
+      case 'ADMIN': return 'Administrador';
+      default: return role;
+    }
   }
 
   logout() {
-    this.showProfileDropdown = false;
-    // Implementar logout
-    this.router.navigate(['/']);
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 } 

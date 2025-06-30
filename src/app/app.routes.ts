@@ -6,6 +6,7 @@ import { LayoutComponent } from './components/layout/layout.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { EquipmentsComponent } from './components/equipments/equipments.component';
 import { HelmetsComponent } from './components/helmets/helmets.component';
+import { MinersComponent } from './components/miners/miners.component';
 import { AlertsComponent } from './components/alerts/alerts.component';
 import { ReportsComponent } from './components/reports/reports.component';
 import { SettingsComponent } from './components/settings/settings.component';
@@ -24,6 +25,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'equipments', component: EquipmentsComponent },
       { path: 'helmets', component: HelmetsComponent },
+      { path: 'miners', component: MinersComponent },
       { path: 'alerts', component: AlertsComponent },
       { path: 'reports', component: ReportsComponent },
       { path: 'settings', component: SettingsComponent },

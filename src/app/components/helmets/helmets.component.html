@@ -6,7 +6,7 @@
         <h1>Gestión de Cascos IoT</h1>
         <p>Monitorea y administra todos los cascos inteligentes</p>
       </div>
-      <div class="header-right">
+      <div class="header-right" *ngIf="canCreateHelmet()">
         <button class="btn btn-primary" (click)="openCreateModal()">
           <i class="fas fa-plus"></i>
           Nuevo Casco
@@ -23,38 +23,48 @@
           <i class="fas fa-hard-hat"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ totalHelmets }}</h3>
+          <h3>{{ helmetStats.total }}</h3>
           <p>Total Cascos</p>
         </div>
       </div>
       
       <div class="stat-card glass">
-        <div class="stat-icon active">
-          <i class="fas fa-wifi"></i>
+        <div class="stat-icon inactive">
+          <i class="fas fa-pause-circle"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ onlineHelmets }}</h3>
-          <p>En Línea</p>
+          <h3>{{ helmetStats.inactivo }}</h3>
+          <p>Inactivos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon active">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ helmetStats.activo }}</h3>
+          <p>Activos</p>
         </div>
       </div>
       
       <div class="stat-card glass">
         <div class="stat-icon warning">
-          <i class="fas fa-exclamation-triangle"></i>
+          <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ alertHelmets }}</h3>
-          <p>Con Alertas</p>
+          <h3>{{ helmetStats.activoSinAsignar }}</h3>
+          <p>Sin Asignar</p>
         </div>
       </div>
       
       <div class="stat-card glass">
-        <div class="stat-icon">
-          <i class="fas fa-bell"></i>
+        <div class="stat-icon assigned">
+          <i class="fas fa-user-check"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ totalAlerts }}</h3>
-          <p>Alertas Activas</p>
+          <h3>{{ helmetStats.activoAsignado }}</h3>
+          <p>Asignados</p>
         </div>
       </div>
     </div>
@@ -75,11 +85,9 @@
       
       <div class="filter-options">
         <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
-          <option value="all">Todos los estados</option>
-          <option value="online">En línea</option>
-          <option value="alert">Alerta</option>
-          <option value="offline">Desconectado</option>
-          <option value="maintenance">Mantenimiento</option>
+          <option *ngFor="let option of getStatusOptions()" [value]="option.value">
+            {{ option.label }}
+          </option>
         </select>
         
         <select [(ngModel)]="equipmentFilter" (change)="onEquipmentFilterChange()">
@@ -103,11 +111,13 @@
     </div>
     
     <div class="helmets-grid">
-      <div class="helmet-card glass" *ngFor="let helmet of filteredHelmets">
+      <div class="helmet-card glass" *ngFor="let helmet of filteredHelmets" [attr.data-status]="helmet.status">
         <div class="card-header">
           <div class="helmet-info">
             <h3>{{ helmet.serialNumber }}</h3>
-            <span class="assigned-to">{{ helmet.assignedTo }}</span>
+            <span class="uuid-text">{{ helmet.uuid }}</span>
+            <span class="assigned-to" *ngIf="helmet.assignedTo">{{ helmet.assignedTo }}</span>
+            <span class="not-assigned" *ngIf="!helmet.assignedTo">Sin asignar</span>
           </div>
           <div class="status-badge" [style.background-color]="getStatusColor(helmet.status)">
             {{ getStatusText(helmet.status) }}
@@ -121,8 +131,8 @@
                 <i class="fas fa-thermometer-half"></i>
               </div>
               <div class="sensor-data">
-                <span class="sensor-value" [style.color]="getTemperatureColor(helmet.temperature)">
-                  {{ helmet.temperature }}°C
+                <span class="sensor-value" [style.color]="getTemperatureColor(helmet.temperature || 0)">
+                  {{ helmet.temperature || 0 }}°C
                 </span>
                 <span class="sensor-label">Temperatura</span>
               </div>
@@ -133,8 +143,8 @@
                 <i class="fas fa-battery-three-quarters"></i>
               </div>
               <div class="sensor-data">
-                <span class="sensor-value" [style.color]="getBatteryColor(helmet.batteryLevel)">
-                  {{ helmet.batteryLevel }}%
+                <span class="sensor-value" [style.color]="getBatteryColor(helmet.batteryLevel || 0)">
+                  {{ helmet.batteryLevel || 0 }}%
                 </span>
                 <span class="sensor-label">Batería</span>
               </div>
@@ -145,31 +155,24 @@
                 <i class="fas fa-map-marker-alt"></i>
               </div>
               <div class="sensor-data">
-                <span class="sensor-value">{{ helmet.location }}</span>
+                <span class="sensor-value">{{ helmet.location || 'N/A' }}</span>
                 <span class="sensor-label">Ubicación</span>
               </div>
             </div>
           </div>
           
           <div class="helmet-details">
-            <div class="detail-item">
+            <div class="detail-item" *ngIf="helmet.equipmentName">
               <span class="detail-label">Equipo:</span>
-              <span class="detail-value">{{ helmet.equipment }}</span>
+              <span class="detail-value">{{ helmet.equipmentName }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Última señal:</span>
-              <span class="detail-value">{{ helmet.lastHeartbeat }}</span>
+              <span class="detail-value">{{ helmet.lastHeartbeat || 'N/A' }}</span>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Movimiento:</span>
-              <span class="detail-value">{{ helmet.sensors.movement }}</span>
-            </div>
-          </div>
-          
-          <div class="alerts-section" *ngIf="helmet.alerts > 0">
-            <div class="alerts-badge">
-              <i class="fas fa-exclamation-triangle"></i>
-              {{ helmet.alerts }} alerta{{ helmet.alerts > 1 ? 's' : '' }}
+            <div class="detail-item" *ngIf="helmet.sensors?.heartRate">
+              <span class="detail-label">Frecuencia cardíaca:</span>
+              <span class="detail-value">{{ helmet.sensors?.heartRate || 0 }} bpm</span>
             </div>
           </div>
         </div>
@@ -179,11 +182,48 @@
             <i class="fas fa-eye"></i>
             Ver Detalle
           </button>
-          <button class="btn btn-secondary" (click)="editHelmet(helmet)">
+          
+          <button 
+            class="btn btn-success" 
+            *ngIf="helmet.status === 'inactivo' && canModifyHelmet()"
+            (click)="activateHelmet(helmet)"
+          >
+            <i class="fas fa-play"></i>
+            Activar
+          </button>
+          
+          <button 
+            class="btn btn-warning" 
+            *ngIf="helmet.status === 'activo-sin-asignar' && canModifyHelmet()"
+            (click)="assignHelmet(helmet)"
+          >
+            <i class="fas fa-user-plus"></i>
+            Asignar
+          </button>
+          
+          <button 
+            class="btn btn-info" 
+            *ngIf="helmet.status === 'activo-asignado' && canModifyHelmet()"
+            (click)="unassignHelmet(helmet)"
+          >
+            <i class="fas fa-user-minus"></i>
+            Desasignar
+          </button>
+          
+          <button 
+            class="btn btn-secondary" 
+            *ngIf="canModifyHelmet()"
+            (click)="editHelmet(helmet)"
+          >
             <i class="fas fa-edit"></i>
             Editar
           </button>
-          <button class="btn btn-danger" (click)="deleteHelmet(helmet)">
+          
+          <button 
+            class="btn btn-danger" 
+            *ngIf="canModifyHelmet()"
+            (click)="deleteHelmet(helmet)"
+          >
             <i class="fas fa-trash"></i>
             Eliminar
           </button>
@@ -217,36 +257,14 @@
           </div>
           
           <div class="form-group">
-            <label for="assignedTo">Asignado a</label>
+            <label for="uuid">UUID Físico del Casco</label>
             <input 
               type="text" 
-              id="assignedTo"
-              [(ngModel)]="newHelmet.assignedTo" 
-              name="assignedTo"
-              placeholder="Nombre del minero"
+              id="uuid"
+              [(ngModel)]="newHelmet.uuid" 
+              name="uuid"
+              placeholder="UUID del dispositivo físico"
               required
-            >
-          </div>
-          
-          <div class="form-group">
-            <label for="equipment">Equipo</label>
-            <select id="equipment" [(ngModel)]="newHelmet.equipment" name="equipment" required>
-              <option value="">Seleccionar equipo</option>
-              <option value="Equipo Mina Norte">Equipo Mina Norte</option>
-              <option value="Equipo Mina Sur">Equipo Mina Sur</option>
-              <option value="Equipo Mina Este">Equipo Mina Este</option>
-              <option value="Equipo Mina Oeste">Equipo Mina Oeste</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="location">Ubicación</label>
-            <input 
-              type="text" 
-              id="location"
-              [(ngModel)]="newHelmet.location" 
-              name="location"
-              placeholder="Ej: Zona A-12"
             >
           </div>
           
@@ -255,7 +273,7 @@
               Cancelar
             </button>
             <button type="submit" class="btn btn-primary">
-              <i class="fas fa-plus"></i>
+              <i class="fas fa-save"></i>
               Registrar Casco
             </button>
           </div>
