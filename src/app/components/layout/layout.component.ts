@@ -49,7 +49,17 @@ interface UserProfile {
             <li class="nav-item" [class.active]="activeSidebarItem === 'dashboard'">
               <a (click)="setActiveSidebarItem('dashboard')">
                 <i class="fas fa-tachometer-alt"></i>
-                <span>Dashboard</span>
+                <span>{{ authService.isMinero() ? 'Mi Dashboard' : 'Dashboard' }}</span>
+              </a>
+            </li>
+            
+            <!-- Opciones para Admin -->
+            <li class="nav-item" 
+                [class.active]="activeSidebarItem === 'supervisors'"
+                *ngIf="authService.isAdmin()">
+              <a (click)="setActiveSidebarItem('supervisors')">
+                <i class="fas fa-user-tie"></i>
+                <span>Supervisores</span>
               </a>
             </li>
             
@@ -59,7 +69,7 @@ interface UserProfile {
                 *ngIf="authService.canViewAllEquipments()">
               <a (click)="setActiveSidebarItem('equipments')">
                 <i class="fas fa-hard-hat"></i>
-                <span>Equipos</span>
+                <span>{{ authService.isMinero() ? 'Mi Equipo' : 'Equipos' }}</span>
               </a>
             </li>
             
@@ -80,6 +90,15 @@ interface UserProfile {
               <a (click)="setActiveSidebarItem('miners')">
                 <i class="fas fa-users"></i>
                 <span>Mineros</span>
+              </a>
+            </li>
+            
+            <!-- Opciones para Supervisor, Minero y Admin -->
+            <li class="nav-item" 
+                [class.active]="activeSidebarItem === 'monitoring'">
+              <a (click)="setActiveSidebarItem('monitoring')">
+                <i class="fas fa-chart-line"></i>
+                <span>{{ authService.isMinero() ? 'Mi Casco' : 'Monitoreo' }}</span>
               </a>
             </li>
             
@@ -296,12 +315,16 @@ export class LayoutComponent implements OnInit {
     const currentRoute = this.router.url;
     if (currentRoute.includes('/dashboard')) {
       this.activeSidebarItem = 'dashboard';
+    } else if (currentRoute.includes('/supervisors')) {
+      this.activeSidebarItem = 'supervisors';
     } else if (currentRoute.includes('/equipments')) {
       this.activeSidebarItem = 'equipments';
     } else if (currentRoute.includes('/helmets')) {
       this.activeSidebarItem = 'helmets';
     } else if (currentRoute.includes('/miners')) {
       this.activeSidebarItem = 'miners';
+    } else if (currentRoute.includes('/monitoring')) {
+      this.activeSidebarItem = 'monitoring';
     } else if (currentRoute.includes('/alerts')) {
       this.activeSidebarItem = 'alerts';
     } else if (currentRoute.includes('/reports')) {
@@ -321,6 +344,9 @@ export class LayoutComponent implements OnInit {
       case 'dashboard':
         this.router.navigate(['/dashboard']);
         break;
+      case 'supervisors':
+        this.router.navigate(['/supervisors']);
+        break;
       case 'equipments':
         this.router.navigate(['/equipments']);
         break;
@@ -329,6 +355,9 @@ export class LayoutComponent implements OnInit {
         break;
       case 'miners':
         this.router.navigate(['/miners']);
+        break;
+      case 'monitoring':
+        this.router.navigate(['/monitoring']);
         break;
       case 'alerts':
         this.router.navigate(['/alerts']);

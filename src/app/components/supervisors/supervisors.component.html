@@ -1,0 +1,211 @@
+<div class="supervisors-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Gestión de Supervisores</h1>
+        <p>Invita supervisores y gestiona sus códigos de acceso únicos</p>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="openCreateModal()">
+          <i class="fas fa-user-plus"></i>
+          Invitar Supervisor
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ supervisors.length }}</h3>
+          <p>Total Supervisores</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon active">
+          <i class="fas fa-hard-hat"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getTotalHelmets() }}</h3>
+          <p>Total Cascos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card glass">
+        <div class="stat-icon warning">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getActiveHelmets() }}</h3>
+          <p>Cascos Activos</p>
+        </div>
+      </div>
+      
+
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          placeholder="Buscar por nombre, correo o código de acceso..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+        >
+      </div>
+    </div>
+  </section>
+
+  <!-- Supervisors Grid -->
+  <section class="supervisors-section">
+    <div class="section-header">
+      <h2>Lista de Supervisores</h2>
+      <span class="results-count">{{ filteredSupervisors.length }} supervisores encontrados</span>
+    </div>
+    
+    <div class="supervisors-grid">
+      <div class="supervisor-card glass" *ngFor="let supervisor of filteredSupervisors">
+        <div class="card-header">
+          <div class="supervisor-info">
+            <div class="supervisor-avatar">
+              <span>{{ supervisor.avatar }}</span>
+            </div>
+            <div class="supervisor-details">
+              <h3>{{ supervisor.name }}</h3>
+              <span class="supervisor-email">{{ supervisor.email }}</span>
+              <span class="supervisor-code">Código: {{ supervisor.accessCode }}</span>
+            </div>
+          </div>
+
+        </div>
+        
+        <div class="card-body">
+          <div class="supervisor-stats">
+            <div class="stat-item">
+              <span class="stat-label">Total Cascos:</span>
+              <span class="stat-value">{{ supervisor.totalHelmets }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Cascos Activos:</span>
+              <span class="stat-value active">{{ supervisor.activeHelmets }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Cascos Inactivos:</span>
+              <span class="stat-value inactive">{{ supervisor.inactiveHelmets }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Fecha Registro:</span>
+              <span class="stat-value">{{ supervisor.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <button class="btn btn-primary" (click)="viewSupervisorDetail(supervisor)">
+            <i class="fas fa-eye"></i>
+            Ver Detalle
+          </button>
+          
+          <button class="btn btn-secondary" (click)="showAccessCode(supervisor)">
+            <i class="fas fa-key"></i>
+            Código Acceso
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Supervisor Modal -->
+  <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Invitar Supervisor</h3>
+        <button class="close-btn" (click)="closeCreateModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form (ngSubmit)="createSupervisor()">
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="newSupervisor.email" 
+              name="email"
+              placeholder="correo@ejemplo.com"
+              required
+            >
+            <small class="form-help">
+              Se enviará un código de acceso único al correo proporcionado
+            </small>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane"></i>
+              Enviar Invitación
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Access Code Modal -->
+  <div class="modal-overlay" *ngIf="showAccessCodeModal" (click)="closeAccessCodeModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Código de Acceso</h3>
+        <button class="close-btn" (click)="closeAccessCodeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="access-code-section">
+          <div class="supervisor-info-display">
+            <h4>{{ selectedSupervisor?.name }}</h4>
+            <p>{{ selectedSupervisor?.email }}</p>
+          </div>
+          
+          <div class="access-code-display">
+            <label>Código de Acceso:</label>
+            <div class="code-container">
+              <span class="access-code">{{ generatedAccessCode }}</span>
+              <button class="btn btn-secondary" disabled>
+                <i class="fas fa-lock"></i>
+                Código Único
+              </button>
+            </div>
+            <p class="code-instructions">
+              Este código de acceso único ha sido enviado al correo del supervisor. 
+              El supervisor debe usar este código para completar su registro en el sistema.
+            </p>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" (click)="closeAccessCodeModal()">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

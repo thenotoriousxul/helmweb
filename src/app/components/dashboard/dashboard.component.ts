@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 interface Equipment {
   id: string;
@@ -27,7 +28,7 @@ interface Equipment {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   equipments: Equipment[] = [
     {
       id: '1',
@@ -125,8 +126,29 @@ export class DashboardComponent {
   searchTerm = '';
   statusFilter = 'all';
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    public authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    this.loadDashboardData();
     this.filteredEquipments = [...this.equipments];
+  }
+
+  loadDashboardData() {
+    // Filtrar datos según el rol del usuario
+    if (this.authService.isMinero()) {
+      // Minero solo ve su equipo
+      const currentUser = this.authService.getCurrentUser();
+      this.equipments = this.equipments.filter(equipment => 
+        equipment.miners.some(miner => miner.id === currentUser?.id)
+      );
+    } else if (this.authService.isSupervisor()) {
+      // Supervisor ve solo sus equipos (simulado)
+      this.equipments = this.equipments.slice(0, 3); // Primeros 3 equipos
+    }
+    // Admin ve todos los equipos
   }
 
   onSearchChange() {
@@ -174,12 +196,32 @@ export class DashboardComponent {
   }
 
   getTotalStats() {
-    return {
-      totalEquipments: this.equipments.length,
-      totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
-      activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
-      totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0)
-    };
+    if (this.authService.isAdmin()) {
+      return {
+        totalEquipments: this.equipments.length,
+        totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
+        activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
+        totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0),
+        totalSupervisors: 3, // Simulado
+        helmetsWithSupervisor: 120, // Simulado
+        helmetsWithoutMiner: 15 // Simulado
+      };
+    } else if (this.authService.isSupervisor()) {
+      return {
+        totalEquipments: this.equipments.length,
+        totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
+        activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
+        totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0)
+      };
+    } else {
+      // Minero
+      return {
+        totalEquipments: this.equipments.length,
+        totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
+        activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
+        totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0)
+      };
+    }
   }
 
   showDetail(equipment: Equipment) {

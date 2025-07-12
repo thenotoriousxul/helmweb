@@ -4,13 +4,13 @@
     <div class="breadcrumbs">
       <span class="breadcrumb-item">Dashboard</span>
       <i class="fas fa-chevron-right"></i>
-      <span class="breadcrumb-item active">General</span>
+      <span class="breadcrumb-item active">{{ authService.isMinero() ? 'Personal' : 'General' }}</span>
     </div>
-    <h1>Dashboard General</h1>
+    <h1>{{ authService.isMinero() ? 'Mi Dashboard' : 'Dashboard General' }}</h1>
   </div>
   
-  <div class="header-right">
-    <button class="btn btn-primary">
+  <div class="header-right" *ngIf="!authService.isMinero()">
+    <button class="btn btn-primary" *ngIf="authService.isAdmin()">
       <i class="fas fa-plus"></i>
       Crear Nuevo Equipo
     </button>
@@ -30,7 +30,8 @@
 <!-- Stats Cards -->
 <section class="stats-section">
   <div class="stats-grid">
-    <div class="stat-card glass">
+    <!-- Estadísticas para Admin -->
+    <div class="stat-card glass" *ngIf="authService.isAdmin()">
       <div class="stat-icon">
         <i class="fas fa-hard-hat"></i>
       </div>
@@ -40,7 +41,7 @@
       </div>
     </div>
     
-    <div class="stat-card glass">
+    <div class="stat-card glass" *ngIf="authService.isAdmin()">
       <div class="stat-icon">
         <i class="fas fa-shield-alt"></i>
       </div>
@@ -50,7 +51,7 @@
       </div>
     </div>
     
-    <div class="stat-card glass">
+    <div class="stat-card glass" *ngIf="authService.isAdmin()">
       <div class="stat-icon active">
         <i class="fas fa-wifi"></i>
       </div>
@@ -60,13 +61,126 @@
       </div>
     </div>
     
-    <div class="stat-card glass">
+    <div class="stat-card glass" *ngIf="authService.isAdmin()">
       <div class="stat-icon warning">
         <i class="fas fa-exclamation-triangle"></i>
       </div>
       <div class="stat-content">
         <h3>{{ getTotalStats().totalAlerts }}</h3>
         <p>Alertas Activas</p>
+      </div>
+    </div>
+
+    <!-- Estadísticas específicas para Admin -->
+    <div class="stat-card glass" *ngIf="authService.isAdmin()">
+      <div class="stat-icon">
+        <i class="fas fa-user-tie"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().totalSupervisors }}</h3>
+        <p>Total Supervisores</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isAdmin()">
+      <div class="stat-icon">
+        <i class="fas fa-link"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().helmetsWithSupervisor }}</h3>
+        <p>Cascos con Supervisor</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isAdmin()">
+      <div class="stat-icon warning">
+        <i class="fas fa-user-slash"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().helmetsWithoutMiner }}</h3>
+        <p>Sin Minero Asignado</p>
+      </div>
+    </div>
+
+    <!-- Estadísticas para Supervisor -->
+    <div class="stat-card glass" *ngIf="authService.isSupervisor()">
+      <div class="stat-icon">
+        <i class="fas fa-hard-hat"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().totalEquipments }}</h3>
+        <p>Mis Equipos</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isSupervisor()">
+      <div class="stat-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().totalHelmets }}</h3>
+        <p>Mis Cascos</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isSupervisor()">
+      <div class="stat-icon active">
+        <i class="fas fa-wifi"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().activeHelmets }}</h3>
+        <p>Cascos Activos</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isSupervisor()">
+      <div class="stat-icon warning">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().totalAlerts }}</h3>
+        <p>Alertas Activas</p>
+      </div>
+    </div>
+
+    <!-- Estadísticas para Minero -->
+    <div class="stat-card glass" *ngIf="authService.isMinero()">
+      <div class="stat-icon">
+        <i class="fas fa-hard-hat"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ getTotalStats().totalEquipments }}</h3>
+        <p>Mi Equipo</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isMinero()">
+      <div class="stat-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <div class="stat-content">
+        <h3>1</h3>
+        <p>Mi Casco</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isMinero()">
+      <div class="stat-icon active">
+        <i class="fas fa-heartbeat"></i>
+      </div>
+      <div class="stat-content">
+        <h3>72</h3>
+        <p>Frecuencia Cardíaca</p>
+      </div>
+    </div>
+    
+    <div class="stat-card glass" *ngIf="authService.isMinero()">
+      <div class="stat-icon">
+        <i class="fas fa-thermometer-half"></i>
+      </div>
+      <div class="stat-content">
+        <h3>36.5°C</h3>
+        <p>Temperatura</p>
       </div>
     </div>
   </div>

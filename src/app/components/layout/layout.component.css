@@ -60,6 +60,8 @@
 .sidebar-nav {
   flex: 1;
   padding: 2rem 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
 }
 
 .nav-list {
@@ -98,6 +100,25 @@
 .nav-item i {
   width: 20px;
   text-align: center;
+}
+
+/* Scrollbar styles for sidebar */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: rgba(61, 244, 244, 0.05);
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(61, 244, 244, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(61, 244, 244, 0.5);
 }
 
 .alert-badge {

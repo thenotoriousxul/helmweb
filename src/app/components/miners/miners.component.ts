@@ -23,10 +23,11 @@ export class MinersComponent implements OnInit {
   constructor(
     private router: Router,
     public authService: AuthService
-  ) {}
+  ) {
+    this.currentUser = this.authService.getCurrentUser();
+  }
 
   ngOnInit() {
-    this.currentUser = this.authService.getCurrentUser();
     this.loadMiners();
   }
 

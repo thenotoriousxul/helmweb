@@ -1,0 +1,203 @@
+<div class="monitoring-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Monitoreo en Tiempo Real</h1>
+        <p *ngIf="authService.isMinero()">Estado de tu casco y sensores</p>
+        <p *ngIf="!authService.isMinero()">Monitoreo de sensores y ubicación GPS</p>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-secondary" (click)="toggleMap()">
+          <i class="fas fa-map-marked-alt"></i>
+          {{ showMap ? 'Ocultar Mapa' : 'Mostrar Mapa' }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filters Section -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="filter-group">
+        <label for="sensorFilter">Filtrar por Sensor:</label>
+        <select id="sensorFilter" [(ngModel)]="selectedSensor">
+          <option *ngFor="let option of getSensorOptions()" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filter-group" *ngIf="!authService.isMinero()">
+        <label for="minerFilter">Filtrar por Minero:</label>
+        <select id="minerFilter" [(ngModel)]="selectedMiner">
+          <option *ngFor="let option of getMinerOptions()" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- GPS Map Section -->
+  <section class="map-section" *ngIf="showMap">
+    <div class="section-header">
+      <h2>Ubicación GPS</h2>
+      <span class="update-info">Actualizado: {{ formatTimestamp(gpsLocations[0].timestamp || '') }}</span>
+    </div>
+    
+    <div class="map-container glass">
+      <div id="map" class="map-content"></div>
+      
+      <!-- Mensaje de estado del mapa -->
+      <div class="map-status" *ngIf="mapStatus">
+        <div class="status-message" [class]="mapStatus.type">
+          <i [class]="mapStatus.icon"></i>
+          <span>{{ mapStatus.message }}</span>
+        </div>
+      </div>
+      
+      <div class="gps-locations-panel">
+        <h4>Ubicaciones GPS</h4>
+        <div class="gps-locations">
+          <div class="location-item" *ngFor="let location of gpsLocations">
+            <div class="location-marker" [style.background-color]="getStatusColor('normal')">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="location-info">
+              <h5>{{ location.minerName }}</h5>
+              <p>Lat: {{ location.lat.toFixed(6) }}</p>
+              <p>Lng: {{ location.lng.toFixed(6) }}</p>
+              <p>Altura: {{ location.altitude.toFixed(0) }}m</p>
+              <small>{{ formatTimestamp(location.timestamp) }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Real-time Sensors Section -->
+  <section class="sensors-section">
+    <div class="section-header">
+      <h2>Datos de Sensores</h2>
+      <span class="update-info">Actualizado: {{ formatTimestamp(realTimeData[0].timestamp || '') }}</span>
+    </div>
+    
+    <div class="sensors-grid">
+      <div class="sensor-card glass" *ngFor="let sensor of getFilteredData()">
+        <div class="sensor-header">
+          <div class="sensor-info">
+            <h3>{{ sensor.name }}</h3>
+            <span class="sensor-unit">{{ sensor.unit }}</span>
+          </div>
+          <div class="sensor-status" [style.background-color]="getStatusColor(sensor.status)">
+            <i class="fas fa-circle"></i>
+          </div>
+        </div>
+        
+        <div class="sensor-value">
+          <span class="value">{{ sensor.value.toFixed(1) }}</span>
+          <span class="trend" [style.color]="getTrendColor(sensor.trend)">
+            <i [class]="getTrendIcon(sensor.trend)"></i>
+          </span>
+        </div>
+        
+        <div class="sensor-footer">
+          <span class="timestamp">{{ formatTimestamp(sensor.timestamp) }}</span>
+          <span class="status-text">{{ sensor.status.toUpperCase() }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Helmet Status Section -->
+  <section class="helmets-section">
+    <div class="section-header">
+      <h2>Estado de Cascos</h2>
+    </div>
+    
+    <div class="helmets-grid">
+      <div class="helmet-card glass" *ngFor="let helmet of helmets">
+        <div class="helmet-header">
+          <div class="helmet-info">
+            <h3>{{ helmet.serialNumber }}</h3>
+            <span class="assigned-to">{{ helmet.assignedTo }}</span>
+          </div>
+          <div class="helmet-status" [class]="helmet.status">
+            {{ helmet.status.replace('-', ' ').toUpperCase() }}
+          </div>
+        </div>
+        
+        <div class="helmet-details">
+          <div class="detail-row">
+            <span class="detail-label">Batería:</span>
+            <div class="battery-indicator">
+              <div class="battery-bar">
+                <div class="battery-fill" 
+                     [style.width.%]="helmet.batteryLevel"
+                     [style.background-color]="getBatteryStatus(helmet.batteryLevel || 0) === 'danger' ? '#dc3545' : 
+                                              getBatteryStatus(helmet.batteryLevel || 0) === 'warning' ? '#ffc107' : '#28a745'">
+                </div>
+              </div>
+              <span class="battery-text">{{ helmet.batteryLevel }}%</span>
+            </div>
+          </div>
+          
+          <div class="detail-row">
+            <span class="detail-label">Temperatura:</span>
+            <span class="detail-value">{{ helmet.temperature }}°C</span>
+          </div>
+          
+          <div class="detail-row">
+            <span class="detail-label">Última Comunicación:</span>
+            <span class="detail-value">{{ formatTimestamp(helmet.lastHeartbeat || '') }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <span class="detail-label">Ubicación:</span>
+            <span class="detail-value">{{ helmet.location }}</span>
+          </div>
+        </div>
+        
+        <div class="helmet-actions">
+          <button class="btn btn-primary">
+            <i class="fas fa-eye"></i>
+            Ver Detalle
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alerts Section -->
+  <section class="alerts-section" *ngIf="hasAnyAlerts()">
+    <div class="section-header">
+      <h2>Alertas Activas</h2>
+    </div>
+    
+    <div class="alerts-grid">
+      <div class="alert-card danger" *ngFor="let sensor of getDangerSensors()">
+        <div class="alert-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="alert-content">
+          <h4>Alerta Crítica - {{ sensor.name }}</h4>
+          <p>Valor: {{ sensor.value.toFixed(1) }} {{ sensor.unit }}</p>
+          <small>{{ formatTimestamp(sensor.timestamp) }}</small>
+        </div>
+      </div>
+      
+      <div class="alert-card warning" *ngFor="let sensor of getWarningSensors()">
+        <div class="alert-icon">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="alert-content">
+          <h4>Advertencia - {{ sensor.name }}</h4>
+          <p>Valor: {{ sensor.value.toFixed(1) }} {{ sensor.unit }}</p>
+          <small>{{ formatTimestamp(sensor.timestamp) }}</small>
+        </div>
+      </div>
+    </div>
+  </section>
+</div> 

@@ -353,3 +353,11 @@
     font-size: 0.9rem;
   }
 }
+
+.help-text {
+  display: block;
+  color: #7f8c8d;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
