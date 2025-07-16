@@ -185,16 +185,17 @@
           </div>
           
           <div class="access-code-display">
-            <label>Código de Acceso:</label>
+            <label>Código de Acceso Generado:</label>
             <div class="code-container">
               <span class="access-code">{{ generatedAccessCode }}</span>
-              <button class="btn btn-secondary" disabled>
-                <i class="fas fa-lock"></i>
-                Código Único
+              <button class="btn btn-secondary" (click)="copyToClipboard()">
+                <i class="fas fa-copy"></i>
+                Copiar
               </button>
             </div>
             <p class="code-instructions">
-              Este código de acceso único ha sido enviado al correo del supervisor. 
+              <i class="fas fa-info-circle"></i>
+              Este código de acceso único ha sido generado y guardado en la base de datos. 
               El supervisor debe usar este código para completar su registro en el sistema.
             </p>
           </div>

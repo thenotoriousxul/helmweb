@@ -127,6 +127,8 @@ export class DashboardComponent implements OnInit {
   searchTerm = '';
   statusFilter = 'all';
 
+
+
   constructor(
     private router: Router,
     public authService: AuthService
@@ -251,7 +253,7 @@ export class DashboardComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
-    showDetail(equipment: Equipment) {
+  showDetail(equipment: Equipment) {
     this.router.navigate(['/equipment-detail', equipment.id]);
   }
 
@@ -259,4 +261,6 @@ export class DashboardComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+
 } 

@@ -369,7 +369,7 @@ export class ProfileComponent {
     this.closePasswordModal();
   }
 
-    updatePreference(preference: string) {
+  updatePreference(preference: string) {
     // Implementar actualización de preferencias
     console.log('Actualizando preferencia:', preference, this.userProfile.preferences[preference as keyof typeof this.userProfile.preferences]);
   }

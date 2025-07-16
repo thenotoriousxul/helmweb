@@ -408,7 +408,7 @@ export class LayoutComponent implements OnInit {
     return { totalAlerts };
   }
 
-    getRoleDisplayName(role: string): string {
+  getRoleDisplayName(role: string): string {
     switch (role) {
       case 'supervisor': return 'Supervisor';
       case 'minero': return 'Minero';

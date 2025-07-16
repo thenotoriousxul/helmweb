@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService, User, Helmet } from '../../services/auth.service';
 
@@ -15,7 +16,7 @@ interface Supervisor extends User {
 @Component({
   selector: 'app-supervisors',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './supervisors.component.html',
   styleUrls: ['./supervisors.component.css']
 })
@@ -31,6 +32,7 @@ export class SupervisorsComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private http: HttpClient,
     public authService: AuthService
   ) {}
 
@@ -39,7 +41,7 @@ export class SupervisorsComponent implements OnInit {
   }
 
   loadSupervisors() {
-    // Simular datos de supervisores
+    // Simular datos de supervisores con códigos reales
     this.supervisors = [
       {
         id: '1',
@@ -51,7 +53,7 @@ export class SupervisorsComponent implements OnInit {
         totalHelmets: 15,
         activeHelmets: 12,
         inactiveHelmets: 3,
-        accessCode: 'SUP001',
+        accessCode: 'A1B2C3D4E5F6',
         createdAt: '2024-01-15'
       },
       {
@@ -64,7 +66,7 @@ export class SupervisorsComponent implements OnInit {
         totalHelmets: 20,
         activeHelmets: 18,
         inactiveHelmets: 2,
-        accessCode: 'SUP002',
+        accessCode: 'F7G8H9I0J1K2',
         createdAt: '2024-02-10'
       },
       {
@@ -77,7 +79,7 @@ export class SupervisorsComponent implements OnInit {
         totalHelmets: 10,
         activeHelmets: 8,
         inactiveHelmets: 2,
-        accessCode: 'SUP003',
+        accessCode: 'L3M4N5O6P7Q8',
         createdAt: '2024-03-05'
       }
     ];
@@ -110,9 +112,21 @@ export class SupervisorsComponent implements OnInit {
     this.newSupervisor = {};
   }
 
-  createSupervisor() {
-    if (this.newSupervisor.email) {
-      const accessCode = this.generateAccessCode();
+  async createSupervisor() {
+    if (!this.newSupervisor.email) {
+      alert('Por favor, ingresa un correo electrónico válido');
+      return;
+    }
+
+    try {
+      // Llamar a la API para generar el código de acceso
+      const response: any = await this.http.post('http://localhost:3333/access-codes', {
+        email: this.newSupervisor.email
+      }, { withCredentials: true }).toPromise();
+
+      const accessCode = response.data.code;
+      
+      // Crear el supervisor en la lista local (simulado)
       const newSupervisor: Supervisor = {
         id: (this.supervisors.length + 1).toString(),
         fullName: 'Pendiente de Registro',
@@ -131,20 +145,24 @@ export class SupervisorsComponent implements OnInit {
       this.filteredSupervisors = [...this.supervisors];
       this.closeCreateModal();
       
-      // Mostrar alerta de confirmación
-      alert(`✅ Supervisor registrado exitosamente!\n\n📧 Se ha enviado el código de acceso ${accessCode} al correo:\n${this.newSupervisor.email}\n\nEl supervisor debe usar este código para completar su registro en el sistema.`);
+      // Mostrar el código generado en el modal
+      this.selectedSupervisor = newSupervisor;
+      this.generatedAccessCode = accessCode;
+      this.showAccessCodeModal = true;
+      
+      console.log('Código de acceso generado exitosamente:', response.data);
+    } catch (error: any) {
+      console.error('Error al generar código de acceso:', error);
+      const errorMessage = error.error?.message || error.message || 'Error desconocido';
+      alert('Error al generar código de acceso: ' + errorMessage);
     }
   }
 
-  generateAccessCode(): string {
-    const prefix = 'SUP';
-    const number = (this.supervisors.length + 1).toString().padStart(3, '0');
-    return prefix + number;
-  }
+
 
   showAccessCode(supervisor: Supervisor) {
     this.selectedSupervisor = supervisor;
-    this.generatedAccessCode = supervisor.accessCode || this.generateAccessCode();
+    this.generatedAccessCode = supervisor.accessCode || 'Código no disponible';
     this.showAccessCodeModal = true;
   }
 
@@ -176,5 +194,14 @@ export class SupervisorsComponent implements OnInit {
     return this.supervisors.reduce((sum, s) => sum + s.activeHelmets, 0);
   }
 
+  copyToClipboard() {
+    if (this.generatedAccessCode) {
+      navigator.clipboard.writeText(this.generatedAccessCode).then(() => {
+        alert('Código copiado al portapapeles');
+      }).catch(() => {
+        alert('Error al copiar al portapapeles');
+      });
+    }
+  }
 
 } 

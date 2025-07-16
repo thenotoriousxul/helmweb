@@ -26,7 +26,7 @@ export class RegisterComponent {
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       username: ['', [Validators.required, Validators.minLength(3)]],
-      accessCode: ['', [Validators.required, Validators.pattern(/^SUP\d{3}$/)]],
+      accessCode: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
@@ -83,7 +83,6 @@ export class RegisterComponent {
         return `Mínimo ${minLength} caracteres.`;
       }
       if (control.errors['pattern']) {
-        if (field === 'accessCode') return 'El código debe tener el formato SUP seguido de 3 números (ej: SUP001).';
         return 'Formato inválido.';
       }
       if (control.errors['passwordMismatch']) return 'Las contraseñas no coinciden.';

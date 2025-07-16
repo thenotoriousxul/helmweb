@@ -189,4 +189,10 @@ export class AuthService {
   canViewAllMiners(): boolean {
     return this.isSupervisor() || this.isAdmin();
   }
+
+  getToken(): string | null {
+    // En una implementación real, el token se almacenaría en localStorage o en una cookie
+    // Por ahora, retornamos null ya que el backend maneja la autenticación con cookies
+    return null;
+  }
 } 
