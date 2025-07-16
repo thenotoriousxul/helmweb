@@ -2,11 +2,13 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
@@ -16,7 +18,8 @@ export class RegisterComponent {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.registerForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -50,8 +53,21 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.registerForm.valid) {
-      // Simular registro exitoso
-      this.router.navigate(['/dashboard']);
+      const formValue = this.registerForm.value;
+      const data = {
+        fullName: formValue.firstName + ' ' + formValue.lastName,
+        email: formValue.email,
+        password: formValue.password,
+        codigo: formValue.accessCode
+      };
+      this.authService.register(data).subscribe({
+        next: (user) => {
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.registerError = 'Error al registrar usuario. Verifica los datos e inténtalo de nuevo.';
+        }
+      });
     } else {
       this.registerError = 'Por favor, completa todos los campos correctamente.';
     }

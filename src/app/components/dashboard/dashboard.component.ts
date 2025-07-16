@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, User } from '../../services/auth.service';
 
 interface Equipment {
   id: string;
@@ -29,6 +29,7 @@ interface Equipment {
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  currentUser: User | null = null;
   equipments: Equipment[] = [
     {
       id: '1',
@@ -132,6 +133,7 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
     this.loadDashboardData();
     this.filteredEquipments = [...this.equipments];
   }
@@ -139,16 +141,13 @@ export class DashboardComponent implements OnInit {
   loadDashboardData() {
     // Filtrar datos según el rol del usuario
     if (this.authService.isMinero()) {
-      // Minero solo ve su equipo
-      const currentUser = this.authService.getCurrentUser();
-      this.equipments = this.equipments.filter(equipment => 
-        equipment.miners.some(miner => miner.id === currentUser?.id)
-      );
+      // Minero solo ve su equipo específico (simulado - equipo 1)
+      this.equipments = this.equipments.filter(equipment => equipment.id === '1');
     } else if (this.authService.isSupervisor()) {
-      // Supervisor ve solo sus equipos (simulado)
-      this.equipments = this.equipments.slice(0, 3); // Primeros 3 equipos
+      // Supervisor ve equipos específicos (simulado - equipos 2 y 3)
+      this.equipments = this.equipments.filter(equipment => ['2', '3'].includes(equipment.id));
     }
-    // Admin ve todos los equipos
+    // Admin ve todos los equipos por defecto (no se filtra)
   }
 
   onSearchChange() {
@@ -224,7 +223,40 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  showDetail(equipment: Equipment) {
+  getDashboardTitle(): string {
+    if (this.authService.isAdmin()) {
+      return 'Dashboard Administrativo';
+    } else if (this.authService.isSupervisor()) {
+      return 'Dashboard de Supervisor';
+    } else {
+      return 'Mi Dashboard';
+    }
+  }
+
+  getWelcomeMessage(): string {
+    if (this.authService.isAdmin()) {
+      return 'Bienvenido, Administrador. Aquí tienes una vista completa del sistema.';
+    } else if (this.authService.isSupervisor()) {
+      return 'Bienvenido, Supervisor. Gestiona tus equipos y cascos.';
+    } else {
+      return 'Bienvenido. Aquí puedes ver el estado de tu equipo y casco.';
+    }
+  }
+
+  canCreateEquipment(): boolean {
+    return this.authService.isAdmin() || this.authService.isSupervisor();
+  }
+
+  canViewAllEquipments(): boolean {
+    return this.authService.isAdmin();
+  }
+
+    showDetail(equipment: Equipment) {
     this.router.navigate(['/equipment-detail', equipment.id]);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 } 

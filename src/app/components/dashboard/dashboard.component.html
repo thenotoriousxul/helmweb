@@ -6,11 +6,12 @@
       <i class="fas fa-chevron-right"></i>
       <span class="breadcrumb-item active">{{ authService.isMinero() ? 'Personal' : 'General' }}</span>
     </div>
-    <h1>{{ authService.isMinero() ? 'Mi Dashboard' : 'Dashboard General' }}</h1>
+    <h1>{{ getDashboardTitle() }}</h1>
+    <p class="welcome-message">{{ getWelcomeMessage() }}</p>
   </div>
   
-  <div class="header-right" *ngIf="!authService.isMinero()">
-    <button class="btn btn-primary" *ngIf="authService.isAdmin()">
+  <div class="header-right">
+    <button class="btn btn-primary" *ngIf="canCreateEquipment()">
       <i class="fas fa-plus"></i>
       Crear Nuevo Equipo
     </button>
@@ -20,9 +21,7 @@
         <i class="fas fa-bell"></i>
         <span class="notification-badge" *ngIf="getTotalStats().totalAlerts > 0">{{ getTotalStats().totalAlerts }}</span>
       </button>
-      <button class="action-btn">
-        <i class="fas fa-user-circle"></i>
-      </button>
+
     </div>
   </div>
 </header>
@@ -187,7 +186,7 @@
 </section>
 
 <!-- Filters and Search -->
-<section class="filters-section">
+<section class="filters-section" *ngIf="!authService.isMinero()">
   <div class="filters-container">
     <div class="search-box">
       <i class="fas fa-search"></i>

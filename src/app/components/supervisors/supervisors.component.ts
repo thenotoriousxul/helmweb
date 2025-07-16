@@ -43,9 +43,9 @@ export class SupervisorsComponent implements OnInit {
     this.supervisors = [
       {
         id: '1',
-        name: 'Juan',
+        fullName: 'Juan',
         email: 'juan.supervisor@helmmining.com',
-        role: 'SUPERVISOR',
+        role: 'supervisor',
         avatar: 'JS',
         department: 'Minería',
         totalHelmets: 15,
@@ -56,9 +56,9 @@ export class SupervisorsComponent implements OnInit {
       },
       {
         id: '2',
-        name: 'María',
+        fullName: 'María',
         email: 'maria.supervisor@helmmining.com',
-        role: 'SUPERVISOR',
+        role: 'supervisor',
         avatar: 'MS',
         department: 'Minería',
         totalHelmets: 20,
@@ -69,9 +69,9 @@ export class SupervisorsComponent implements OnInit {
       },
       {
         id: '3',
-        name: 'Pedro',
+        fullName: 'Pedro',
         email: 'pedro.supervisor@helmmining.com',
-        role: 'SUPERVISOR',
+        role: 'supervisor',
         avatar: 'PS',
         department: 'Minería',
         totalHelmets: 10,
@@ -91,7 +91,7 @@ export class SupervisorsComponent implements OnInit {
 
   filterSupervisors() {
     this.filteredSupervisors = this.supervisors.filter(supervisor => {
-      const fullName = supervisor.name.toLowerCase();
+      const fullName = supervisor.fullName.toLowerCase();
       const matchesSearch = fullName.includes(this.searchTerm.toLowerCase()) ||
                            supervisor.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
                            supervisor.accessCode?.toLowerCase().includes(this.searchTerm.toLowerCase());
@@ -115,9 +115,9 @@ export class SupervisorsComponent implements OnInit {
       const accessCode = this.generateAccessCode();
       const newSupervisor: Supervisor = {
         id: (this.supervisors.length + 1).toString(),
-        name: 'Pendiente de Registro',
+        fullName: 'Pendiente de Registro',
         email: this.newSupervisor.email,
-        role: 'SUPERVISOR',
+        role: 'supervisor',
         avatar: 'PS',
         department: 'Minería',
         totalHelmets: 0,

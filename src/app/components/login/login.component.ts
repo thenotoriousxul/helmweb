@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -41,11 +42,11 @@ export class LoginComponent {
         console.log('Usuario logueado:', user);
         
         // Redirigir según el rol
-        if (user.role === 'ADMIN') {
+        if (user.role === 'admin') {
           this.router.navigate(['/dashboard']);
-        } else if (user.role === 'SUPERVISOR') {
+        } else if (user.role === 'supervisor') {
           this.router.navigate(['/dashboard']);
-        } else if (user.role === 'MINERO') {
+        } else if (user.role === 'minero') {
           this.router.navigate(['/dashboard']);
         }
       },

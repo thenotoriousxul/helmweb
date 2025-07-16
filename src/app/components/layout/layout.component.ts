@@ -132,7 +132,7 @@ interface UserProfile {
               <span>{{ userProfile.avatar }}</span>
             </div>
             <div class="user-info">
-              <span class="user-name">{{ userProfile.name }}</span>
+              <span class="user-name">{{ userProfile.fullName }}</span>
               <span class="user-role">{{ getRoleDisplayName(userProfile.role) }}</span>
             </div>
             <div class="dropdown-arrow" [class.open]="showProfileDropdown">
@@ -279,9 +279,9 @@ export class LayoutComponent implements OnInit {
 
   userProfile: User = {
     id: '',
-    name: '',
+    fullName: '',
     email: '',
-    role: 'MINERO',
+    role: 'minero',
     avatar: ''
   };
 
@@ -408,11 +408,11 @@ export class LayoutComponent implements OnInit {
     return { totalAlerts };
   }
 
-  getRoleDisplayName(role: string): string {
+    getRoleDisplayName(role: string): string {
     switch (role) {
-      case 'SUPERVISOR': return 'Supervisor';
-      case 'MINERO': return 'Minero';
-      case 'ADMIN': return 'Administrador';
+      case 'supervisor': return 'Supervisor';
+      case 'minero': return 'Minero';
+      case 'admin': return 'Administrador';
       default: return role;
     }
   }

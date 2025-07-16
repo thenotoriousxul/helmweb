@@ -65,35 +65,7 @@
     </form>
 
     <!-- Botones de prueba para desarrollo -->
-    <div class="demo-buttons" *ngIf="!isLoading">
-      <p class="demo-label">Acceso rápido para pruebas:</p>
-      <div class="demo-buttons-grid">
-        <button 
-          type="button" 
-          class="btn btn-demo supervisor"
-          (click)="loginAsSupervisor()"
-        >
-          <i class="fas fa-user-tie"></i>
-          Supervisor
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-demo minero"
-          (click)="loginAsMinero()"
-        >
-          <i class="fas fa-hard-hat"></i>
-          Minero
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-demo admin"
-          (click)="loginAsAdmin()"
-        >
-          <i class="fas fa-user-shield"></i>
-          Admin
-        </button>
-      </div>
-    </div>
+    <!-- Eliminado: demo-buttons y demo-buttons-grid -->
 
     <div class="login-footer">
       <button 

@@ -82,7 +82,7 @@
               <span>{{ supervisor.avatar }}</span>
             </div>
             <div class="supervisor-details">
-              <h3>{{ supervisor.name }}</h3>
+              <h3>{{ supervisor.fullName }}</h3>
               <span class="supervisor-email">{{ supervisor.email }}</span>
               <span class="supervisor-code">Código: {{ supervisor.accessCode }}</span>
             </div>
@@ -180,7 +180,7 @@
       <div class="modal-body">
         <div class="access-code-section">
           <div class="supervisor-info-display">
-            <h4>{{ selectedSupervisor?.name }}</h4>
+            <h4>{{ selectedSupervisor?.fullName }}</h4>
             <p>{{ selectedSupervisor?.email }}</p>
           </div>
           

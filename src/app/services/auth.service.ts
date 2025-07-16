@@ -1,15 +1,22 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 export interface User {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
-  role: 'SUPERVISOR' | 'MINERO' | 'ADMIN';
-  avatar: string;
+  role: 'supervisor' | 'minero' | 'admin';
+  avatar?: string;
   department?: string;
   teamId?: string;
   supervisorId?: string;
+  fechaContratacion?: string;
+  especialidadEnMineria?: string;
+  genero?: string;
+  cascoId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Helmet {
@@ -80,56 +87,52 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor() {
-    // Simular usuario logueado para desarrollo
+  constructor(private http: HttpClient) {
     const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
+    if (storedUser && storedUser !== 'null' && storedUser !== 'undefined' && storedUser.trim() !== '') {
+      try {
+        const user = JSON.parse(storedUser);
+        this.currentUserSubject.next(user);
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('currentUser');
+      }
     }
   }
 
-  login(email: string, password: string): Observable<User> {
-    // Simulación de login - en producción esto sería una llamada HTTP
+  login(email: string, password: string): Observable<any> {
     return new Observable(observer => {
-      setTimeout(() => {
-        let user: User;
-        
-        if (email.includes('supervisor')) {
-          user = {
-            id: '1',
-            name: 'Juan Supervisor',
-            email: email,
-            role: 'SUPERVISOR',
-            avatar: 'JS',
-            department: 'Minería'
-          };
-        } else if (email.includes('minero')) {
-          user = {
-            id: '2',
-            name: 'Carlos Minero',
-            email: email,
-            role: 'MINERO',
-            avatar: 'CM',
-            department: 'Minería',
-            teamId: '1',
-            supervisorId: '1'
-          };
-        } else {
-          user = {
-            id: '3',
-            name: 'Admin Sistema',
-            email: email,
-            role: 'ADMIN',
-            avatar: 'AS',
-            department: 'IT'
-          };
-        }
+      this.http.post<any>('http://localhost:3333/login', { email, password }, { withCredentials: true })
+        .subscribe({
+          next: (response) => {
+            const user = response.data.user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            this.currentUserSubject.next(user);
+            observer.next(user);
+            observer.complete();
+          },
+          error: (err) => {
+            observer.error(err);
+          }
+        });
+    });
+  }
 
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        this.currentUserSubject.next(user);
-        observer.next(user);
-        observer.complete();
-      }, 1000);
+  register(data: { fullName: string; email: string; password: string; codigo: string }): Observable<any> {
+    return new Observable(observer => {
+      this.http.post<any>('http://localhost:3333/register', data, { withCredentials: true })
+        .subscribe({
+          next: (response) => {
+            const user = response.data.user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            this.currentUserSubject.next(user);
+            observer.next(user);
+            observer.complete();
+          },
+          error: (err) => {
+            observer.error(err);
+          }
+        });
     });
   }
 
@@ -152,15 +155,15 @@ export class AuthService {
   }
 
   isSupervisor(): boolean {
-    return this.hasRole('SUPERVISOR');
+    return this.hasRole('supervisor');
   }
 
   isMinero(): boolean {
-    return this.hasRole('MINERO');
+    return this.hasRole('minero');
   }
 
   isAdmin(): boolean {
-    return this.hasRole('ADMIN');
+    return this.hasRole('admin');
   }
 
   canCreateEquipment(): boolean {
