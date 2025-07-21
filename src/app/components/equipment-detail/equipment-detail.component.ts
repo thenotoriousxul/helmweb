@@ -3,28 +3,39 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
+interface TeamMiner {
+  id: number;
+  mineroId: string;
+  equipoId: string;
+  activo: boolean;
+  fechaAsignacion: string;
+  fechaSalida: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  minero?: {
+    id: string;
+    fullName: string;
+    email?: string;
+    especialidadEnMineria?: string;
+    genero?: string;
+    fechaContratacion?: string;
+    birthDate?: string;
+    phone?: string;
+    address?: string;
+    rfc?: string;
+    // otros campos relevantes
+  };
+}
+
 interface Equipment {
   id: string;
-  name: string;
-  totalHelmets: number;
-  activeHelmets: number;
-  status: 'active' | 'inactive' | 'warning';
-  alerts: number;
-  miners: Array<{
-    id: string;
-    name: string;
-    avatar: string;
-    status: 'online' | 'offline' | 'alert';
-    helmetId: string;
-    lastSeen: string;
-  }>;
-  location: string;
-  lastUpdate: string;
-  type: string;
-  supervisor: string;
-  startDate: string;
-  description: string;
-  capacity: number;
+  nombre: string;
+  zona: string;
+  supervisor?: { fullName: string } | string;
+  createdAt: string;
+  updatedAt: string;
+  mineros: TeamMiner[];
+  // otros campos si es necesario
 }
 
 interface Helmet {
@@ -62,6 +73,45 @@ export class EquipmentDetailComponent implements OnInit {
   helmets: Helmet[] = [];
   alerts: Alert[] = [];
 
+  newMiner = {
+    fullName: '',
+    email: '',
+    fechaContratacion: '',
+    especialidadEnMineria: '',
+    genero: ''
+  };
+
+  addMiner() {
+    // Aquí deberías hacer la petición HTTP real al backend
+    // Por ahora, simulamos el alta en el array local
+    if (!this.equipment) return;
+    const nuevoMinero: TeamMiner = {
+      id: Date.now(),
+      mineroId: 'simulado-' + Date.now(),
+      equipoId: this.equipment.id,
+      activo: true,
+      fechaAsignacion: new Date().toISOString(),
+      fechaSalida: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      minero: {
+        id: 'simulado-' + Date.now(),
+        fullName: this.newMiner.fullName,
+        email: this.newMiner.email,
+        especialidadEnMineria: this.newMiner.especialidadEnMineria,
+        fechaContratacion: this.newMiner.fechaContratacion
+      }
+    };
+    this.equipment.mineros.push(nuevoMinero);
+    this.newMiner = {
+      fullName: '',
+      email: '',
+      fechaContratacion: '',
+      especialidadEnMineria: '',
+      genero: ''
+    };
+  }
+
   constructor(
     private router: Router,
     private route: ActivatedRoute
@@ -75,25 +125,46 @@ export class EquipmentDetailComponent implements OnInit {
   }
 
   loadEquipmentData(equipmentId: string) {
-    // Simulación de datos del equipo
     this.equipment = {
       id: equipmentId,
-      name: 'Equipo Mina Norte',
-      totalHelmets: 45,
-      activeHelmets: 42,
-      status: 'active',
-      alerts: 2,
-      location: 'Zona A-12',
-      lastUpdate: '2 min',
-      type: 'Extracción',
-      supervisor: 'Carlos Mendoza',
-      startDate: '2024-01-15',
-      description: 'Equipo principal de extracción en la zona norte de la mina. Responsable de la extracción de minerales en los niveles 3-5.',
-      capacity: 50,
-      miners: [
-        { id: '1', name: 'Carlos M.', avatar: 'CM', status: 'online', helmetId: 'H001', lastSeen: '2 min' },
-        { id: '2', name: 'Ana R.', avatar: 'AR', status: 'online', helmetId: 'H002', lastSeen: '1 min' },
-        { id: '3', name: 'Miguel T.', avatar: 'MT', status: 'alert', helmetId: 'H003', lastSeen: '5 min' }
+      nombre: 'Equipo Mina Norte',
+      zona: 'Zona A-12',
+      supervisor: { fullName: 'Carlos Mendoza' },
+      createdAt: '2024-01-15T08:00:00.000Z',
+      updatedAt: '2024-01-15T08:00:00.000Z',
+      mineros: [
+        {
+          id: 1,
+          mineroId: '1',
+          equipoId: equipmentId,
+          activo: true,
+          fechaAsignacion: '2024-01-15T08:00:00.000Z',
+          fechaSalida: null,
+          createdAt: '2024-01-15T08:00:00.000Z',
+          updatedAt: '2024-01-15T08:00:00.000Z',
+          minero: {
+            id: '1',
+            fullName: 'Carlos M.',
+            email: 'carlos.m@example.com',
+            especialidadEnMineria: 'Perforación',
+          }
+        },
+        {
+          id: 2,
+          mineroId: '2',
+          equipoId: equipmentId,
+          activo: true,
+          fechaAsignacion: '2024-01-15T08:00:00.000Z',
+          fechaSalida: null,
+          createdAt: '2024-01-15T08:00:00.000Z',
+          updatedAt: '2024-01-15T08:00:00.000Z',
+          minero: {
+            id: '2',
+            fullName: 'Ana R.',
+            email: 'ana.r@example.com',
+            especialidadEnMineria: 'Explosivos',
+          }
+        }
       ]
     };
 
@@ -150,12 +221,19 @@ export class EquipmentDetailComponent implements OnInit {
     }
   }
 
+  getSupervisorName(supervisor: any): string {
+    if (!supervisor) return 'Sin asignar';
+    if (typeof supervisor === 'string') return supervisor;
+    if (typeof supervisor === 'object' && supervisor.fullName) return supervisor.fullName;
+    return 'Sin asignar';
+  }
+
   editEquipment() {
     this.router.navigate(['/equipment-edit', this.equipment?.id]);
   }
 
   deleteEquipment() {
-    if (confirm(`¿Estás seguro de que quieres eliminar el equipo "${this.equipment?.name}"?`)) {
+    if (confirm(`¿Estás seguro de que quieres eliminar el equipo "${this.equipment?.nombre}"?`)) {
       this.router.navigate(['/equipments']);
     }
   }

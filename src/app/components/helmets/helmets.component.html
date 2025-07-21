@@ -33,7 +33,7 @@
           <i class="fas fa-pause-circle"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ helmetStats.inactivo }}</h3>
+          <h3>{{ helmetStats.inactive }}</h3>
           <p>Inactivos</p>
         </div>
       </div>
@@ -43,7 +43,7 @@
           <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ helmetStats.activo }}</h3>
+          <h3>{{ helmetStats.active }}</h3>
           <p>Activos</p>
         </div>
       </div>
@@ -53,7 +53,7 @@
           <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ helmetStats.activoSinAsignar }}</h3>
+          <h3>{{ helmetStats.active - helmetStats.assigned }}</h3>
           <p>Sin Asignar</p>
         </div>
       </div>
@@ -63,7 +63,7 @@
           <i class="fas fa-user-check"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ helmetStats.activoAsignado }}</h3>
+          <h3>{{ helmetStats.assigned }}</h3>
           <p>Asignados</p>
         </div>
       </div>
@@ -245,25 +245,13 @@
       <div class="modal-body">
         <form (ngSubmit)="createHelmet()">
           <div class="form-group">
-            <label for="serialNumber">Número de Serie</label>
+            <label for="serialNumber">Identificador Físico del Casco</label>
             <input 
               type="text" 
               id="serialNumber"
               [(ngModel)]="newHelmet.serialNumber" 
               name="serialNumber"
               placeholder="Ej: HELM-001"
-              required
-            >
-          </div>
-          
-          <div class="form-group">
-            <label for="uuid">UUID Físico del Casco</label>
-            <input 
-              type="text" 
-              id="uuid"
-              [(ngModel)]="newHelmet.uuid" 
-              name="uuid"
-              placeholder="UUID del dispositivo físico"
               required
             >
           </div>
@@ -278,6 +266,94 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Helmet Modal -->
+  <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Detalle del Casco</h3>
+        <button class="close-btn" (click)="closeDetailModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-row"><strong>Serial:</strong> {{ detailHelmetData.serialNumber }}</div>
+        <div class="detail-row"><strong>UUID:</strong> {{ detailHelmetData.uuid }}</div>
+        <div class="detail-row"><strong>Estado:</strong> {{ getStatusText(detailHelmetData.status || 'inactivo') }}</div>
+        <div class="detail-row"><strong>Asignado a:</strong> {{ detailHelmetData.assignedTo || 'Sin asignar' }}</div>
+        <div class="detail-row"><strong>Supervisor:</strong> {{ detailHelmetData.supervisorId }}</div>
+        <div class="detail-row"><strong>Última señal:</strong> {{ detailHelmetData.lastHeartbeat }}</div>
+        <div class="detail-row"><strong>Temperatura:</strong> {{ detailHelmetData.temperature || 0 }}°C</div>
+        <div class="detail-row"><strong>Batería:</strong> {{ detailHelmetData.batteryLevel || 0 }}%</div>
+        <div class="detail-row"><strong>Ubicación:</strong> {{ detailHelmetData.location || 'N/A' }}</div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Helmet Modal -->
+  <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Editar Casco</h3>
+        <button class="close-btn" (click)="closeEditModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="saveEditHelmet()">
+          <div class="form-group">
+            <label for="editSerialNumber">Serial</label>
+            <input type="text" id="editSerialNumber" [(ngModel)]="editHelmetData.serialNumber" name="editSerialNumber" required>
+          </div>
+          <div class="form-group">
+            <label for="editUuid">UUID</label>
+            <input type="text" id="editUuid" [(ngModel)]="editHelmetData.uuid" name="editUuid">
+          </div>
+          <div class="form-group">
+            <label for="editStatus">Estado</label>
+            <select id="editStatus" [(ngModel)]="editHelmetData.status" name="editStatus">
+              <option value="inactivo">Inactivo</option>
+              <option value="activo">Activo</option>
+              <option value="activo-sin-asignar">Activo Sin Asignar</option>
+              <option value="activo-asignado">Activo Asignado</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i>
+              Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Helmet Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Eliminar Casco</h3>
+        <button class="close-btn" (click)="closeDeleteModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que quieres eliminar el casco <strong>{{ helmetToDelete?.serialNumber }}</strong>?</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="confirmDeleteHelmet()">
+            <i class="fas fa-trash"></i>
+            Eliminar
+          </button>
+        </div>
       </div>
     </div>
   </div>

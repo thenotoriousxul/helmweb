@@ -23,22 +23,11 @@
   <div class="equipment-info" *ngIf="equipment">
     <div class="equipment-header">
       <div class="equipment-title">
-        <h1>{{ equipment.name }}</h1>
-        <span class="status-badge" [style.background-color]="getStatusColor(equipment.status)">
-          {{ getStatusText(equipment.status) }}
-        </span>
+        <h1>{{ equipment.nombre }}</h1>
       </div>
       <div class="equipment-stats">
         <div class="stat">
-          <span class="stat-value">{{ equipment.activeHelmets }}/{{ equipment.totalHelmets }}</span>
-          <span class="stat-label">Cascos Activos</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">{{ equipment.alerts }}</span>
-          <span class="stat-label">Alertas</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">{{ equipment.miners.length }}</span>
+          <span class="stat-value">{{ equipment.mineros.length || 0 }}</span>
           <span class="stat-label">Mineros</span>
         </div>
       </div>
@@ -47,26 +36,16 @@
     <div class="equipment-details">
       <div class="detail-row">
         <div class="detail-item">
-          <span class="detail-label">Ubicación:</span>
-          <span class="detail-value">{{ equipment.location }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Tipo:</span>
-          <span class="detail-value">{{ equipment.type }}</span>
+          <span class="detail-label">Zona:</span>
+          <span class="detail-value">{{ equipment.zona }}</span>
         </div>
         <div class="detail-item">
           <span class="detail-label">Supervisor:</span>
-          <span class="detail-value">{{ equipment.supervisor }}</span>
+          <span class="detail-value">{{ getSupervisorName(equipment.supervisor) }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Fecha de Inicio:</span>
-          <span class="detail-value">{{ equipment.startDate }}</span>
-        </div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-item full-width">
-          <span class="detail-label">Descripción:</span>
-          <span class="detail-value">{{ equipment.description }}</span>
+          <span class="detail-label">Fecha de creación:</span>
+          <span class="detail-value">{{ equipment.createdAt | date:'short' }}</span>
         </div>
       </div>
     </div>
@@ -102,34 +81,8 @@
             <h3>Estado General</h3>
             <div class="summary-stats">
               <div class="summary-stat">
-                <span class="stat-number">{{ equipment?.activeHelmets }}</span>
-                <span class="stat-text">Cascos Activos</span>
-              </div>
-              <div class="summary-stat">
-                <span class="stat-number">{{ equipment?.alerts }}</span>
-                <span class="stat-text">Alertas Activas</span>
-              </div>
-              <div class="summary-stat">
-                <span class="stat-number">{{ equipment?.miners?.length || 0 }}</span>
+                <span class="stat-number">{{ equipment?.mineros?.length || 0 }}</span>
                 <span class="stat-text">Mineros Asignados</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="summary-card">
-            <h3>Última Actividad</h3>
-            <div class="activity-list">
-              <div class="activity-item">
-                <span class="activity-time">{{ equipment?.lastUpdate }}</span>
-                <span class="activity-text">Última actualización de datos</span>
-              </div>
-              <div class="activity-item">
-                <span class="activity-time">5 min</span>
-                <span class="activity-text">Última alerta generada</span>
-              </div>
-              <div class="activity-item">
-                <span class="activity-time">10 min</span>
-                <span class="activity-text">Último cambio de turno</span>
               </div>
             </div>
           </div>
@@ -138,29 +91,45 @@
 
       <!-- Miners Tab -->
       <div class="tab-pane" *ngIf="activeTab === 'miners'">
-        <div class="miners-grid">
-          <div class="miner-card" *ngFor="let miner of equipment?.miners">
-            <div class="miner-header">
-              <div class="miner-avatar">{{ miner.avatar }}</div>
-              <div class="miner-info">
-                <h4>{{ miner.name }}</h4>
-                <span class="miner-status" [style.color]="getStatusColor(miner.status)">
-                  {{ miner.status === 'online' ? 'En línea' : miner.status === 'alert' ? 'Alerta' : 'Desconectado' }}
-                </span>
-              </div>
+        <h3>Mineros asignados ({{ equipment?.mineros?.length || 0 }})</h3>
+        <form (ngSubmit)="addMiner()" #minerForm="ngForm" class="form-minero">
+          <div class="form-row">
+            <input type="text" [(ngModel)]="newMiner.fullName" name="fullName" placeholder="Nombre completo" required />
+            <input type="email" [(ngModel)]="newMiner.email" name="email" placeholder="Correo electrónico" required />
+          </div>
+          <div class="form-row">
+            <input type="date" [(ngModel)]="newMiner.fechaContratacion" name="fechaContratacion" placeholder="Fecha de contratación" />
+            <input type="text" [(ngModel)]="newMiner.especialidadEnMineria" name="especialidadEnMineria" placeholder="Especialidad en minería" />
+            <select [(ngModel)]="newMiner.genero" name="genero">
+              <option value="">Género</option>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-secondary" [disabled]="minerForm.invalid">Registrar Minero</button>
+        </form>
+        <div *ngIf="equipment?.mineros?.length; else sinMineros">
+          <div class="minero-card" *ngFor="let tm of equipment.mineros">
+            <div class="minero-info">
+              <span class="minero-nombre">{{ tm.minero?.fullName || 'Sin nombre' }}</span>
+              <span class="minero-email" *ngIf="tm.minero?.email">({{ tm.minero?.email }})</span>
+              <span class="minero-estado" [ngClass]="{'activo': tm.activo, 'inactivo': !tm.activo}">
+                {{ tm.activo ? 'Activo' : 'Inactivo' }}
+              </span>
             </div>
-            <div class="miner-details">
-              <div class="miner-detail">
-                <span class="detail-label">Casco:</span>
-                <span class="detail-value">{{ miner.helmetId }}</span>
-              </div>
-              <div class="miner-detail">
-                <span class="detail-label">Última vez:</span>
-                <span class="detail-value">{{ miner.lastSeen }}</span>
-              </div>
+            <div class="minero-extra">
+              <span *ngIf="tm.minero?.especialidadEnMineria">Especialidad: {{ tm.minero?.especialidadEnMineria }}</span>
+              <span *ngIf="tm.minero?.birthDate"><br>Fecha de nacimiento: {{ tm.minero?.birthDate }}</span>
+              <span *ngIf="tm.minero?.phone"><br>Teléfono: {{ tm.minero?.phone }}</span>
+              <span *ngIf="tm.minero?.address"><br>Dirección: {{ tm.minero?.address }}</span>
+              <span *ngIf="tm.minero?.rfc"><br>RFC: {{ tm.minero?.rfc }}</span>
+              <span *ngIf="tm.fechaAsignacion"><br>Asignado desde: {{ tm.fechaAsignacion | date:'short' }}</span>
             </div>
           </div>
         </div>
+        <ng-template #sinMineros>
+          <p class="sin-mineros">No hay mineros asignados a este equipo.</p>
+        </ng-template>
       </div>
 
       <!-- Helmets Tab -->

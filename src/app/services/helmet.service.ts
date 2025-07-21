@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map, catchError, shareReplay } from 'rxjs/operators';
 
 export interface Helmet {
   id: string;
@@ -23,265 +25,196 @@ export interface Helmet {
   };
 }
 
+export interface HelmetStats {
+  total: number;
+  active: number;
+  assigned: number;
+  inactive: number;
+  utilizationRate: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class HelmetService {
-  private helmets: Helmet[] = [
-    {
-      id: '1',
-      uuid: 'HELM-001-UUID',
-      serialNumber: 'HELM-001',
-      status: 'activo-asignado',
-      assignedTo: 'Carlos Mendoza',
-      assignedToId: '1',
-      equipmentId: '1',
-      equipmentName: 'Equipo Mina Norte',
-      supervisorId: '1',
-      lastHeartbeat: '2 min',
-      batteryLevel: 85,
-      temperature: 36.5,
-      location: 'Zona A-12',
-      sensors: {
-        gps: { lat: -33.4489, lng: -70.6693 },
-        temperature: 36.5,
-        heartRate: 72,
-        acceleration: { x: 0.1, y: 0.2, z: 9.8 }
-      }
-    },
-    {
-      id: '2',
-      uuid: 'HELM-002-UUID',
-      serialNumber: 'HELM-002',
-      status: 'activo-asignado',
-      assignedTo: 'Ana Rodríguez',
-      assignedToId: '2',
-      equipmentId: '1',
-      equipmentName: 'Equipo Mina Norte',
-      supervisorId: '1',
-      lastHeartbeat: '1 min',
-      batteryLevel: 92,
-      temperature: 37.1,
-      location: 'Zona A-12',
-      sensors: {
-        gps: { lat: -33.4491, lng: -70.6695 },
-        temperature: 37.1,
-        heartRate: 68,
-        acceleration: { x: 0.0, y: 0.1, z: 9.8 }
-      }
-    },
-    {
-      id: '3',
-      uuid: 'HELM-003-UUID',
-      serialNumber: 'HELM-003',
-      status: 'activo-asignado',
-      assignedTo: 'Miguel Torres',
-      assignedToId: '3',
-      equipmentId: '1',
-      equipmentName: 'Equipo Mina Norte',
-      supervisorId: '1',
-      lastHeartbeat: '30 seg',
-      batteryLevel: 15,
-      temperature: 38.5,
-      location: 'Zona A-12',
-      sensors: {
-        gps: { lat: -33.4487, lng: -70.6691 },
-        temperature: 38.5,
-        heartRate: 95,
-        acceleration: { x: 2.1, y: 1.8, z: 8.5 }
-      }
-    },
-    {
-      id: '4',
-      uuid: 'HELM-004-UUID',
-      serialNumber: 'HELM-004',
-      status: 'activo-sin-asignar',
-      equipmentId: '2',
-      equipmentName: 'Equipo Mina Sur',
-      supervisorId: '1',
-      lastHeartbeat: '3 min',
-      batteryLevel: 78,
-      temperature: 25.0,
-      location: 'Almacén',
-      sensors: {
-        gps: { lat: -33.4495, lng: -70.6700 },
-        temperature: 25.0,
-        heartRate: 0,
-        acceleration: { x: 0.0, y: 0.0, z: 9.8 }
-      }
-    },
-    {
-      id: '5',
-      uuid: 'HELM-005-UUID',
-      serialNumber: 'HELM-005',
-      status: 'activo-sin-asignar',
-      equipmentId: '2',
-      equipmentName: 'Equipo Mina Sur',
-      supervisorId: '1',
-      lastHeartbeat: '5 min',
-      batteryLevel: 95,
-      temperature: 24.5,
-      location: 'Almacén',
-      sensors: {
-        gps: { lat: -33.4496, lng: -70.6701 },
-        temperature: 24.5,
-        heartRate: 0,
-        acceleration: { x: 0.0, y: 0.0, z: 9.8 }
-      }
-    },
-    {
-      id: '6',
-      uuid: 'HELM-006-UUID',
-      serialNumber: 'HELM-006',
-      status: 'activo',
-      supervisorId: '1',
-      lastHeartbeat: '1 hora',
-      batteryLevel: 100,
-      temperature: 22.0,
-      location: 'Taller',
-      sensors: {
-        gps: { lat: 0, lng: 0 },
-        temperature: 22.0,
-        heartRate: 0,
-        acceleration: { x: 0.0, y: 0.0, z: 9.8 }
-      }
-    },
-    {
-      id: '7',
-      uuid: 'HELM-007-UUID',
-      serialNumber: 'HELM-007',
-      status: 'inactivo',
-      supervisorId: '1',
-      lastHeartbeat: 'Nunca',
-      batteryLevel: 0,
-      temperature: 0,
-      location: 'Registrado',
-      sensors: {
-        gps: { lat: 0, lng: 0 },
-        temperature: 0,
-        heartRate: 0,
-        acceleration: { x: 0.0, y: 0.0, z: 0.0 }
-      }
-    },
-    {
-      id: '8',
-      uuid: 'HELM-008-UUID',
-      serialNumber: 'HELM-008',
-      status: 'inactivo',
-      supervisorId: '1',
-      lastHeartbeat: 'Nunca',
-      batteryLevel: 0,
-      temperature: 0,
-      location: 'Registrado',
-      sensors: {
-        gps: { lat: 0, lng: 0 },
-        temperature: 0,
-        heartRate: 0,
-        acceleration: { x: 0.0, y: 0.0, z: 0.0 }
-      }
-    }
-  ];
+  private apiUrl = 'http://localhost:3333';
+  private helmetsCache$: Observable<Helmet[]> | null = null;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
+  /**
+   * Obtiene todos los cascos con cache
+   */
   getAllHelmets(): Observable<Helmet[]> {
-    return of([...this.helmets]);
+    if (!this.helmetsCache$) {
+      this.helmetsCache$ = this.http.get<any>(`${this.apiUrl}/cascos/my-helmets`, { withCredentials: true }).pipe(
+        map(response => (response.data || []).map((item: any) => ({
+          id: item.id,
+          uuid: item.physicalId || item.uuid || '',
+          serialNumber: item.serial || item.serialNumber || '',
+          status: item.isActive ? (item.isAssigned ? 'activo-asignado' : 'activo-sin-asignar') : 'inactivo',
+          assignedTo: item.minero ? item.minero.fullName : undefined,
+          assignedToId: item.minero ? item.minero.id : undefined,
+          equipmentId: undefined, // Ajustar si hay campo en backend
+          equipmentName: undefined, // Ajustar si hay campo en backend
+          supervisorId: item.supervisorId,
+          lastHeartbeat: item.updatedAt || '',
+          batteryLevel: undefined, // Ajustar si hay campo en backend
+          temperature: undefined, // Ajustar si hay campo en backend
+          location: undefined, // Ajustar si hay campo en backend
+          sensors: undefined // Ajustar si hay campo en backend
+        }))),
+        catchError(error => {
+          console.error('Error fetching helmets:', error);
+          return of([]);
+        }),
+        shareReplay(1)
+      );
+    }
+    return this.helmetsCache$;
   }
 
-  getHelmetsByStatus(status: Helmet['status']): Observable<Helmet[]> {
-    return of(this.helmets.filter(helmet => helmet.status === status));
+  /**
+   * Limpia el cache de cascos
+   */
+  clearCache(): void {
+    this.helmetsCache$ = null;
   }
 
-  getHelmetsBySupervisor(supervisorId: string): Observable<Helmet[]> {
-    return of(this.helmets.filter(helmet => helmet.supervisorId === supervisorId));
+  /**
+   * Obtiene un casco por ID
+   */
+  getHelmetById(id: string): Observable<Helmet> {
+    return this.http.get<any>(`${this.apiUrl}/cascos/${id}`, { withCredentials: true }).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching helmet:', error);
+        throw error;
+      })
+    );
   }
 
-  getHelmetById(id: string): Observable<Helmet | undefined> {
-    return of(this.helmets.find(helmet => helmet.id === id));
+  /**
+   * Activa un casco
+   */
+  activateHelmet(id: string): Observable<Helmet> {
+    this.clearCache(); // Limpiar cache después de modificar
+    return this.http.put<any>(`${this.apiUrl}/cascos/${id}/activate`, {}, { withCredentials: true }).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error activating helmet:', error);
+        throw error;
+      })
+    );
   }
 
+  /**
+   * Asigna un casco a un minero
+   */
+  assignHelmet(helmetId: string, mineroId: string): Observable<Helmet> {
+    this.clearCache(); // Limpiar cache después de modificar
+    return this.http.put<any>(`${this.apiUrl}/cascos/${helmetId}/assign`, { mineroId }, { withCredentials: true }).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error assigning helmet:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Desasigna un casco
+   */
+  unassignHelmet(helmetId: string): Observable<Helmet> {
+    this.clearCache(); // Limpiar cache después de modificar
+    return this.http.put<any>(`${this.apiUrl}/cascos/${helmetId}/unassign`, {}, { withCredentials: true }).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error unassigning helmet:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Crea un nuevo casco
+   */
   createHelmet(helmet: Partial<Helmet>): Observable<Helmet> {
-    const newHelmet: Helmet = {
-      id: (this.helmets.length + 1).toString(),
-      uuid: helmet.uuid || `HELM-${Date.now()}-UUID`,
-      serialNumber: helmet.serialNumber || `HELM-${Date.now()}`,
-      status: 'inactivo',
-      supervisorId: helmet.supervisorId || '',
-      lastHeartbeat: 'Nunca',
-      batteryLevel: 0,
-      temperature: 0,
-      location: 'Registrado',
-      sensors: {
-        gps: { lat: 0, lng: 0 },
-        temperature: 0,
-        heartRate: 0,
-        acceleration: { x: 0.0, y: 0.0, z: 0.0 }
-      }
-    };
-
-    this.helmets.push(newHelmet);
-    return of(newHelmet);
-  }
-
-  updateHelmetStatus(id: string, status: Helmet['status']): Observable<Helmet | undefined> {
-    const helmet = this.helmets.find(h => h.id === id);
-    if (helmet) {
-      helmet.status = status;
-      return of(helmet);
+    this.clearCache(); // Limpiar cache después de modificar
+    // Mapear serialNumber a physicalId para el backend
+    const payload: any = { ...helmet };
+    if (helmet.serialNumber) {
+      payload.physicalId = helmet.serialNumber;
+      delete payload.serialNumber;
     }
-    return of(undefined);
+    return this.http.post<any>(`${this.apiUrl}/cascos`, payload, { withCredentials: true }).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error creating helmet:', error);
+        throw error;
+      })
+    );
   }
 
-  assignHelmetToMiner(helmetId: string, minerId: string, minerName: string): Observable<Helmet | undefined> {
-    const helmet = this.helmets.find(h => h.id === helmetId);
-    if (helmet) {
-      helmet.assignedToId = minerId;
-      helmet.assignedTo = minerName;
-      helmet.status = 'activo-asignado';
-      return of(helmet);
-    }
-    return of(undefined);
+  /**
+   * Actualiza un casco existente
+   */
+  updateHelmet(id: string, helmet: Partial<Helmet>): Observable<Helmet> {
+    this.clearCache();
+    // Mapear serialNumber a serial y physicalId si corresponde
+    const payload: any = { ...helmet };
+    if (helmet.serialNumber) payload.serial = helmet.serialNumber;
+    if (helmet.uuid) payload.physicalId = helmet.uuid;
+    return this.http.put<any>(`${this.apiUrl}/cascos/${id}`, payload, { withCredentials: true }).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error updating helmet:', error);
+        throw error;
+      })
+    );
   }
 
-  unassignHelmet(helmetId: string): Observable<Helmet | undefined> {
-    const helmet = this.helmets.find(h => h.id === helmetId);
-    if (helmet) {
-      delete helmet.assignedToId;
-      delete helmet.assignedTo;
-      helmet.status = 'activo-sin-asignar';
-      return of(helmet);
-    }
-    return of(undefined);
+  /**
+   * Elimina un casco
+   */
+  deleteHelmet(id: string): Observable<void> {
+    this.clearCache();
+    return this.http.delete<any>(`${this.apiUrl}/cascos/${id}`, { withCredentials: true }).pipe(
+      map(() => {}),
+      catchError(error => {
+        console.error('Error deleting helmet:', error);
+        throw error;
+      })
+    );
   }
 
-  activateHelmet(helmetId: string): Observable<Helmet | undefined> {
-    const helmet = this.helmets.find(h => h.id === helmetId);
-    if (helmet && helmet.status === 'inactivo') {
-      helmet.status = 'activo';
-      helmet.lastHeartbeat = '1 min';
-      helmet.batteryLevel = 100;
-      helmet.temperature = 22.0;
-      helmet.location = 'Taller';
-      return of(helmet);
-    }
-    return of(undefined);
-  }
+  getHelmetStats(): Observable<HelmetStats> {
+    return this.getAllHelmets().pipe(
+      map(helmets => {
+        const total = helmets.length
+        const active = helmets.filter(h => h.status === 'activo').length
+        const assigned = helmets.filter(h => h.status === 'activo-asignado').length
+        const inactive = helmets.filter(h => h.status === 'inactivo').length
 
-  getHelmetStats(): Observable<{
-    total: number;
-    inactivo: number;
-    activo: number;
-    activoSinAsignar: number;
-    activoAsignado: number;
-  }> {
-    const stats = {
-      total: this.helmets.length,
-      inactivo: this.helmets.filter(h => h.status === 'inactivo').length,
-      activo: this.helmets.filter(h => h.status === 'activo').length,
-      activoSinAsignar: this.helmets.filter(h => h.status === 'activo-sin-asignar').length,
-      activoAsignado: this.helmets.filter(h => h.status === 'activo-asignado').length
-    };
-    return of(stats);
+        return {
+          total,
+          active,
+          assigned,
+          inactive,
+          utilizationRate: total > 0 ? (assigned / total) * 100 : 0
+        }
+      }),
+      catchError(error => {
+        console.error('Error calculating helmet stats:', error);
+        return of({
+          total: 0,
+          active: 0,
+          assigned: 0,
+          inactive: 0,
+          utilizationRate: 0
+        });
+      })
+    )
   }
 
   getStatusColor(status: Helmet['status']): string {

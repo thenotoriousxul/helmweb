@@ -1,27 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
-interface Equipment {
-  id: string;
-  name: string;
-  totalHelmets: number;
-  activeHelmets: number;
-  status: 'active' | 'inactive' | 'warning';
-  alerts: number;
-  miners: Array<{
-    id: string;
-    name: string;
-    avatar: string;
-    status: 'online' | 'offline' | 'alert';
-  }>;
-  location: string;
-  lastUpdate: string;
-  type: string;
-  supervisor: string;
-  startDate: string;
-}
+import { TeamService, Team, TeamStats } from '../../services/team.service';
+import { AuthService } from '../../services/auth.service';
+import { MineroService } from '../../services/minero.service';
 
 @Component({
   selector: 'app-equipments',
@@ -30,113 +13,116 @@ interface Equipment {
   templateUrl: './equipments.component.html',
   styleUrls: ['./equipments.component.css']
 })
-export class EquipmentsComponent {
-  equipments: Equipment[] = [
-    {
-      id: '1',
-      name: 'Equipo Mina Norte',
-      totalHelmets: 45,
-      activeHelmets: 42,
-      status: 'active',
-      alerts: 2,
-      location: 'Zona A-12',
-      lastUpdate: '2 min',
-      type: 'Extracción',
-      supervisor: 'Carlos Mendoza',
-      startDate: '2024-01-15',
-      miners: [
-        { id: '1', name: 'Carlos M.', avatar: 'CM', status: 'online' },
-        { id: '2', name: 'Ana R.', avatar: 'AR', status: 'online' },
-        { id: '3', name: 'Miguel T.', avatar: 'MT', status: 'alert' }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Equipo Mina Sur',
-      totalHelmets: 38,
-      activeHelmets: 35,
-      status: 'active',
-      alerts: 1,
-      location: 'Zona B-8',
-      lastUpdate: '5 min',
-      type: 'Perforación',
-      supervisor: 'Ana Rodríguez',
-      startDate: '2024-01-20',
-      miners: [
-        { id: '4', name: 'Luis P.', avatar: 'LP', status: 'online' },
-        { id: '5', name: 'María G.', avatar: 'MG', status: 'online' },
-        { id: '6', name: 'Roberto S.', avatar: 'RS', status: 'offline' }
-      ]
-    },
-    {
-      id: '3',
-      name: 'Equipo Mina Este',
-      totalHelmets: 52,
-      activeHelmets: 48,
-      status: 'warning',
-      alerts: 5,
-      location: 'Zona C-15',
-      lastUpdate: '1 min',
-      type: 'Carga',
-      supervisor: 'Miguel Torres',
-      startDate: '2024-01-10',
-      miners: [
-        { id: '7', name: 'Elena V.', avatar: 'EV', status: 'alert' },
-        { id: '8', name: 'Diego H.', avatar: 'DH', status: 'online' },
-        { id: '9', name: 'Sofia L.', avatar: 'SL', status: 'alert' }
-      ]
-    }
-  ];
-
-  filteredEquipments: Equipment[] = [];
+export class EquipmentsComponent implements OnInit {
+  teams: Team[] = [];
+  filteredTeams: Team[] = [];
   searchTerm = '';
   statusFilter = 'all';
-  typeFilter = 'all';
+  zoneFilter = 'all';
   showCreateModal = false;
-  newEquipment: Partial<Equipment> = {};
+  newTeam: Partial<Team> = {};
+  stats: TeamStats = {
+    totalTeams: 0,
+    totalSupervisors: 0,
+    avgMinersPerTeam: 0
+  };
+  loading = false;
+  showDetailModal = false;
+  detailTeamData: Partial<Team> = {};
+  showEditModal = false;
+  editTeamData: Partial<Team> = {};
+  showDeleteModal = false;
+  teamToDelete: Team | null = null;
+  showAssignMinerModal = false;
+  teamToAssignMiner: Team | null = null;
+  availableMiners: any[] = [];
+  selectedMinerId: string = '';
 
-  constructor(private router: Router) {
-    this.filteredEquipments = [...this.equipments];
+  constructor(
+    private router: Router,
+    private teamService: TeamService,
+    private authService: AuthService,
+    private mineroService: MineroService
+  ) {}
+
+  ngOnInit() {
+    this.loadTeams();
+    this.loadStats();
   }
 
-  // Propiedades computadas para evitar filtros en el template
-  get totalEquipments(): number {
-    return this.equipments.length;
+  loadTeams() {
+    this.loading = true;
+    this.teamService.getAllTeams().subscribe({
+      next: (teams) => {
+        this.teams = teams || [];
+        this.filteredTeams = [...this.teams];
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading teams:', error);
+        this.teams = [];
+        this.filteredTeams = [];
+        this.loading = false;
+      }
+    });
   }
 
-  get activeEquipments(): number {
-    return this.equipments.filter(eq => eq.status === 'active').length;
+  loadStats() {
+    this.teamService.getTeamStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+      },
+      error: (error) => {
+        console.error('Error loading stats:', error);
+      }
+    });
   }
 
-  get warningEquipments(): number {
-    return this.equipments.filter(eq => eq.status === 'warning').length;
+  // Propiedades computadas
+  get totalTeams(): number {
+    return this.teams.length;
   }
 
-  get totalHelmets(): number {
-    return this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0);
+  get activeTeams(): number {
+    return this.teams.filter(team => this.getTeamStatus(team) === 'active').length;
+  }
+
+  get warningTeams(): number {
+    return this.teams.filter(team => this.getTeamStatus(team) === 'warning').length;
+  }
+
+  get totalMiners(): number {
+    return this.teams.reduce((sum, team) => sum + (team.mineros?.length || 0), 0);
   }
 
   onSearchChange() {
-    this.filterEquipments();
+    this.filterTeams();
   }
 
   onStatusFilterChange() {
-    this.filterEquipments();
+    this.filterTeams();
   }
 
-  onTypeFilterChange() {
-    this.filterEquipments();
+  onZoneFilterChange() {
+    this.filterTeams();
   }
 
-  filterEquipments() {
-    this.filteredEquipments = this.equipments.filter(equipment => {
-      const matchesSearch = equipment.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           equipment.location.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           equipment.supervisor.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesStatus = this.statusFilter === 'all' || equipment.status === this.statusFilter;
-      const matchesType = this.typeFilter === 'all' || equipment.type === this.typeFilter;
-      return matchesSearch && matchesStatus && matchesType;
+  filterTeams() {
+    this.filteredTeams = this.teams.filter(team => {
+      const matchesSearch = team.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                           team.zona.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                           (team.supervisor?.fullName || '').toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesStatus = this.statusFilter === 'all' || this.getTeamStatus(team) === this.statusFilter;
+      const matchesZone = this.zoneFilter === 'all' || team.zona === this.zoneFilter;
+      return matchesSearch && matchesStatus && matchesZone;
     });
+  }
+
+  getTeamStatus(team: Team): 'active' | 'warning' | 'inactive' {
+    const minerCount = team.mineros?.length || 0;
+    if (minerCount === 0) return 'inactive';
+    if (minerCount >= 8) return 'warning'; // Equipo casi lleno
+    return 'active';
   }
 
   getStatusColor(status: string): string {
@@ -157,55 +143,160 @@ export class EquipmentsComponent {
     }
   }
 
-  showDetail(equipment: Equipment) {
-    this.router.navigate(['/equipment-detail', equipment.id]);
+  showDetail(team: Team) {
+    this.teamService.getTeamById(team.id).subscribe({
+      next: (data) => {
+        this.detailTeamData = data;
+        this.showDetailModal = true;
+      },
+      error: () => {
+        alert('No se pudo obtener el detalle del equipo.');
+      }
+    });
   }
 
-  editEquipment(equipment: Equipment) {
-    this.router.navigate(['/equipment-edit', equipment.id]);
+  closeDetailModal() {
+    this.showDetailModal = false;
+    this.detailTeamData = {};
   }
 
-  deleteEquipment(equipment: Equipment) {
-    if (confirm(`¿Estás seguro de que quieres eliminar el equipo "${equipment.name}"?`)) {
-      this.equipments = this.equipments.filter(eq => eq.id !== equipment.id);
-      this.filterEquipments();
+  editTeam(team: Team) {
+    this.editTeamData = { ...team };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editTeamData = {};
+  }
+
+  saveEditTeam() {
+    if (this.editTeamData.id) {
+      this.teamService.updateTeam(this.editTeamData.id, this.editTeamData).subscribe({
+        next: () => {
+          this.loadTeams();
+          this.loadStats();
+          this.closeEditModal();
+        },
+        error: () => {
+          alert('Error al actualizar el equipo.');
+        }
+      });
     }
+  }
+
+  deleteTeam(team: Team) {
+    this.teamToDelete = team;
+    this.showDeleteModal = true;
+  }
+
+  confirmDeleteTeam() {
+    if (this.teamToDelete) {
+      this.teamService.deleteTeam(this.teamToDelete.id).subscribe({
+        next: () => {
+          this.loadTeams();
+          this.loadStats();
+          this.closeDeleteModal();
+        },
+        error: () => {
+          alert('Error al eliminar el equipo.');
+        }
+      });
+    }
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.teamToDelete = null;
   }
 
   openCreateModal() {
     this.showCreateModal = true;
-    this.newEquipment = {};
+    this.newTeam = {};
   }
 
   closeCreateModal() {
     this.showCreateModal = false;
-    this.newEquipment = {};
+    this.newTeam = {};
   }
 
-  createEquipment() {
-    if (this.newEquipment.name && this.newEquipment.location && this.newEquipment.type) {
-      const newEq: Equipment = {
-        id: Date.now().toString(),
-        name: this.newEquipment.name!,
-        totalHelmets: this.newEquipment.totalHelmets || 0,
-        activeHelmets: 0,
-        status: 'inactive',
-        alerts: 0,
-        location: this.newEquipment.location!,
-        lastUpdate: 'Ahora',
-        type: this.newEquipment.type!,
-        supervisor: this.newEquipment.supervisor || 'Sin asignar',
-        startDate: new Date().toISOString().split('T')[0],
-        miners: []
-      };
+  createTeam() {
+    if (this.newTeam.nombre && this.newTeam.zona) {
+      const currentUser = this.authService.getCurrentUser();
       
-      this.equipments.push(newEq);
-      this.filterEquipments();
-      this.closeCreateModal();
+      // Preparar los datos del equipo
+      const teamData: Partial<Team> = {
+        nombre: this.newTeam.nombre,
+        zona: this.newTeam.zona
+      };
+
+      // Si el usuario es admin, puede necesitar especificar supervisorId
+      // Si es supervisor, el backend lo asignará automáticamente
+      if (currentUser?.role === 'admin') {
+        // Por ahora, asignar al primer supervisor disponible o al usuario actual
+        teamData.supervisorId = currentUser.id;
+      }
+
+      this.teamService.createTeam(teamData).subscribe({
+        next: (team) => {
+          // Recargar desde el servidor para asegurar sincronización
+          this.loadTeams();
+          this.loadStats();
+          this.closeCreateModal();
+        },
+        error: (error) => {
+          console.error('Error creating team:', error);
+          alert('Error al crear el equipo: ' + (error.error?.message || error.message || 'Error desconocido'));
+        }
+      });
+    } else {
+      alert('Por favor completa todos los campos requeridos');
     }
   }
 
-  getEquipmentTypes(): string[] {
-    return [...new Set(this.equipments.map(eq => eq.type))];
+  openAssignMinerModal(team: Team) {
+    this.teamToAssignMiner = team;
+    this.selectedMinerId = '';
+    this.showAssignMinerModal = true;
+    this.mineroService.getAllMiners().subscribe(miners => {
+      // Filtrar mineros ya asignados a algún equipo
+      const assignedIds = (team.mineros || []).map(m => m.id);
+      this.availableMiners = miners.filter((m: any) => !assignedIds.includes(m.id));
+    });
+  }
+
+  closeAssignMinerModal() {
+    this.showAssignMinerModal = false;
+    this.teamToAssignMiner = null;
+    this.availableMiners = [];
+    this.selectedMinerId = '';
+  }
+
+  assignMinerToTeam() {
+    if (this.teamToAssignMiner && this.selectedMinerId) {
+      this.teamService.assignMinerToTeam(this.teamToAssignMiner.id, this.selectedMinerId).subscribe({
+        next: () => {
+          this.loadTeams();
+          this.closeAssignMinerModal();
+        },
+        error: () => {
+          alert('Error al asignar minero al equipo.');
+        }
+      });
+    }
+  }
+
+  getZones(): string[] {
+    return [...new Set(this.teams.map(team => team.zona))];
+  }
+
+  canCreateTeam(): boolean {
+    const canCreate = this.authService.canCreateEquipment();
+    return true; // Temporalmente siempre true para testing
+  }
+
+  canModifyTeam(): boolean {
+    const canModify = this.authService.canModifyEquipment();
+    return true; // Temporalmente siempre true para testing
   }
 } 

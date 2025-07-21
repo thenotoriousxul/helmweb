@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HelmetService, Helmet } from '../../services/helmet.service';
+import { HelmetService, Helmet, HelmetStats } from '../../services/helmet.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -20,13 +20,19 @@ export class HelmetsComponent implements OnInit {
   equipmentFilter = 'all';
   showCreateModal = false;
   newHelmet: Partial<Helmet> = {};
-  helmetStats = {
+  helmetStats: HelmetStats = {
     total: 0,
-    inactivo: 0,
-    activo: 0,
-    activoSinAsignar: 0,
-    activoAsignado: 0
+    active: 0,
+    assigned: 0,
+    inactive: 0,
+    utilizationRate: 0
   };
+  showDetailModal = false;
+  detailHelmetData: Partial<Helmet> = {};
+  showEditModal = false;
+  editHelmetData: Partial<Helmet> = {};
+  showDeleteModal = false;
+  helmetToDelete: Helmet | null = null;
 
   constructor(
     private router: Router,
@@ -40,20 +46,10 @@ export class HelmetsComponent implements OnInit {
   }
 
   loadHelmets() {
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      if (this.authService.isAdmin()) {
-        this.helmetService.getAllHelmets().subscribe(helmets => {
-          this.helmets = helmets;
-          this.filteredHelmets = [...helmets];
-        });
-      } else {
-        this.helmetService.getHelmetsBySupervisor(currentUser.id).subscribe(helmets => {
-          this.helmets = helmets;
-          this.filteredHelmets = [...helmets];
-        });
-      }
-    }
+    this.helmetService.getAllHelmets().subscribe(helmets => {
+      this.helmets = helmets;
+      this.filteredHelmets = [...helmets];
+    });
   }
 
   loadStats() {
@@ -108,45 +104,82 @@ export class HelmetsComponent implements OnInit {
   }
 
   showDetail(helmet: Helmet) {
-    // Implementar navegación al detalle del casco
-    console.log('Ver detalle del casco:', helmet);
+    this.helmetService.getHelmetById(helmet.id).subscribe({
+      next: (data) => {
+        this.detailHelmetData = data;
+        this.showDetailModal = true;
+      },
+      error: () => {
+        alert('No se pudo obtener el detalle del casco.');
+      }
+    });
+  }
+
+  closeDetailModal() {
+    this.showDetailModal = false;
+    this.detailHelmetData = {};
   }
 
   editHelmet(helmet: Helmet) {
-    // Implementar edición del casco
-    console.log('Editar casco:', helmet);
+    this.editHelmetData = { ...helmet };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editHelmetData = {};
+  }
+
+  saveEditHelmet() {
+    if (this.editHelmetData.id) {
+      this.helmetService.updateHelmet(this.editHelmetData.id, this.editHelmetData).subscribe(() => {
+        this.loadHelmets();
+        this.loadStats();
+        this.closeEditModal();
+      });
+    }
   }
 
   deleteHelmet(helmet: Helmet) {
-    if (confirm('¿Estás seguro de que quieres eliminar este casco?')) {
-      // Implementar eliminación del casco
-      console.log('Eliminar casco:', helmet);
+    this.helmetToDelete = helmet;
+    this.showDeleteModal = true;
+  }
+
+  confirmDeleteHelmet() {
+    if (this.helmetToDelete) {
+      this.helmetService.deleteHelmet(this.helmetToDelete.id).subscribe(() => {
+        this.loadHelmets();
+        this.loadStats();
+        this.closeDeleteModal();
+      });
     }
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.helmetToDelete = null;
   }
 
   activateHelmet(helmet: Helmet) {
     if (helmet.status === 'inactivo') {
-      this.helmetService.activateHelmet(helmet.id).subscribe(updatedHelmet => {
-        if (updatedHelmet) {
-          this.loadHelmets();
-          this.loadStats();
-        }
+      this.helmetService.activateHelmet(helmet.serialNumber).subscribe(() => {
+        this.loadHelmets();
+        this.loadStats();
       });
     }
   }
 
   assignHelmet(helmet: Helmet) {
-    // Implementar asignación de casco a minero
+    // TODO: Mostrar modal para seleccionar minero y luego llamar a:
+    // this.helmetService.assignHelmetToMiner(helmet.id, mineroId).subscribe(...)
     console.log('Asignar casco:', helmet);
   }
 
   unassignHelmet(helmet: Helmet) {
     if (helmet.status === 'activo-asignado') {
-      this.helmetService.unassignHelmet(helmet.id).subscribe(updatedHelmet => {
-        if (updatedHelmet) {
-          this.loadHelmets();
-          this.loadStats();
-        }
+      this.helmetService.unassignHelmet(helmet.id).subscribe(() => {
+        this.loadHelmets();
+        this.loadStats();
       });
     }
   }
@@ -162,13 +195,12 @@ export class HelmetsComponent implements OnInit {
   }
 
   createHelmet() {
-    if (this.newHelmet.serialNumber && this.newHelmet.uuid) {
+    if (this.newHelmet.serialNumber) {
       const currentUser = this.authService.getCurrentUser();
       if (currentUser) {
         this.newHelmet.supervisorId = currentUser.id;
-        this.helmetService.createHelmet(this.newHelmet).subscribe(newHelmet => {
-          this.helmets.push(newHelmet);
-          this.filteredHelmets = [...this.helmets];
+        this.helmetService.createHelmet(this.newHelmet).subscribe(() => {
+          this.loadHelmets();
           this.loadStats();
           this.closeCreateModal();
         });

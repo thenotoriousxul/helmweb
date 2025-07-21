@@ -53,6 +53,7 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.registerForm.valid) {
+      this.registerError = '';
       const formValue = this.registerForm.value;
       const data = {
         fullName: formValue.firstName + ' ' + formValue.lastName,
@@ -60,12 +61,13 @@ export class RegisterComponent {
         password: formValue.password,
         codigo: formValue.accessCode
       };
+      
       this.authService.register(data).subscribe({
         next: (user) => {
           this.router.navigate(['/dashboard']);
         },
-        error: (err) => {
-          this.registerError = 'Error al registrar usuario. Verifica los datos e inténtalo de nuevo.';
+        error: (error) => {
+          this.registerError = error.message || 'Error al registrar usuario. Verifica los datos e inténtalo de nuevo.';
         }
       });
     } else {

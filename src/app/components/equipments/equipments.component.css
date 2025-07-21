@@ -560,3 +560,82 @@
     flex-direction: column;
   }
 } 
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #64ffda;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Zone Badge */
+.zone-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Supervisor Name */
+.supervisor-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #8892b0;
+  font-size: 0.875rem;
+}
+
+.supervisor-name i {
+  color: #64ffda;
+  font-size: 0.75rem;
+}
+
+/* Miners Info */
+.miners-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.miners-count {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ccd6f6;
+}
+
+.miners-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(100, 255, 218, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.miners-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #64ffda 0%, #00d4aa 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+} 

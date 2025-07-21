@@ -185,23 +185,36 @@
           </div>
           
           <div class="access-code-display">
-            <label>Código de Acceso Generado:</label>
+            <label>Información del Código de Acceso:</label>
             <div class="code-container">
-              <span class="access-code">{{ generatedAccessCode }}</span>
-              <button class="btn btn-secondary" (click)="copyToClipboard()">
+              <pre class="access-code" 
+                   [class.no-code]="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró')"
+                   [class.error]="generatedAccessCode.includes('Error al obtener')">
+                {{ generatedAccessCode }}
+              </pre>
+              <button class="btn btn-secondary" 
+                      (click)="copyToClipboard()"
+                      [disabled]="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró') || generatedAccessCode.includes('Error al obtener')">
                 <i class="fas fa-copy"></i>
-                Copiar
+                Copiar Código
               </button>
             </div>
             <p class="code-instructions">
               <i class="fas fa-info-circle"></i>
-              Este código de acceso único ha sido generado y guardado en la base de datos. 
-              El supervisor debe usar este código para completar su registro en el sistema.
+              Los códigos de acceso son únicos y se pueden usar una sola vez. 
+              Si el código ya fue usado, el supervisor ya está registrado en el sistema.
             </p>
           </div>
         </div>
         
         <div class="modal-actions">
+          <button type="button" 
+                  class="btn btn-secondary" 
+                  (click)="generateNewCode()"
+                  *ngIf="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró')">
+            <i class="fas fa-plus"></i>
+            Generar Nuevo Código
+          </button>
           <button type="button" class="btn btn-primary" (click)="closeAccessCodeModal()">
             Aceptar
           </button>

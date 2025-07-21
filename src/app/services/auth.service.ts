@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { map, catchError, shareReplay } from 'rxjs/operators';
 
 export interface User {
   id: string;
@@ -86,67 +87,98 @@ export interface Miner {
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+  private userCache: User | null = null;
 
   constructor(private http: HttpClient) {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser && storedUser !== 'null' && storedUser !== 'undefined' && storedUser.trim() !== '') {
-      try {
+    this.initializeUser();
+  }
+
+  private initializeUser(): void {
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser && storedUser !== 'null' && storedUser !== 'undefined' && storedUser.trim() !== '') {
         const user = JSON.parse(storedUser);
+        this.userCache = user;
         this.currentUserSubject.next(user);
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('currentUser');
       }
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
+      localStorage.removeItem('currentUser');
     }
   }
 
   login(email: string, password: string): Observable<any> {
-    return new Observable(observer => {
-      this.http.post<any>('http://localhost:3333/login', { email, password }, { withCredentials: true })
-        .subscribe({
-          next: (response) => {
-            const user = response.data.user;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            this.currentUserSubject.next(user);
-            observer.next(user);
-            observer.complete();
-          },
-          error: (err) => {
-            observer.error(err);
-          }
-        });
-    });
+    return this.http.post<any>('http://localhost:3333/login', { email, password }, { withCredentials: true }).pipe(
+      map(response => {
+        const user = response.data.user;
+        this.userCache = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return user;
+      }),
+      shareReplay(1)
+    );
   }
 
   register(data: { fullName: string; email: string; password: string; codigo: string }): Observable<any> {
-    return new Observable(observer => {
-      this.http.post<any>('http://localhost:3333/register', data, { withCredentials: true })
-        .subscribe({
-          next: (response) => {
-            const user = response.data.user;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            this.currentUserSubject.next(user);
-            observer.next(user);
-            observer.complete();
-          },
-          error: (err) => {
-            observer.error(err);
-          }
-        });
-    });
+    return this.http.post<any>('http://localhost:3333/register', data, { withCredentials: true }).pipe(
+      map(response => {
+        const user = response.data.user;
+        this.userCache = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return user;
+      }),
+      catchError(error => {
+        console.error('Registration error:', error);
+        let errorMessage = 'Error al registrar usuario';
+        
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.status === 400) {
+          errorMessage = 'Datos inválidos. Verifica la información proporcionada.';
+        } else if (error.status === 409) {
+          errorMessage = 'El email ya está registrado.';
+        }
+        
+        throw new Error(errorMessage);
+      }),
+      shareReplay(1)
+    );
+  }
+
+  generateAccessCode(email: string): Observable<any> {
+    return this.http.post<any>('http://localhost:3333/access-code', { email }, { withCredentials: true }).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Access code generation error:', error);
+        let errorMessage = 'Error al generar código de acceso';
+        
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.status === 400) {
+          errorMessage = 'Email inválido.';
+        } else if (error.status === 409) {
+          errorMessage = 'El email ya está registrado.';
+        }
+        
+        throw new Error(errorMessage);
+      })
+    );
   }
 
   logout(): void {
+    this.userCache = null;
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.userCache || this.currentUserSubject.value;
   }
 
   isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
+    return this.getCurrentUser() !== null;
   }
 
   hasRole(role: string): boolean {
@@ -175,7 +207,7 @@ export class AuthService {
   }
 
   canCreateHelmet(): boolean {
-    return this.isAdmin();
+    return this.isSupervisor() || this.isAdmin();
   }
 
   canModifyEquipment(): boolean {
@@ -191,8 +223,6 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    // En una implementación real, el token se almacenaría en localStorage o en una cookie
-    // Por ahora, retornamos null ya que el backend maneja la autenticación con cookies
     return null;
   }
 } 

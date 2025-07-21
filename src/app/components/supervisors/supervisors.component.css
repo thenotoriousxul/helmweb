@@ -369,7 +369,7 @@
   backdrop-filter: blur(20px);
   border: 1px solid rgba(100, 255, 218, 0.3);
   border-radius: 16px;
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -461,18 +461,26 @@
 
 /* Access Code Modal Specific Styles */
 .access-code-section {
-  text-align: center;
+  text-align: left;
+  width: 100%;
 }
 
 .supervisor-info-display h4 {
   color: #ccd6f6;
   font-size: 1.3rem;
   margin: 0 0 0.5rem 0;
+  text-align: left;
 }
 
 .supervisor-info-display p {
   color: #8892b0;
   margin: 0 0 2rem 0;
+  text-align: left;
+}
+
+.supervisor-info-display {
+  text-align: left;
+  width: 100%;
 }
 
 .access-code-display label {
@@ -481,31 +489,48 @@
   font-weight: 600;
   margin-bottom: 1rem;
   font-size: 1rem;
+  text-align: left;
+}
+
+.access-code-display {
+  width: 100%;
+  text-align: left;
 }
 
 .code-container {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 1rem;
   justify-content: center;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .access-code {
   background: rgba(100, 255, 218, 0.1);
   border: 2px solid rgba(100, 255, 218, 0.3);
   border-radius: 8px;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem;
   color: #64ffda;
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 500;
   font-family: 'Courier New', monospace;
-  letter-spacing: 2px;
-  min-width: 200px;
+  line-height: 1.6;
+  min-width: 250px;
+  max-width: 100%;
   text-align: center;
-  user-select: all;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  user-select: text;
   cursor: text;
   transition: all 0.3s ease;
+  overflow-wrap: break-word;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  text-indent: 0;
 }
 
 .access-code:hover {
@@ -519,6 +544,27 @@
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 0;
+}
+
+/* Estilos para cuando no hay código de acceso */
+.access-code.no-code {
+  background: rgba(255, 193, 7, 0.1);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+  font-size: 1rem;
+  text-align: center;
+  font-family: inherit;
+  font-weight: 400;
+}
+
+.access-code.error {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  font-size: 1rem;
+  text-align: center;
+  font-family: inherit;
+  font-weight: 400;
 }
 
 /* Responsive Design */
@@ -580,6 +626,25 @@
   
   .access-code {
     min-width: auto;
-    width: 100%;
+    max-width: 100%;
+    font-size: 1rem;
+    padding: 1rem;
+  }
+  
+  .modal-content {
+    max-width: 95vw;
+    margin: 1rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.3rem;
   }
 } 

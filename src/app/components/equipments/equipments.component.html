@@ -12,7 +12,7 @@
         <p>Administra los equipos de minería y sus configuraciones</p>
       </div>
       <div class="header-right">
-        <button class="btn btn-primary" (click)="openCreateModal()">
+        <button class="btn btn-primary" (click)="openCreateModal()" *ngIf="canCreateTeam()">
           <i class="fas fa-plus"></i>
           Nuevo Equipo
         </button>
@@ -41,10 +41,10 @@
           <option value="inactive">Inactivo</option>
         </select>
         
-        <select [(ngModel)]="typeFilter" (change)="onTypeFilterChange()">
-          <option value="all">Todos los Tipos</option>
-          <option *ngFor="let type of getEquipmentTypes()" [value]="type">
-            {{ type }}
+        <select [(ngModel)]="zoneFilter" (change)="onZoneFilterChange()">
+          <option value="all">Todas las Zonas</option>
+          <option *ngFor="let zone of getZones()" [value]="zone">
+            {{ zone }}
           </option>
         </select>
       </div>
@@ -59,7 +59,7 @@
           <i class="fas fa-hard-hat"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ totalEquipments }}</h3>
+          <h3>{{ totalTeams }}</h3>
           <p>Total Equipos</p>
         </div>
       </div>
@@ -69,7 +69,7 @@
           <i class="fas fa-wifi"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ activeEquipments }}</h3>
+          <h3>{{ activeTeams }}</h3>
           <p>Equipos Activos</p>
         </div>
       </div>
@@ -79,7 +79,7 @@
           <i class="fas fa-exclamation-triangle"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ warningEquipments }}</h3>
+          <h3>{{ warningTeams }}</h3>
           <p>Con Advertencias</p>
         </div>
       </div>
@@ -89,19 +89,25 @@
           <i class="fas fa-users"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ totalHelmets }}</h3>
-          <p>Total Cascos</p>
+          <h3>{{ totalMiners }}</h3>
+          <p>Total Mineros</p>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Cargando equipos...</p>
+  </div>
+
   <!-- Equipment Table -->
-  <section class="equipment-table-section">
+  <section class="equipment-table-section" *ngIf="!loading">
     <div class="table-container glass">
       <div class="table-header">
         <h2>Lista de Equipos</h2>
-        <span class="results-count">{{ filteredEquipments.length }} equipos encontrados</span>
+        <span class="results-count">{{ filteredTeams.length }} equipos encontrados</span>
       </div>
       
       <div class="table-responsive">
@@ -109,63 +115,59 @@
           <thead>
             <tr>
               <th>Equipo</th>
-              <th>Tipo</th>
-              <th>Ubicación</th>
+              <th>Zona</th>
               <th>Supervisor</th>
               <th>Estado</th>
-              <th>Cascos</th>
-              <th>Alertas</th>
-              <th>Última Actualización</th>
+              <th>Mineros</th>
+              <th>Fecha Creación</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let equipment of filteredEquipments" class="equipment-row">
+            <tr *ngFor="let team of filteredTeams" class="equipment-row">
               <td class="equipment-name">
                 <div class="name-cell">
-                  <h4>{{ equipment.name }}</h4>
-                  <span class="equipment-id">ID: {{ equipment.id }}</span>
+                  <h4>{{ team.nombre }}</h4>
+                  <span class="equipment-id">ID: {{ team.id }}</span>
                 </div>
               </td>
               <td>
-                <span class="type-badge">{{ equipment.type }}</span>
+                <span class="zone-badge">{{ team.zona }}</span>
               </td>
               <td>
-                <span class="location">
-                  <i class="fas fa-map-marker-alt"></i>
-                  {{ equipment.location }}
-                </span>
-              </td>
-              <td>{{ equipment.supervisor }}</td>
-              <td>
-                <span class="status-badge" [style.background-color]="getStatusColor(equipment.status)">
-                  {{ getStatusText(equipment.status) }}
+                <span class="supervisor-name">
+                  <i class="fas fa-user-tie"></i>
+                  {{ team.supervisor?.fullName || 'Sin asignar' }}
                 </span>
               </td>
               <td>
-                <div class="helmets-info">
-                  <span class="helmets-count">{{ equipment.activeHelmets }}/{{ equipment.totalHelmets }}</span>
-                  <div class="helmets-bar">
-                    <div class="helmets-progress" 
-                         [style.width]="(equipment.activeHelmets / equipment.totalHelmets * 100) + '%'">
+                <span class="status-badge" [style.background-color]="getStatusColor(getTeamStatus(team))">
+                  {{ getStatusText(getTeamStatus(team)) }}
+                </span>
+              </td>
+              <td>
+                <div class="miners-info">
+                  <span class="miners-count">{{ team.mineros?.length || 0 }}/10</span>
+                  <div class="miners-bar">
+                    <div class="miners-progress" 
+                         [style.width]="((team.mineros?.length || 0) / 10 * 100) + '%'">
                     </div>
                   </div>
                 </div>
               </td>
-              <td>
-                <span class="alerts-count" *ngIf="equipment.alerts > 0">{{ equipment.alerts }}</span>
-                <span class="no-alerts" *ngIf="equipment.alerts === 0">-</span>
-              </td>
-              <td>{{ equipment.lastUpdate }}</td>
+              <td>{{ team.createdAt | date:'short' }}</td>
               <td class="actions">
                 <div class="action-buttons">
-                  <button class="btn-icon" (click)="showDetail(equipment)" title="Ver detalle">
+                  <button class="btn-icon" (click)="showDetail(team)" title="Ver detalle">
                     <i class="fas fa-eye"></i>
                   </button>
-                  <button class="btn-icon" (click)="editEquipment(equipment)" title="Editar">
+                  <button class="btn-icon" (click)="editTeam(team)" title="Editar" *ngIf="canModifyTeam()">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn-icon danger" (click)="deleteEquipment(equipment)" title="Eliminar">
+                  <button class="btn-icon" (click)="openAssignMinerModal(team)" title="Asignar minero" *ngIf="canModifyTeam()">
+                    <i class="fas fa-user-plus"></i>
+                  </button>
+                  <button class="btn-icon danger" (click)="deleteTeam(team)" title="Eliminar" *ngIf="canModifyTeam()">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -188,55 +190,27 @@
       </div>
       
       <div class="modal-body">
-        <form (ngSubmit)="createEquipment()">
+        <form (ngSubmit)="createTeam()">
           <div class="form-group">
-            <label for="name">Nombre del Equipo</label>
+            <label for="nombre">Nombre del Equipo</label>
             <input 
               type="text" 
-              id="name"
-              [(ngModel)]="newEquipment.name" 
-              name="name"
+              id="nombre"
+              [(ngModel)]="newTeam.nombre" 
+              name="nombre"
               placeholder="Ej: Equipo Mina Norte"
               required
             >
           </div>
           
           <div class="form-group">
-            <label for="type">Tipo de Equipo</label>
-            <select 
-              id="type"
-              [(ngModel)]="newEquipment.type" 
-              name="type"
-              required
-            >
-              <option value="">Seleccionar tipo</option>
-              <option value="Excavadora">Excavadora</option>
-              <option value="Cargador">Cargador</option>
-              <option value="Camión">Camión</option>
-              <option value="Perforadora">Perforadora</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="location">Ubicación</label>
+            <label for="zona">Zona</label>
             <input 
               type="text" 
-              id="location"
-              [(ngModel)]="newEquipment.location" 
-              name="location"
+              id="zona"
+              [(ngModel)]="newTeam.zona" 
+              name="zona"
               placeholder="Ej: Zona A-12"
-              required
-            >
-          </div>
-          
-          <div class="form-group">
-            <label for="supervisor">Supervisor</label>
-            <input 
-              type="text" 
-              id="supervisor"
-              [(ngModel)]="newEquipment.supervisor" 
-              name="supervisor"
-              placeholder="Nombre del supervisor"
               required
             >
           </div>
@@ -248,6 +222,113 @@
             <button type="submit" class="btn btn-primary">
               <i class="fas fa-plus"></i>
               Crear Equipo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Team Modal -->
+  <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Detalle del Equipo</h3>
+        <button class="close-btn" (click)="closeDetailModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-row"><strong>Nombre:</strong> {{ detailTeamData.nombre }}</div>
+        <div class="detail-row"><strong>Zona:</strong> {{ detailTeamData.zona }}</div>
+        <div class="detail-row"><strong>Supervisor:</strong> {{ detailTeamData.supervisor?.fullName || 'Sin asignar' }}</div>
+        <div class="detail-row"><strong>Mineros:</strong> {{ detailTeamData.mineros?.length || 0 }}</div>
+        <div class="detail-row"><strong>Fecha de creación:</strong> {{ detailTeamData.createdAt | date:'short' }}</div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Team Modal -->
+  <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Editar Equipo</h3>
+        <button class="close-btn" (click)="closeEditModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="saveEditTeam()">
+          <div class="form-group">
+            <label for="editNombre">Nombre</label>
+            <input type="text" id="editNombre" [(ngModel)]="editTeamData.nombre" name="editNombre" required>
+          </div>
+          <div class="form-group">
+            <label for="editZona">Zona</label>
+            <input type="text" id="editZona" [(ngModel)]="editTeamData.zona" name="editZona" required>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i>
+              Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Team Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Eliminar Equipo</h3>
+        <button class="close-btn" (click)="closeDeleteModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que quieres eliminar el equipo <strong>{{ teamToDelete?.nombre }}</strong>?</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="confirmDeleteTeam()">
+            <i class="fas fa-trash"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Miner Modal -->
+  <div class="modal-overlay" *ngIf="showAssignMinerModal" (click)="closeAssignMinerModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Asignar Minero a Equipo</h3>
+        <button class="close-btn" (click)="closeAssignMinerModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="assignMinerToTeam()">
+          <div class="form-group">
+            <label for="selectMiner">Selecciona un minero</label>
+            <select id="selectMiner" [(ngModel)]="selectedMinerId" name="selectMiner" required>
+              <option value="" disabled selected>Selecciona un minero</option>
+              <option *ngFor="let miner of availableMiners" [value]="miner.id">
+                {{ miner.fullName }} ({{ miner.email }})
+              </option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeAssignMinerModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!selectedMinerId">
+              <i class="fas fa-user-plus"></i>
+              Asignar Minero
             </button>
           </div>
         </form>

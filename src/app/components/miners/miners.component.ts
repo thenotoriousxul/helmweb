@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, Miner, Equipment } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
+import { MineroService, Minero, MineroStats } from '../../services/minero.service';
 
 @Component({
   selector: 'app-miners',
@@ -12,130 +13,74 @@ import { AuthService, Miner, Equipment } from '../../services/auth.service';
   styleUrls: ['./miners.component.css']
 })
 export class MinersComponent implements OnInit {
-  miners: Miner[] = [];
-  filteredMiners: Miner[] = [];
+  miners: Minero[] = [];
+  filteredMiners: Minero[] = [];
   searchTerm = '';
   statusFilter = 'all';
   showCreateModal = false;
-  newMiner: Partial<Miner> = {};
+  newMiner: Partial<Minero> = {};
+  showEditModal = false;
+  editMinerData: Partial<Minero> = {};
+  showDetailModal = false;
+  detailMinerData: Partial<Minero> = {};
   currentUser: any = null;
+  minerStats: MineroStats = {
+    totalMiners: 0,
+    activeMiners: 0,
+    inactiveMiners: 0,
+    avgAge: 0
+  };
 
   constructor(
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private mineroService: MineroService,
+    private cdr: ChangeDetectorRef
   ) {
     this.currentUser = this.authService.getCurrentUser();
   }
 
   ngOnInit() {
     this.loadMiners();
+    this.loadStats();
   }
 
   // Propiedades computadas para estadísticas
   get totalMiners(): number {
-    return this.miners.length;
+    return this.minerStats.totalMiners;
   }
 
-  get onlineMiners(): number {
-    return this.miners.filter(m => m.status === 'online').length;
+  get activeMiners(): number {
+    return this.minerStats.activeMiners;
   }
 
-  get alertMiners(): number {
-    return this.miners.filter(m => m.status === 'alert').length;
+  get inactiveMiners(): number {
+    return this.minerStats.inactiveMiners;
   }
 
-  get minersWithHelmet(): number {
-    return this.miners.filter(m => m.helmetId).length;
+  get avgAge(): number {
+    return this.minerStats.avgAge;
   }
 
   loadMiners() {
-    // Simular datos de mineros
-    this.miners = [
-      {
-        id: '1',
-        name: 'Carlos',
-        lastName: 'Mendoza',
-        email: 'carlos.mendoza@helmmining.com',
-        birthDate: '1985-03-15',
-        hireDate: '2020-01-15',
-        phone: '+52 55 1234 5678',
-        rfc: 'MEMC850315ABC',
-        address: {
-          country: 'México',
-          state: 'Sonora',
-          city: 'Hermosillo',
-          neighborhood: 'Centro',
-          street: 'Revolución',
-          number: '123',
-          zipCode: '83000'
-        },
-        photo: 'CM',
-        helmetId: '1',
-        teamId: '1',
-        supervisorId: '1',
-        status: 'online'
+    this.mineroService.getAllMiners().subscribe({
+      next: (miners) => {
+        this.miners = miners;
+        this.filteredMiners = [...miners];
+        
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
       },
-      {
-        id: '2',
-        name: 'Ana',
-        lastName: 'Rodríguez',
-        email: 'ana.rodriguez@helmmining.com',
-        birthDate: '1990-07-22',
-        hireDate: '2021-03-10',
-        phone: '+52 55 9876 5432',
-        rfc: 'ROAA900722DEF',
-        address: {
-          country: 'México',
-          state: 'Sonora',
-          city: 'Hermosillo',
-          neighborhood: 'San Benito',
-          street: 'Independencia',
-          number: '456',
-          zipCode: '83100'
-        },
-        photo: 'AR',
-        helmetId: '2',
-        teamId: '1',
-        supervisorId: '1',
-        status: 'online'
-      },
-      {
-        id: '3',
-        name: 'Miguel',
-        lastName: 'Torres',
-        email: 'miguel.torres@helmmining.com',
-        birthDate: '1988-11-08',
-        hireDate: '2019-08-20',
-        phone: '+52 55 5555 1234',
-        rfc: 'TOMM881108GHI',
-        address: {
-          country: 'México',
-          state: 'Sonora',
-          city: 'Hermosillo',
-          neighborhood: 'Pitic',
-          street: 'Morelos',
-          number: '789',
-          zipCode: '83200'
-        },
-        photo: 'MT',
-        helmetId: '3',
-        teamId: '1',
-        supervisorId: '1',
-        status: 'alert'
+      error: (error) => {
+        console.error('MinersComponent: Error al cargar mineros:', error);
       }
-    ];
+    });
+  }
 
-    // Filtrar según el rol del usuario
-    if (this.authService.isMinero()) {
-      // Minero solo ve su información
-      this.miners = this.miners.filter(miner => miner.id === this.currentUser?.id);
-    } else if (this.authService.isSupervisor()) {
-      // Supervisor ve solo los mineros de sus equipos
-      this.miners = this.miners.filter(miner => miner.supervisorId === this.currentUser?.id);
-    }
-    // Admin ve todos los mineros
-
-    this.filteredMiners = [...this.miners];
+  loadStats() {
+    this.mineroService.getMineroStats().subscribe((stats: MineroStats) => {
+      this.minerStats = stats;
+    });
   }
 
   onSearchChange() {
@@ -148,7 +93,7 @@ export class MinersComponent implements OnInit {
 
   filterMiners() {
     this.filteredMiners = this.miners.filter(miner => {
-      const fullName = `${miner.name} ${miner.lastName}`.toLowerCase();
+      const fullName = miner.fullName.toLowerCase();
       const matchesSearch = fullName.includes(this.searchTerm.toLowerCase()) ||
                            miner.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
                            miner.rfc.toLowerCase().includes(this.searchTerm.toLowerCase());
@@ -176,20 +121,59 @@ export class MinersComponent implements OnInit {
     }
   }
 
-  showDetail(miner: Miner) {
-    // Implementar navegación al detalle del minero
-    console.log('Ver detalle del minero:', miner);
+  showDetail(miner: Minero) {
+    this.openDetailModal(miner.id);
   }
 
-  editMiner(miner: Miner) {
-    // Implementar edición del minero
-    console.log('Editar minero:', miner);
+  openDetailModal(id: string) {
+    this.mineroService.getMineroById(id).subscribe({
+      next: (data) => {
+        this.detailMinerData = data;
+        this.showDetailModal = true;
+      },
+      error: (err) => {
+        alert('No se pudo obtener el detalle del minero.');
+      }
+    });
   }
 
-  deleteMiner(miner: Miner) {
+  closeDetailModal() {
+    this.showDetailModal = false;
+    this.detailMinerData = {};
+  }
+
+  editMiner(miner: Minero) {
+    this.openEditModal(miner);
+  }
+
+  openEditModal(miner: Minero) {
+    this.editMinerData = { ...miner };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editMinerData = {};
+  }
+
+  saveEditMiner() {
+    if (this.editMinerData.id) {
+      this.mineroService.updateMinero(this.editMinerData.id, this.editMinerData).subscribe(() => {
+        this.mineroService.clearCache(); // Limpiar cache para mostrar datos actualizados
+        this.loadMiners();
+        this.loadStats();
+        this.closeEditModal();
+      });
+    }
+  }
+
+  deleteMiner(miner: Minero) {
     if (confirm('¿Estás seguro de que quieres eliminar este minero?')) {
-      // Implementar eliminación del minero
-      console.log('Eliminar minero:', miner);
+      this.mineroService.deleteMinero(miner.id).subscribe(() => {
+        this.mineroService.clearCache(); // Limpiar cache para mostrar datos actualizados
+        this.loadMiners();
+        this.loadStats();
+      });
     }
   }
 
@@ -204,33 +188,24 @@ export class MinersComponent implements OnInit {
   }
 
   createMiner() {
-    if (this.newMiner.name && this.newMiner.lastName && this.newMiner.email) {
-      const newMiner: Miner = {
-        id: (this.miners.length + 1).toString(),
-        name: this.newMiner.name,
-        lastName: this.newMiner.lastName,
-        email: this.newMiner.email,
-        birthDate: this.newMiner.birthDate || '',
-        hireDate: this.newMiner.hireDate,
-        phone: this.newMiner.phone || '',
-        rfc: this.newMiner.rfc || '',
-        address: this.newMiner.address || {
-          country: '',
-          state: '',
-          city: '',
-          neighborhood: '',
-          street: '',
-          number: '',
-          zipCode: ''
+    if (this.newMiner.fullName && this.newMiner.email) {
+      console.log('Creando minero con datos:', this.newMiner);
+      this.mineroService.createMinero(this.newMiner).subscribe({
+        next: (response) => {
+          console.log('Minero creado exitosamente:', response);
+          this.mineroService.clearCache(); // Limpiar cache para mostrar datos actualizados
+          this.closeCreateModal();
+          // Forzar recarga completa de datos
+          setTimeout(() => {
+            this.loadMiners();
+            this.loadStats();
+          }, 100);
         },
-        photo: `${this.newMiner.name?.charAt(0)}${this.newMiner.lastName?.charAt(0)}`,
-        supervisorId: this.currentUser?.id || '',
-        status: 'offline'
-      };
-
-      this.miners.push(newMiner);
-      this.filteredMiners = [...this.miners];
-      this.closeCreateModal();
+        error: (error) => {
+          console.error('Error al crear minero:', error);
+          alert('Error al crear el minero. Por favor, inténtalo de nuevo.');
+        }
+      });
     }
   }
 
@@ -255,8 +230,8 @@ export class MinersComponent implements OnInit {
     ];
   }
 
-  getFullAddress(miner: Miner): string {
-    const addr = miner.address;
-    return `${addr.street} ${addr.number}, ${addr.neighborhood}, ${addr.city}, ${addr.state}, ${addr.country} ${addr.zipCode}`;
+  getFullAddress(miner: Minero): string {
+    // Since address is a string in the Minero interface, just return it as is
+    return miner.address || 'Sin dirección';
   }
 } 
