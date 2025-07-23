@@ -109,7 +109,7 @@
           <button type="submit" class="btn btn-secondary" [disabled]="minerForm.invalid">Registrar Minero</button>
         </form>
         <div *ngIf="equipment?.mineros?.length; else sinMineros">
-          <div class="minero-card" *ngFor="let tm of equipment.mineros">
+          <div class="minero-card" *ngFor="let tm of equipment?.mineros">
             <div class="minero-info">
               <span class="minero-nombre">{{ tm.minero?.fullName || 'Sin nombre' }}</span>
               <span class="minero-email" *ngIf="tm.minero?.email">({{ tm.minero?.email }})</span>
