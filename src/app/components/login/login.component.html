@@ -2,7 +2,7 @@
   <div class="login-card glass">
     <div class="login-header">
       <div class="logo">
-        <h1>Helm<span class="accent">IoT</span></h1>
+        <h1><a (click)="goToLanding()" class="logo-link">Helm<span class="accent"></span></a></h1>
       </div>
       <p>Inicia sesión en tu cuenta</p>
     </div>
@@ -64,48 +64,13 @@
       </button>
     </form>
 
-    <!-- Botones de prueba para desarrollo -->
-    <!-- Eliminado: demo-buttons y demo-buttons-grid -->
-
     <div class="login-footer">
-      <button 
-        type="button" 
-        class="btn btn-link"
-        (click)="clearForm()"
-      >
-        <i class="fas fa-eraser"></i>
-        Limpiar Formulario
-      </button>
+      <p class="register-link">¿No tienes una cuenta? <a (click)="goToRegister()" class="accent-link">Regístrate</a></p>
     </div>
-  </div>
 
-  <!-- Información adicional -->
-  <div class="login-info">
-    <div class="info-card glass">
-      <h3>Roles del Sistema</h3>
-      <div class="role-info">
-        <div class="role-item">
-          <i class="fas fa-user-shield"></i>
-          <div>
-            <strong>Administrador</strong>
-            <p>Gestión completa del sistema, creación de cascos</p>
-          </div>
-        </div>
-        <div class="role-item">
-          <i class="fas fa-user-tie"></i>
-          <div>
-            <strong>Supervisor</strong>
-            <p>Gestión de equipos y mineros, activación de cascos</p>
-          </div>
-        </div>
-        <div class="role-item">
-          <i class="fas fa-hard-hat"></i>
-          <div>
-            <strong>Minero</strong>
-            <p>Vista limitada, solo su equipo y datos personales</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
+
+
+  
+
+  

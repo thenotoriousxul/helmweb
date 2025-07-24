@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError, shareReplay } from 'rxjs/operators';
 
@@ -116,6 +116,15 @@ export class AuthService {
         this.currentUserSubject.next(user);
         return user;
       }),
+      catchError(error => {
+        let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.status === 401) {
+          errorMessage = 'Credenciales incorrectas.';
+        }
+        return throwError(() => new Error(errorMessage));
+      }),
       shareReplay(1)
     );
   }
@@ -132,16 +141,20 @@ export class AuthService {
       catchError(error => {
         console.error('Registration error:', error);
         let errorMessage = 'Error al registrar usuario';
-        
+        // Si el backend responde con un objeto { message: ... }
         if (error.error?.message) {
           errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          // Si el backend responde con un string plano
+          errorMessage = error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
         } else if (error.status === 400) {
           errorMessage = 'Datos inválidos. Verifica la información proporcionada.';
         } else if (error.status === 409) {
           errorMessage = 'El email ya está registrado.';
         }
-        
-        throw new Error(errorMessage);
+        return throwError(() => new Error(errorMessage));
       }),
       shareReplay(1)
     );

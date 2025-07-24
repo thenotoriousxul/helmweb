@@ -16,10 +16,10 @@
 }
 
 .header-left h1 {
+  margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #ccd6f6;
-  margin: 0.5rem 0;
+  color: #ffffff;
 }
 
 .breadcrumbs {

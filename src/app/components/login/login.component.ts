@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -24,7 +24,8 @@ export class LoginComponent {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   onSubmit() {
@@ -52,7 +53,10 @@ export class LoginComponent {
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+        this.errorMessage =
+          (error && (error.message || error.error?.message)) ||
+          'Error al iniciar sesión. Verifica tus credenciales.';
+        this.cdr.detectChanges();
         console.error('Error de login:', error);
       }
     });
@@ -87,5 +91,13 @@ export class LoginComponent {
       password: ''
     };
     this.errorMessage = '';
+  }
+
+  goToRegister() {
+    this.router.navigate(['/register']);
+  }
+
+  goToLanding() {
+    this.router.navigate(['/']);
   }
 } 

@@ -37,11 +37,14 @@ interface UserProfile {
   template: `
     <div class="dashboard-container">
       <!-- Sidebar -->
-      <aside class="sidebar">
+      <aside class="sidebar" [class.open]="sidebarOpen">
         <div class="sidebar-header">
           <div class="logo">
-            <h2>Helm<span class="accent">IoT</span></h2>
+            <h2>Helm</h2>
           </div>
+          <button class="close-btn" (click)="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
         </div>
         
         <nav class="sidebar-nav">
@@ -117,12 +120,6 @@ interface UserProfile {
               </a>
             </li>
             
-            <li class="nav-item" [class.active]="activeSidebarItem === 'settings'">
-              <a (click)="setActiveSidebarItem('settings')">
-                <i class="fas fa-cog"></i>
-                <span>Configuración</span>
-              </a>
-            </li>
           </ul>
         </nav>
         
@@ -160,7 +157,11 @@ interface UserProfile {
       </aside>
 
       <!-- Main Content -->
-      <main class="main-content">
+      <main class="main-content" [class.sidebar-closed]="!sidebarOpen">
+        <!-- Hamburger Menu Button -->
+        <button class="hamburger-btn" *ngIf="!sidebarOpen" (click)="openSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
         <router-outlet></router-outlet>
       </main>
     </div>
@@ -288,6 +289,7 @@ export class LayoutComponent implements OnInit {
   activeSidebarItem = 'dashboard';
   showProfileDropdown = false;
   showPasswordModal = false;
+  sidebarOpen = true;
   passwordData = {
     currentPassword: '',
     newPassword: '',
@@ -302,6 +304,18 @@ export class LayoutComponent implements OnInit {
   ngOnInit() {
     this.loadUserProfile();
     this.setActiveSidebarItemFromRoute();
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar() {
+    this.sidebarOpen = false;
+  }
+
+  openSidebar() {
+    this.sidebarOpen = true;
   }
 
   loadUserProfile() {
@@ -329,8 +343,6 @@ export class LayoutComponent implements OnInit {
       this.activeSidebarItem = 'alerts';
     } else if (currentRoute.includes('/reports')) {
       this.activeSidebarItem = 'reports';
-    } else if (currentRoute.includes('/settings')) {
-      this.activeSidebarItem = 'settings';
     } else if (currentRoute.includes('/profile')) {
       this.activeSidebarItem = 'profile';
     }
@@ -364,9 +376,6 @@ export class LayoutComponent implements OnInit {
         break;
       case 'reports':
         this.router.navigate(['/reports']);
-        break;
-      case 'settings':
-        this.router.navigate(['/settings']);
         break;
       case 'profile':
         this.router.navigate(['/profile']);

@@ -25,14 +25,37 @@
   gap: 1rem;
 }
 
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #8892b0;
+}
+
+.breadcrumb-item {
+  color: #8892b0;
+}
+
+.breadcrumb-item.active {
+  color: #64ffda;
+}
+
+.breadcrumbs i {
+  font-size: 0.8rem;
+}
+
 .header-left h1 {
-  font-size: 2.5rem;
+  margin: 0;
+  font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #64ffda 0%, #00d4aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
 }
 
 .header-left p {

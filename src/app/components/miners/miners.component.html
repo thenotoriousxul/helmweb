@@ -3,6 +3,11 @@
   <header class="page-header">
     <div class="header-content">
       <div class="header-left">
+        <div class="breadcrumbs">
+          <span class="breadcrumb-item">Dashboard</span>
+          <i class="fas fa-chevron-right"></i>
+          <span class="breadcrumb-item active">Mineros</span>
+        </div>
         <h1>Gestión de Mineros</h1>
         <p *ngIf="authService.isMinero()">Tu información personal y sensores</p>
         <p *ngIf="!authService.isMinero()">Administra y monitorea todos los mineros</p>
@@ -108,9 +113,6 @@
               <span class="miner-email">{{ miner.email }}</span>
               <span class="miner-rfc">{{ miner.rfc || 'RFC no especificado' }}</span>
             </div>
-          </div>
-          <div class="status-badge" [style.background-color]="getStatusColor(miner.status)">
-            {{ getStatusText(miner.status) }}
           </div>
         </div>
         

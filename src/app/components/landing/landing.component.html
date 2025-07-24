@@ -1,3 +1,6 @@
+<app-splash-screen *ngIf="showSplash" (animationDone)="onSplashDone()"></app-splash-screen>
+<div *ngIf="!showSplash" class="landing-background">
+<ng-container class="fade-in-content">
 <!-- Header -->
 <header class="header">
   <div class="container">
@@ -38,22 +41,160 @@
       </div>
       <div class="hero-visual">
         <div class="hero-image glass">
-          <div class="mockup-phone">
+          <div class="mockup-phone iphone">
+            <div class="iphone-notch">
+              <div class="notch-camera"></div>
+              <div class="notch-speaker"></div>
+            </div>
+            <div class="iphone-btn iphone-btn-left"></div>
+            <div class="iphone-btn iphone-btn-right"></div>
             <div class="phone-screen">
               <div class="app-preview">
                 <div class="status-bar">
-                  <span class="status-dot active"></span>
-                  <span class="status-dot active"></span>
-                  <span class="status-dot active"></span>
                 </div>
                 <div class="dashboard-preview">
-                  <div class="sensor-widget temp">
-                    <span class="sensor-value">36.5°C</span>
+                  <div class="sensor-widget temp" [class.expanded]="expandedSensor === 'temperature'" (click)="toggleSensor('temperature')">
+                    <span class="sensor-value" [class.changing]="temperature !== displayedTemperature">{{ displayedTemperature | number:'1.1-1' }}°C</span>
                     <span class="sensor-label">Temperatura</span>
+                    
+                    <!-- Datos expandidos de temperatura -->
+                    <div class="sensor-details" *ngIf="expandedSensor === 'temperature'">
+                      <div class="detail-row">
+                        <span class="detail-label">Promedio:</span>
+                        <span class="detail-value">{{ getSensorData('temperature')?.average }}°C</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Mín/Máx:</span>
+                        <span class="detail-value">{{ getSensorData('temperature')?.min }}°C / {{ getSensorData('temperature')?.max }}°C</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Tendencia:</span>
+                        <span class="detail-value trend">{{ getSensorData('temperature')?.trend }}</span>
+                      </div>
+                      <!-- Mini gráfico -->
+                      <div class="mini-chart">
+                        <svg width="80" height="20" viewBox="0 0 100 30">
+                          <polyline 
+                            [attr.points]="getTemperatureChartPoints()"
+                            fill="none" 
+                            stroke="#64ffda" 
+                            stroke-width="1.5"
+                          />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
-                  <div class="sensor-widget movement">
-                    <span class="sensor-value">Normal</span>
+                  
+                  <div class="sensor-widget movement" [class.expanded]="expandedSensor === 'movement'" (click)="toggleSensor('movement')">
+                    <span class="sensor-value" [class.changing]="movement !== lastMovement">{{ movement }}</span>
                     <span class="sensor-label">Movimiento</span>
+                    
+                    <!-- Datos expandidos de movimiento -->
+                    <div class="sensor-details" *ngIf="expandedSensor === 'movement'">
+                      <div class="detail-row">
+                        <span class="detail-label">Normal:</span>
+                        <span class="detail-value">{{ getSensorData('movement')?.normalPercentage }}%</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Alertas:</span>
+                        <span class="detail-value">{{ getSensorData('movement')?.alerts }}</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Última alerta:</span>
+                        <span class="detail-value">{{ getSensorData('movement')?.lastAlert }}</span>
+                      </div>
+                      <!-- Gráfico de estado -->
+                      <div class="status-chart">
+                        <div class="status-bar">
+                          <div class="status-fill normal" [style.width.%]="getSensorData('movement')?.normalPercentage"></div>
+                          <div class="status-fill alert" [style.width.%]="100 - (getSensorData('movement')?.normalPercentage || 0)"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="sensor-widget gps" [class.expanded]="expandedSensor === 'gps'" (click)="toggleSensor('gps')">
+                    <span class="sensor-value">GPS</span>
+                    <span class="sensor-label">Ubicación</span>
+                    
+                    <!-- Datos expandidos de GPS -->
+                    <div class="sensor-details" *ngIf="expandedSensor === 'gps'">
+                      <div class="detail-row">
+                        <span class="detail-label">Distancia:</span>
+                        <span class="detail-value">{{ getSensorData('gps')?.distance }}m</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Velocidad:</span>
+                        <span class="detail-value">{{ getSensorData('gps')?.speed }}m/s</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Zona:</span>
+                        <span class="detail-value">{{ getSensorData('gps')?.zone }}</span>
+                      </div>
+                      <!-- Mapa expandido -->
+                      <div class="expanded-map">
+                        <svg width="100" height="60" viewBox="0 0 100 100">
+                          <rect x="5" y="5" width="90" height="90" rx="12" fill="#172a45" stroke="#3df4f4" stroke-width="1.5"/>
+                          <!-- Ruta del GPS -->
+                          <polyline 
+                            [attr.points]="getGpsChartPoints()"
+                            fill="none" 
+                            stroke="rgba(100,255,218,0.3)" 
+                            stroke-width="0.8"
+                          />
+                          <circle [attr.cx]="displayedGps.x" [attr.cy]="displayedGps.y" r="3" fill="#3df4f4" stroke="#fff" stroke-width="1.5"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="sensor-widget environmental" [class.expanded]="expandedSensor === 'environmental'" (click)="toggleSensor('environmental')">
+                    <span class="sensor-value">Ambiental</span>
+                    <span class="sensor-label">Presión/Humedad</span>
+                    
+                    <!-- Datos expandidos ambientales -->
+                    <div class="sensor-details" *ngIf="expandedSensor === 'environmental'">
+                      <div class="detail-row">
+                        <span class="detail-label">Presión:</span>
+                        <span class="detail-value">1013 hPa</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Humedad:</span>
+                        <span class="detail-value">65%</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Estado:</span>
+                        <span class="detail-value">Óptimo</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="sensor-widget battery" [class.expanded]="expandedSensor === 'battery'" (click)="toggleSensor('battery')">
+                    <span class="sensor-value">85%</span>
+                    <span class="sensor-label">Batería</span>
+                    
+                    <!-- Datos expandidos de batería -->
+                    <div class="sensor-details" *ngIf="expandedSensor === 'battery'">
+                      <div class="detail-row">
+                        <span class="detail-label">Tiempo restante:</span>
+                        <span class="detail-value">32h</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Estado:</span>
+                        <span class="detail-value">Cargando</span>
+                      </div>
+                      <div class="detail-row">
+                        <span class="detail-label">Ciclos:</span>
+                        <span class="detail-value">127</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                
+                  
+                  <!-- Home Bar del iPhone -->
+                  <div class="home-bar">
+                    <div class="home-indicator"></div>
                   </div>
                 </div>
               </div>
@@ -72,52 +213,19 @@
       <p>Tecnología avanzada para la seguridad minera</p>
     </div>
     <div class="features-grid">
-      <div class="feature-card glass fade-in">
-        <div class="feature-icon temp">
-          <i class="fas fa-thermometer-half"></i>
+      <div class="feature-card glass fade-in flip-card" *ngFor="let f of features" tabindex="0"
+           [class.flipped]="f.toggled" (click)="f.toggled = !f.toggled" (keydown.enter)="f.toggled = !f.toggled">
+        <div class="flip-card-inner">
+          <div class="card-front">
+            <div class="feature-icon" [ngClass]="f.iconType">
+              <i [class]="f.iconClass"></i>
         </div>
-        <h3>Monitoreo de Temperatura</h3>
-        <p>Control en tiempo real de la temperatura corporal de cada minero con alertas automáticas.</p>
+            <h3>{{ f.title }}</h3>
       </div>
-      
-      <div class="feature-card glass fade-in">
-        <div class="feature-icon movement">
-          <i class="fas fa-running"></i>
-        </div>
-        <h3>Detección de Movimiento</h3>
-        <p>Sensores de acelerómetro que detectan caídas y movimientos anómalos instantáneamente.</p>
+          <div class="card-back">
+            <p>{{ f.description }}</p>
       </div>
-      
-      <div class="feature-card glass fade-in">
-        <div class="feature-icon gps">
-          <i class="fas fa-map-marker-alt"></i>
         </div>
-        <h3>Rastreo GPS</h3>
-        <p>Ubicación precisa de cada minero en tiempo real con geofencing inteligente.</p>
-      </div>
-      
-      <div class="feature-card glass fade-in">
-        <div class="feature-icon pressure">
-          <i class="fas fa-tachometer-alt"></i>
-        </div>
-        <h3>Monitoreo Ambiental</h3>
-        <p>Control de presión atmosférica y humedad para condiciones óptimas de trabajo.</p>
-      </div>
-      
-      <div class="feature-card glass fade-in">
-        <div class="feature-icon battery">
-          <i class="fas fa-battery-three-quarters"></i>
-        </div>
-        <h3>Batería de Larga Duración</h3>
-        <p>Hasta 48 horas de autonomía con alertas de batería baja y carga rápida.</p>
-      </div>
-      
-      <div class="feature-card glass fade-in">
-        <div class="feature-icon analytics">
-          <i class="fas fa-chart-line"></i>
-        </div>
-        <h3>Analytics Avanzados</h3>
-        <p>Reportes detallados y análisis predictivo para optimizar la seguridad.</p>
       </div>
     </div>
   </div>
@@ -133,36 +241,169 @@
     <div class="testimonials-grid">
       <div class="testimonial-card glass fade-in">
         <div class="testimonial-content">
-          <p>" ha reducido nuestros incidentes en un 85%. La detección temprana de problemas de salud ha salvado vidas."</p>
+          <p>" Helm ha reducido nuestros incidentes en un 85%. La detección temprana de problemas de salud ha salvado vidas en nuestras operaciones mineras de oro y plata."</p>
         </div>
         <div class="testimonial-author">
           <div class="author-info">
             <h4>Carlos Mendoza</h4>
-            <span>Gerente de Seguridad, Minera del Norte</span>
+            <span>Gerente de Seguridad, Industrias Peñoles</span>
           </div>
         </div>
       </div>
       
       <div class="testimonial-card glass fade-in">
         <div class="testimonial-content">
-          <p>"La implementación fue sencilla y el ROI se vio en los primeros 3 meses. Nuestros mineros se sienten más seguros."</p>
+          <p>"La implementación fue sencilla y el ROI se vio en los primeros 3 meses. Nuestros mineros en la refinería de oro se sienten más seguros."</p>
         </div>
         <div class="testimonial-author">
           <div class="author-info">
             <h4>Ana Rodríguez</h4>
-            <span>Directora de Operaciones, CobreMax</span>
+            <span>Directora de Operaciones, Industrias Peñoles Torreón</span>
           </div>
         </div>
       </div>
       
       <div class="testimonial-card glass fade-in">
         <div class="testimonial-content">
-          <p>"El sistema de alertas nos permite responder inmediatamente a emergencias. Es como tener un guardián digital."</p>
+          <p>"El sistema de alertas nos permite responder inmediatamente a emergencias en nuestras operaciones de zinc y plomo. Es como tener un guardián digital."</p>
         </div>
         <div class="testimonial-author">
           <div class="author-info">
             <h4>Miguel Torres</h4>
-            <span>Superintendente, OroVerde</span>
+            <span>Superintendente, Industrias Peñoles</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="testimonial-card glass fade-in">
+        <div class="testimonial-content">
+          <p>"Con Helm hemos logrado cero accidentes fatales en 18 meses. La tecnología predictiva es revolucionaria para nuestros proyectos mineros."</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-info">
+            <h4>Laura Sánchez</h4>
+            <span>CEO, Fimsa</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="testimonial-card glass fade-in">
+        <div class="testimonial-content">
+          <p>"Los reportes en tiempo real nos han permitido optimizar nuestras operaciones de distribución de equipos mineros y mejorar la productividad en un 40%."</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-info">
+            <h4>Roberto Jiménez</h4>
+            <span>Director Técnico, Fimsa</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="testimonial-card glass fade-in">
+        <div class="testimonial-content">
+          <p>"La batería de larga duración y la conectividad confiable han sido clave para operaciones en minas remotas. Helm complementa perfectamente nuestros equipos de seguridad."</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-info">
+            <h4>Patricia López</h4>
+            <span>Gerente de Proyectos, Importaciones y Equipos Mineros</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="contact">
+  <div class="container">
+    <div class="section-header">
+      <h2>Contáctanos</h2>
+      <p>¿Listo para revolucionar la seguridad minera? Conecta con nosotros</p>
+    </div>
+    <div class="contact-content">
+      <div class="contact-card glass fade-in">
+        <div class="contact-icon-large">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <h3>Email Directo</h3>
+        <p>proyectohelm0[at]gmail.com</p>
+        <a href="mailto:proyectohelm0@gmail.com" class="contact-action-btn">
+          <i class="fas fa-paper-plane"></i>
+          Enviar Email
+        </a>
+      </div>
+      
+      <div class="contact-card glass fade-in">
+        <div class="contact-icon-large">
+          <i class="fas fa-phone"></i>
+        </div>
+        <h3>Línea Directa</h3>
+        <p>Horario: Lunes a Viernes 9:00 AM - 6:00 PM</p>
+        <button class="contact-action-btn" (click)="openPhoneModal()">
+          <i class="fas fa-phone"></i>
+          Ver Números
+        </button>
+      </div>
+      
+      <div class="contact-card glass fade-in">
+        <div class="contact-icon-large">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <h3>Ubicación</h3>
+        <p>Universidad Tecnológica de Torreón</p>
+        <button class="contact-action-btn" (click)="openLocation()">
+          <i class="fas fa-directions"></i>
+          Ver en Mapa
+        </button>
+      </div>
+    </div>
+    
+    <!-- Modal de Teléfonos -->
+    <div class="phone-modal" *ngIf="showPhoneModal" (click)="closePhoneModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Números de Contacto</h3>
+          <button class="close-btn" (click)="closePhoneModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="phone-list">
+          <div class="phone-item">
+            <div class="phone-icon">
+              <i class="fas fa-phone"></i>
+            </div>
+            <div class="phone-info">
+              <h4>Teléfono Principal</h4>
+              <p>+52 871 200 4633</p>
+            </div>
+            <a href="tel:+52 871 178 0114" class="call-btn">
+              <i class="fas fa-phone"></i>
+            </a>
+          </div>
+          <div class="phone-item">
+            <div class="phone-icon">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="phone-info">
+              <h4>WhatsApp</h4>
+              <p>+52 871 507 1756</p>
+            </div>
+            <a href="https://wa.me/528715071756" class="call-btn whatsapp">
+              <i class="fab fa-whatsapp"></i>
+            </a>
+          </div>
+          <div class="phone-item">
+            <div class="phone-icon">
+              <i class="fas fa-building"></i>
+            </div>
+            <div class="phone-info">
+              <h4>Oficina</h4>
+              <p>+52 871 178 0114</p>
+            </div>
+            <a href="tel:+528711780114" class="call-btn">
+              <i class="fas fa-phone"></i>
+            </a>
           </div>
         </div>
       </div>
@@ -208,3 +449,4 @@
     </div>
   </div>
 </footer> 
+</ng-container> 
