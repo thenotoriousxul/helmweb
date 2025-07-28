@@ -26,7 +26,8 @@ export class SupervisorsComponent implements OnInit {
   showAccessCodeModal = false;
   selectedSupervisor: SupervisorWithAccessCode | null = null;
   newSupervisor: Partial<SupervisorWithAccessCode> = {};
-  generatedAccessCode = '';
+  generatedAccessCode = 'Cargando...';
+  unusedAccessCodes: Array<{email: string, code: string, createdAt: string, status: string}> = [];
 
   constructor(
     private router: Router,
@@ -42,6 +43,7 @@ export class SupervisorsComponent implements OnInit {
       // Verificar si el usuario es admin
       if (this.authService.isAdmin()) {
         this.loadSupervisors();
+        this.loadUnusedAccessCodes();
       } else {
         alert('No tienes permisos para acceder a esta sección');
         this.router.navigate(['/dashboard']);
@@ -117,17 +119,27 @@ export class SupervisorsComponent implements OnInit {
       // Llamar a la API para generar el código de acceso
       const response: any = await firstValueFrom(this.supervisorService.generateAccessCode(this.newSupervisor.email));
 
-      const accessCode = response.data.codigo;
+      console.log('Respuesta completa del servidor:', response);
+      console.log('response.data:', response.data);
+      
+      const accessCode = response.data.code || response.data.codigo;
+      console.log('Código extraído:', accessCode);
       
       this.closeCreateModal();
       
       // Mostrar el código generado en el modal
-      this.generatedAccessCode = accessCode;
+      this.generatedAccessCode = accessCode ? `Código: ${accessCode}\n\nEstado: No usado\nGenerado: ${new Date().toLocaleDateString()}` : 'Código generado exitosamente';
+      console.log('generatedAccessCode final:', this.generatedAccessCode);
       this.showAccessCodeModal = true;
+      
+      // Forzar la detección de cambios
+      this.cdr.detectChanges();
       
       // Recargar la lista de supervisores para mostrar el nuevo supervisor si ya se registró
       this.loadSupervisors();
+      this.loadUnusedAccessCodes();
     } catch (error: any) {
+      console.error('Error completo:', error);
       const errorMessage = error.error?.message || error.message || 'Error desconocido';
       alert('Error al generar código de acceso: ' + errorMessage);
     }
@@ -138,6 +150,7 @@ export class SupervisorsComponent implements OnInit {
   showAccessCode(supervisor: SupervisorWithAccessCode) {
     this.selectedSupervisor = supervisor;
     this.showAccessCodeModal = true;
+    this.generatedAccessCode = 'Cargando código de acceso...';
     
     // Obtener el código de acceso del supervisor
     this.supervisorService.getAccessCodeByEmail(supervisor.email).subscribe({
@@ -186,14 +199,24 @@ export class SupervisorsComponent implements OnInit {
       // Llamar a la API para generar el código de acceso
       const response: any = await firstValueFrom(this.supervisorService.generateAccessCode(this.selectedSupervisor.email));
 
-      const accessCode = response.data.codigo;
+      console.log('Respuesta completa del servidor (generateNewCode):', response);
+      console.log('response.data (generateNewCode):', response.data);
+      
+      const accessCode = response.data.code || response.data.codigo;
+      console.log('Código extraído (generateNewCode):', accessCode);
       
       // Mostrar el código generado en el modal
-      this.generatedAccessCode = `Código: ${accessCode}\n\nEstado: No usado\nGenerado: ${new Date().toLocaleDateString()}`;
+      this.generatedAccessCode = accessCode ? `Código: ${accessCode}\n\nEstado: No usado\nGenerado: ${new Date().toLocaleDateString()}` : 'Error al generar código';
+      console.log('generatedAccessCode final (generateNewCode):', this.generatedAccessCode);
+      
+      // Forzar la detección de cambios
+      this.cdr.detectChanges();
       
       // Recargar la lista de supervisores
       this.loadSupervisors();
+      this.loadUnusedAccessCodes();
     } catch (error: any) {
+      console.error('Error completo (generateNewCode):', error);
       const errorMessage = error.error?.message || error.message || 'Error desconocido';
       alert('Error al generar código de acceso: ' + errorMessage);
     }
@@ -222,7 +245,7 @@ export class SupervisorsComponent implements OnInit {
   }
 
   copyToClipboard() {
-    if (this.generatedAccessCode) {
+    if (this.generatedAccessCode && this.generatedAccessCode !== 'Cargando...' && this.generatedAccessCode !== 'Cargando código de acceso...') {
       // Extraer solo el código de la información completa
       const codeMatch = this.generatedAccessCode.match(/Código: ([A-F0-9]+)/);
       const codeToCopy = codeMatch ? codeMatch[1] : this.generatedAccessCode;
@@ -232,7 +255,23 @@ export class SupervisorsComponent implements OnInit {
       }).catch(() => {
         alert('Error al copiar al portapapeles');
       });
+    } else {
+      alert('No hay código disponible para copiar');
     }
+  }
+
+  copyCodeToClipboard(code: string) {
+    navigator.clipboard.writeText(code).then(() => {
+      alert('Código copiado al portapapeles');
+    }).catch(() => {
+      alert('Error al copiar al portapapeles');
+    });
+  }
+
+  resendCode(email: string) {
+    // Aquí puedes implementar la lógica para reenviar el código
+    // Por ahora solo mostraremos un mensaje
+    alert(`Reenviando código de acceso a ${email}`);
   }
 
   checkAccessCodes() {
@@ -249,6 +288,32 @@ export class SupervisorsComponent implements OnInit {
       },
       error: (error) => {
         alert('Error al obtener códigos de acceso');
+      }
+    });
+  }
+
+  // Método para obtener códigos de acceso no usados
+  loadUnusedAccessCodes() {
+    this.supervisorService.getAllAccessCodes().subscribe({
+      next: (response: any) => {
+        if (response.data && response.data.length > 0) {
+          // Filtrar solo códigos no usados
+          const unusedCodes = response.data.filter((code: any) => !code.usado);
+          this.unusedAccessCodes = unusedCodes.map((code: any) => ({
+            email: code.correoSupervisor,
+            code: code.codigo,
+            createdAt: code.createdAt,
+            status: 'No usado'
+          }));
+        } else {
+          this.unusedAccessCodes = [];
+        }
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al obtener códigos de acceso:', error);
+        this.unusedAccessCodes = [];
+        this.cdr.detectChanges();
       }
     });
   }

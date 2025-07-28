@@ -515,22 +515,29 @@
   font-weight: 600;
   margin-bottom: 1rem;
   font-size: 1rem;
-  text-align: left;
+  text-align: center;
 }
 
 .access-code-display {
   width: 100%;
-  text-align: left;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .code-container {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 1rem;
   justify-content: center;
   margin-bottom: 1rem;
   width: 100%;
+}
+
+.code-container .btn {
+  align-self: center;
 }
 
 .access-code {
@@ -552,11 +559,14 @@
   cursor: text;
   transition: all 0.3s ease;
   overflow-wrap: break-word;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   box-sizing: border-box;
   margin: 0;
   text-indent: 0;
+  min-height: 80px;
 }
 
 .access-code:hover {
@@ -570,6 +580,7 @@
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 0;
+  text-align: center;
 }
 
 /* Estilos para cuando no hay código de acceso */
@@ -591,6 +602,126 @@
   text-align: center;
   font-family: inherit;
   font-weight: 400;
+}
+
+/* Unused Access Codes Section */
+.unused-codes-section {
+  margin-bottom: 2rem;
+}
+
+.unused-codes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.code-card {
+  background: rgba(17, 34, 64, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.code-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.code-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.code-email {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ccd6f6;
+  font-weight: 500;
+}
+
+.code-email i {
+  color: #64ffda;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.code-details {
+  padding: 1rem;
+}
+
+.code-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.code-item:last-child {
+  border-bottom: none;
+}
+
+.code-label {
+  color: #8892b0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.code-value {
+  color: #64ffda;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.no-codes-message {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  color: #8892b0;
+}
+
+.empty-state h3 {
+  color: #ccd6f6;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.empty-state p {
+  color: #8892b0;
+  font-size: 1rem;
+  margin: 0;
+  max-width: 400px;
 }
 
 /* Responsive Design */
@@ -648,6 +779,7 @@
   
   .code-container {
     flex-direction: column;
+    align-items: center;
   }
   
   .access-code {
@@ -655,6 +787,15 @@
     max-width: 100%;
     font-size: 1rem;
     padding: 1rem;
+    text-align: center;
+  }
+  
+  .unused-codes-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .code-card {
+    margin-bottom: 1rem;
   }
   
   .modal-content {

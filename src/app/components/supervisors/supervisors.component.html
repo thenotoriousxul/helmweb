@@ -131,6 +131,67 @@
     </div>
   </section>
 
+  <!-- Unused Access Codes Section -->
+  <section class="unused-codes-section">
+    <div class="section-header">
+      <h2>Códigos de Acceso Pendientes</h2>
+      <div class="results-count">
+        {{ unusedAccessCodes.length }} códigos pendientes
+      </div>
+    </div>
+
+    <div class="unused-codes-grid" *ngIf="unusedAccessCodes.length > 0">
+      <div class="code-card" *ngFor="let accessCode of unusedAccessCodes">
+        <div class="card-header">
+          <div class="code-info">
+            <div class="code-email">
+              <i class="fas fa-envelope"></i>
+              <span>{{ accessCode.email }}</span>
+            </div>
+            <div class="code-status">
+              <span class="status-badge pending">
+                <i class="fas fa-clock"></i>
+                {{ accessCode.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="code-details">
+            <div class="code-item">
+              <span class="code-label">Código:</span>
+              <span class="code-value">{{ accessCode.code }}</span>
+            </div>
+            <div class="code-item">
+              <span class="code-label">Fecha Generado:</span>
+              <span class="code-value">{{ accessCode.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <button class="btn btn-secondary" (click)="copyCodeToClipboard(accessCode.code)">
+            <i class="fas fa-copy"></i>
+            Copiar Código
+          </button>
+          <button class="btn btn-primary" (click)="resendCode(accessCode.email)">
+            <i class="fas fa-paper-plane"></i>
+            Reenviar
+          </button>
+        </div>
+      </div>
+    </div>
+
+             <div class="no-codes-message" *ngIf="unusedAccessCodes.length === 0">
+           <div class="empty-state">
+             <i class="fas fa-key"></i>
+             <h3>No hay códigos pendientes</h3>
+             <p>Todos los códigos de acceso han sido utilizados o no hay códigos generados.</p>
+           </div>
+         </div>
+  </section>
+
   <!-- Create Supervisor Modal -->
   <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
     <div class="modal-content glass" (click)="$event.stopPropagation()">
@@ -193,13 +254,13 @@
             <label>Información del Código de Acceso:</label>
             <div class="code-container">
               <pre class="access-code" 
-                   [class.no-code]="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró')"
-                   [class.error]="generatedAccessCode.includes('Error al obtener')">
+                   [class.no-code]="generatedAccessCode?.includes('no tiene un código') || generatedAccessCode?.includes('No se encontró')"
+                   [class.error]="generatedAccessCode?.includes('Error al obtener')">
                 {{ generatedAccessCode }}
               </pre>
               <button class="btn btn-secondary" 
                       (click)="copyToClipboard()"
-                      [disabled]="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró') || generatedAccessCode.includes('Error al obtener')">
+                      [disabled]="generatedAccessCode?.includes('no tiene un código') || generatedAccessCode?.includes('No se encontró') || generatedAccessCode?.includes('Error al obtener')">
                 <i class="fas fa-copy"></i>
                 Copiar Código
               </button>
@@ -216,7 +277,7 @@
           <button type="button" 
                   class="btn btn-secondary" 
                   (click)="generateNewCode()"
-                  *ngIf="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró')">
+                  *ngIf="generatedAccessCode?.includes('no tiene un código') || generatedAccessCode?.includes('No se encontró')">
             <i class="fas fa-plus"></i>
             Generar Nuevo Código
           </button>
