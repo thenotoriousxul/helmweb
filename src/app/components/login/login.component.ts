@@ -37,18 +37,36 @@ export class LoginComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
+    console.log('Iniciando login con:', this.loginData.email);
+
     this.authService.login(this.loginData.email, this.loginData.password).subscribe({
       next: (user) => {
         this.isLoading = false;
         console.log('Usuario logueado:', user);
+        console.log('Rol del usuario:', user.role);
         
         // Redirigir según el rol
         if (user.role === 'admin') {
-          this.router.navigate(['/dashboard']);
+          console.log('Redirigiendo admin a dashboard');
+          this.router.navigate(['/dashboard']).then(() => {
+            console.log('Navegación completada para admin');
+          }).catch(err => {
+            console.error('Error en navegación para admin:', err);
+          });
         } else if (user.role === 'supervisor') {
-          this.router.navigate(['/dashboard']);
+          console.log('Redirigiendo supervisor a dashboard');
+          this.router.navigate(['/dashboard']).then(() => {
+            console.log('Navegación completada para supervisor');
+          }).catch(err => {
+            console.error('Error en navegación para supervisor:', err);
+          });
         } else if (user.role === 'minero') {
-          this.router.navigate(['/dashboard']);
+          console.log('Redirigiendo minero a dashboard');
+          this.router.navigate(['/dashboard']).then(() => {
+            console.log('Navegación completada para minero');
+          }).catch(err => {
+            console.error('Error en navegación para minero:', err);
+          });
         }
       },
       error: (error) => {

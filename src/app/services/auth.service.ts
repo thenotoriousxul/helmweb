@@ -108,15 +108,20 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<any> {
+    console.log('AuthService: Iniciando login para:', email);
     return this.http.post<any>('http://localhost:3333/login', { email, password }, { withCredentials: true }).pipe(
       map(response => {
+        console.log('AuthService: Respuesta del servidor:', response);
         const user = response.data.user;
+        console.log('AuthService: Usuario extraído:', user);
         this.userCache = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
         this.currentUserSubject.next(user);
+        console.log('AuthService: Usuario guardado en cache y localStorage');
         return user;
       }),
       catchError(error => {
+        console.error('AuthService: Error en login:', error);
         let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
         if (error.error?.message) {
           errorMessage = error.error.message;

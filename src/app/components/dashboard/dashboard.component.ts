@@ -135,9 +135,12 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('Dashboard: ngOnInit iniciado');
     this.currentUser = this.authService.getCurrentUser();
+    console.log('Dashboard: Usuario actual:', this.currentUser);
     this.loadDashboardData();
     this.filteredEquipments = [...this.equipments];
+    console.log('Dashboard: Componente inicializado correctamente');
   }
 
   loadDashboardData() {

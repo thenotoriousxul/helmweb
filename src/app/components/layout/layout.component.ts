@@ -302,8 +302,10 @@ export class LayoutComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('Layout: ngOnInit iniciado');
     this.loadUserProfile();
     this.setActiveSidebarItemFromRoute();
+    console.log('Layout: Componente inicializado correctamente');
   }
 
   toggleSidebar() {
