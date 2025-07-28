@@ -12,7 +12,32 @@
         <li><a href="#features">Características</a></li>
         <li><a href="#testimonials">Casos de Éxito</a></li>
         <li><a href="#contact">Contacto</a></li>
-        <li><a (click)="showLogin()" class="btn btn-secondary">Iniciar Sesión</a></li>
+        
+        <!-- Opciones para usuarios no autenticados -->
+        <li *ngIf="!isAuthenticated">
+          <a (click)="showLogin()" class="btn btn-secondary">Iniciar Sesión</a>
+        </li>
+        
+        <!-- Opciones para usuarios autenticados -->
+        <li *ngIf="isAuthenticated" class="user-menu">
+          <div class="user-dropdown">
+            <button class="user-btn">
+              <i class="fas fa-user"></i>
+              <span>{{ authService.getCurrentUser()?.fullName || 'Usuario' }}</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu">
+              <a (click)="goToDashboard()">
+                <i class="fas fa-tachometer-alt"></i>
+                Panel Principal
+              </a>
+              <a (click)="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+              </a>
+            </div>
+          </div>
+        </li>
       </ul>
     </nav>
   </div>

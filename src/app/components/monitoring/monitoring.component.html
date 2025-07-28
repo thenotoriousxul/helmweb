@@ -3,12 +3,7 @@
   <header class="page-header">
     <div class="header-content">
       <div class="header-left">
-        <div class="breadcrumbs">
-          <span class="breadcrumb-item">Dashboard</span>
-          <i class="fas fa-chevron-right"></i>
-          <span class="breadcrumb-item active">Monitoreo</span>
-        </div>
-        <h1>Gestión de Monitoreo</h1>
+        <h1>Monitoreo en Tiempo Real</h1>
         <p *ngIf="authService.isMinero()">Estado de tu casco y sensores</p>
         <p *ngIf="!authService.isMinero()">Monitoreo de sensores y ubicación GPS</p>
       </div>

@@ -48,58 +48,40 @@ Proteger a los mineros mediante tecnología de vanguardia, proporcionando monito
 - **Botones de acceso rápido** para pruebas (Supervisor, Minero, Admin)
 - **Información de roles** del sistema
 
-### **3. 📊 Dashboard (`/dashboard`)**
-- **Estadísticas en tiempo real** según el rol:
-  - **Admin**: Total equipos, cascos, supervisores, alertas
-  - **Supervisor**: Sus equipos, cascos activos, alertas
-  - **Minero**: Su equipo, casco, frecuencia cardíaca, temperatura
-- **Filtros de búsqueda** por equipos y ubicaciones
-- **Grid de equipos** con estado y alertas
-- **Métricas clave** de seguridad
-
-### **4. 🗺️ Monitoreo (`/monitoring`)**
-- **Mapa GPS interactivo** con ubicaciones en tiempo real
-- **Datos de sensores** (temperatura, frecuencia cardíaca, acelerómetro)
-- **Estado de cascos** con nivel de batería y última comunicación
-- **Alertas activas** con diferentes niveles de severidad
-- **Filtros** por sensor y minero
-- **Panel lateral** con ubicaciones GPS
-- **Múltiples capas** de mapa (calles, satélite, terreno)
-
-### **5. 🏭 Gestión de Equipos (`/equipments`)**
+### **3. 📊 Equipos (`/equipments`)**
 - **Lista de equipos** de minería con estados
 - **Creación de nuevos equipos** (nombre, tipo, ubicación, supervisor)
 - **Edición y eliminación** de equipos
 - **Estadísticas** por equipo (cascos activos, alertas)
 - **Filtros avanzados** por tipo y estado
 
-### **6. 🪖 Gestión de Cascos (`/helmets`)**
+### **4. 🪖 Gestión de Cascos (`/helmets`)**
 - **Inventario de cascos** IoT
 - **Asignación** a mineros
 - **Estado de batería** y conectividad
 - **Configuración** de sensores
 - **Historial** de uso
 
-### **7. 👷 Gestión de Mineros (`/miners`)**
+### **5. 👷 Gestión de Mineros (`/miners`)**
 - **Registro de mineros** con datos personales completos
 - **Asignación de cascos** y equipos
 - **Información de contacto** y dirección
 - **Estado** (online/offline/alert)
 - **Historial médico** básico
 
-### **8. 📈 Reportes (`/reports`)**
+### **6. 📈 Reportes (`/reports`)**
 - **Generación de reportes** de seguridad
 - **Análisis de datos** históricos
 - **Exportación** de información
 - **Gráficos** y estadísticas
 
-### **9. 🚨 Alertas (`/alerts`)**
+### **7. 🚨 Alertas (`/alerts`)**
 - **Sistema de notificaciones** en tiempo real
 - **Diferentes tipos** de alertas (críticas, advertencias)
 - **Historial** de alertas
 - **Configuración** de umbrales
 
-### **10. ⚙️ Configuración (`/settings`)**
+### **8. ⚙️ Configuración (`/settings`)**
 - **Configuración del sistema**
 - **Preferencias de usuario**
 - **Configuración de notificaciones**
@@ -305,7 +287,6 @@ Esta paleta crea una experiencia visual moderna, profesional y tecnológica que 
 - **Integración con IA** para predicción de incidentes
 - **App móvil** nativa
 - **API REST** para integraciones
-- **Dashboard ejecutivo** con KPIs
 - **Sistema de chat** interno
 - **Notificaciones push** avanzadas
 - **Integración con wearables** adicionales

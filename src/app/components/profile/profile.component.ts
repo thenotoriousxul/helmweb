@@ -31,11 +31,6 @@ interface UserProfile {
     <header class="page-header">
       <div class="header-content">
         <div class="header-left">
-          <div class="breadcrumbs">
-            <span class="breadcrumb-item">Dashboard</span>
-            <i class="fas fa-chevron-right"></i>
-            <span class="breadcrumb-item active">Perfil</span>
-          </div>
           <h1>Mi Perfil</h1>
           <p>Gestiona tu información personal y preferencias</p>
         </div>

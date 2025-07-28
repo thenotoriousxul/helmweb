@@ -3,11 +3,6 @@
   <header class="page-header">
     <div class="header-content">
       <div class="header-left">
-        <div class="breadcrumbs">
-          <span class="breadcrumb-item">Dashboard</span>
-          <i class="fas fa-chevron-right"></i>
-          <span class="breadcrumb-item active">Mineros</span>
-        </div>
         <h1>Gestión de Mineros</h1>
         <p *ngIf="authService.isMinero()">Tu información personal y sensores</p>
         <p *ngIf="!authService.isMinero()">Administra y monitorea todos los mineros</p>
@@ -109,9 +104,9 @@
       <h3>Acceso Restringido</h3>
       <p>{{ permissionErrorMessage }}</p>
       <div class="error-actions">
-        <button class="btn btn-primary" (click)="goToDashboard()">
+        <button class="btn btn-primary" (click)="goBack()">
           <i class="fas fa-arrow-left"></i>
-          Volver al Dashboard
+          Volver a Equipos
         </button>
       </div>
     </div>

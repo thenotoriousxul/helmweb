@@ -46,7 +46,7 @@ export class SupervisorsComponent implements OnInit {
         this.loadUnusedAccessCodes();
       } else {
         alert('No tienes permisos para acceder a esta sección');
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/equipments']);
       }
     } else {
       this.router.navigate(['/login']);
@@ -75,7 +75,7 @@ export class SupervisorsComponent implements OnInit {
           this.router.navigate(['/login']);
         } else if (error.status === 403) {
           alert('No tienes permisos para ver supervisores. Se requieren permisos de administrador.');
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/equipments']);
         } else {
           alert('Error al cargar la lista de supervisores: ' + (error.error?.message || error.message || 'Error desconocido'));
         }

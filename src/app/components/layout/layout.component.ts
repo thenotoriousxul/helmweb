@@ -49,13 +49,6 @@ interface UserProfile {
         
         <nav class="sidebar-nav">
           <ul class="nav-list">
-            <li class="nav-item" [class.active]="activeSidebarItem === 'dashboard'">
-              <a (click)="setActiveSidebarItem('dashboard')">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>{{ authService.isMinero() ? 'Mi Dashboard' : 'Dashboard' }}</span>
-              </a>
-            </li>
-            
             <!-- Opciones para Admin -->
             <li class="nav-item" 
                 [class.active]="activeSidebarItem === 'supervisors'"
@@ -286,7 +279,7 @@ export class LayoutComponent implements OnInit {
     avatar: ''
   };
 
-  activeSidebarItem = 'dashboard';
+  activeSidebarItem = 'equipments'; // Changed default to equipments
   showProfileDropdown = false;
   showPasswordModal = false;
   sidebarOpen = true;
@@ -329,9 +322,7 @@ export class LayoutComponent implements OnInit {
 
   setActiveSidebarItemFromRoute() {
     const currentRoute = this.router.url;
-    if (currentRoute.includes('/dashboard')) {
-      this.activeSidebarItem = 'dashboard';
-    } else if (currentRoute.includes('/supervisors')) {
+    if (currentRoute.includes('/supervisors')) {
       this.activeSidebarItem = 'supervisors';
     } else if (currentRoute.includes('/equipments')) {
       this.activeSidebarItem = 'equipments';
@@ -347,6 +338,9 @@ export class LayoutComponent implements OnInit {
       this.activeSidebarItem = 'reports';
     } else if (currentRoute.includes('/profile')) {
       this.activeSidebarItem = 'profile';
+    } else {
+      // Default redirect to equipments if no specific route is active
+      this.router.navigate(['/equipments']);
     }
   }
 

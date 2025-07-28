@@ -47,22 +47,22 @@ export class LoginComponent {
         
         // Redirigir según el rol
         if (user.role === 'admin') {
-          console.log('Redirigiendo admin a dashboard');
-          this.router.navigate(['/dashboard']).then(() => {
+          console.log('Redirigiendo admin a equipments');
+          this.router.navigate(['/equipments']).then(() => {
             console.log('Navegación completada para admin');
           }).catch(err => {
             console.error('Error en navegación para admin:', err);
           });
         } else if (user.role === 'supervisor') {
-          console.log('Redirigiendo supervisor a dashboard');
-          this.router.navigate(['/dashboard']).then(() => {
+          console.log('Redirigiendo supervisor a equipments');
+          this.router.navigate(['/equipments']).then(() => {
             console.log('Navegación completada para supervisor');
           }).catch(err => {
             console.error('Error en navegación para supervisor:', err);
           });
         } else if (user.role === 'minero') {
-          console.log('Redirigiendo minero a dashboard');
-          this.router.navigate(['/dashboard']).then(() => {
+          console.log('Redirigiendo minero a equipments');
+          this.router.navigate(['/equipments']).then(() => {
             console.log('Navegación completada para minero');
           }).catch(err => {
             console.error('Error en navegación para minero:', err);

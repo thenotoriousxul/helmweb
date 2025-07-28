@@ -271,7 +271,7 @@ export class MinersComponent implements OnInit {
     return 'No tienes permisos para acceder a esta sección.';
   }
 
-  goToDashboard() {
-    this.router.navigate(['/dashboard']);
+  goBack() {
+    this.router.navigate(['/equipments']);
   }
 } 

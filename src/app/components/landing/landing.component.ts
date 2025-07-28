@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SplashScreenComponent } from '../splash-screen/splash-screen.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-landing',
@@ -21,9 +22,12 @@ export class LandingComponent implements OnInit, OnDestroy {
   private gpsDirection = 1;
   private animationFrameId: any;
   private movementIntervalId: any;
+  private authSubscription: any;
   showSplash = true;
   expandedSensor: string | null = null;
   showPhoneModal = false;
+  isAuthenticated = false;
+  userRole = '';
   sensorHistory = {
     temperature: [36.5, 36.8, 37.1, 36.9, 37.2, 36.7, 37.0, 36.6, 37.3, 36.8],
     movement: ['Normal', 'Movimiento', 'Normal', 'Caída', 'Normal', 'Inactivo', 'Normal', 'Movimiento', 'Normal', 'Caída'],
@@ -75,9 +79,21 @@ export class LandingComponent implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private router: Router, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private router: Router, 
+    private cdr: ChangeDetectorRef,
+    public authService: AuthService
+  ) {}
 
   ngOnInit() {
+    // Verificar estado de autenticación
+    this.checkAuthStatus();
+    
+    // Suscribirse a cambios de autenticación
+    this.authSubscription = this.authService.currentUser$.subscribe(() => {
+      this.checkAuthStatus();
+    });
+    
     if (sessionStorage.getItem('helmSplashShown')) {
       this.showSplash = false;
     }
@@ -108,12 +124,36 @@ export class LandingComponent implements OnInit, OnDestroy {
     }, 2000);
   }
 
+  checkAuthStatus() {
+    this.isAuthenticated = this.authService.isAuthenticated();
+    if (this.isAuthenticated) {
+      const user = this.authService.getCurrentUser();
+      this.userRole = user?.role || '';
+    }
+  }
+
   showLogin() {
-    this.router.navigate(['/login']);
+    if (!this.isAuthenticated) {
+      this.router.navigate(['/login']);
+    }
   }
 
   showRegister() {
-    this.router.navigate(['/register']);
+    if (!this.isAuthenticated) {
+      this.router.navigate(['/register']);
+    }
+  }
+
+  goToDashboard() {
+    if (this.isAuthenticated) {
+      this.router.navigate(['/equipments']);
+    }
+  }
+
+  logout() {
+    this.authService.logout();
+    this.checkAuthStatus();
+    this.router.navigate(['/']);
   }
 
   onSplashDone() {
@@ -205,5 +245,6 @@ export class LandingComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
     if (this.movementIntervalId) clearInterval(this.movementIntervalId);
+    if (this.authSubscription) this.authSubscription.unsubscribe();
   }
 } 
