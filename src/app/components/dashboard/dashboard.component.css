@@ -236,6 +236,60 @@
   font-size: 0.9rem;
 }
 
+/* Loading State */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: #8892b0;
+}
+
+.loading-spinner i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #3df4f4;
+}
+
+.loading-spinner p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.empty-content {
+  text-align: center;
+  color: #8892b0;
+}
+
+.empty-content i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  color: #3df4f4;
+}
+
+.empty-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.empty-content p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
 .equipment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));

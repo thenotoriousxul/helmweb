@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError, shareReplay } from 'rxjs/operators';
+import { AuthService } from './auth.service';
 
 export interface Minero {
   id: string;
@@ -34,14 +35,17 @@ export class MineroService {
   private minersCache$: Observable<Minero[]> | null = null;
   private statsCache$: Observable<MineroStats> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Obtiene todos los mineros con cache
    */
   getAllMiners(): Observable<Minero[]> {
     if (!this.minersCache$) {
-      this.minersCache$ = this.http.get<any>(`${this.apiUrl}/mineros`, { withCredentials: true }).pipe(
+      // Determinar el endpoint basado en el rol del usuario
+      const endpoint = this.authService.isSupervisor() ? '/supervisor/mineros' : '/mineros';
+      
+      this.minersCache$ = this.http.get<any>(`${this.apiUrl}${endpoint}`, { withCredentials: true }).pipe(
         map(response => {
           return (response.data || []).map((item: any) => ({
             id: item.id,
@@ -137,7 +141,10 @@ export class MineroService {
    */
   getMineroStats(): Observable<MineroStats> {
     if (!this.statsCache$) {
-      this.statsCache$ = this.http.get<any>(`${this.apiUrl}/mineros/stats`, { withCredentials: true }).pipe(
+      // Determinar el endpoint basado en el rol del usuario
+      const endpoint = this.authService.isSupervisor() ? '/supervisor/mineros/stats' : '/mineros/stats';
+      
+      this.statsCache$ = this.http.get<any>(`${this.apiUrl}${endpoint}`, { withCredentials: true }).pipe(
         map(response => response.data),
         catchError(error => {
           console.error('Error fetching miner stats:', error);

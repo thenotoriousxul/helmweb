@@ -3,23 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../services/auth.service';
-
-interface Equipment {
-  id: string;
-  name: string;
-  totalHelmets: number;
-  activeHelmets: number;
-  status: 'active' | 'inactive' | 'warning';
-  alerts: number;
-  miners: Array<{
-    id: string;
-    name: string;
-    avatar: string;
-    status: 'online' | 'offline' | 'alert';
-  }>;
-  location: string;
-  lastUpdate: string;
-}
+import { DashboardService, DashboardStats, TeamData } from '../../services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,108 +14,27 @@ interface Equipment {
 })
 export class DashboardComponent implements OnInit {
   currentUser: User | null = null;
-  equipments: Equipment[] = [
-    {
-      id: '1',
-      name: 'Equipo Mina Norte',
-      totalHelmets: 45,
-      activeHelmets: 42,
-      status: 'active',
-      alerts: 2,
-      location: 'Zona A-12',
-      lastUpdate: '2 min',
-      miners: [
-        { id: '1', name: 'Carlos M.', avatar: 'CM', status: 'online' },
-        { id: '2', name: 'Ana R.', avatar: 'AR', status: 'online' },
-        { id: '3', name: 'Miguel T.', avatar: 'MT', status: 'alert' }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Equipo Mina Sur',
-      totalHelmets: 38,
-      activeHelmets: 35,
-      status: 'active',
-      alerts: 1,
-      location: 'Zona B-8',
-      lastUpdate: '5 min',
-      miners: [
-        { id: '4', name: 'Luis P.', avatar: 'LP', status: 'online' },
-        { id: '5', name: 'María G.', avatar: 'MG', status: 'online' },
-        { id: '6', name: 'Roberto S.', avatar: 'RS', status: 'offline' }
-      ]
-    },
-    {
-      id: '3',
-      name: 'Equipo Mina Este',
-      totalHelmets: 52,
-      activeHelmets: 48,
-      status: 'warning',
-      alerts: 5,
-      location: 'Zona C-15',
-      lastUpdate: '1 min',
-      miners: [
-        { id: '7', name: 'Elena V.', avatar: 'EV', status: 'alert' },
-        { id: '8', name: 'Diego H.', avatar: 'DH', status: 'online' },
-        { id: '9', name: 'Sofia L.', avatar: 'SL', status: 'alert' }
-      ]
-    },
-    {
-      id: '4',
-      name: 'Equipo Mina Oeste',
-      totalHelmets: 29,
-      activeHelmets: 25,
-      status: 'inactive',
-      alerts: 0,
-      location: 'Zona D-3',
-      lastUpdate: '15 min',
-      miners: [
-        { id: '10', name: 'Pedro M.', avatar: 'PM', status: 'offline' },
-        { id: '11', name: 'Carmen F.', avatar: 'CF', status: 'offline' },
-        { id: '12', name: 'Jorge A.', avatar: 'JA', status: 'offline' }
-      ]
-    },
-    {
-      id: '5',
-      name: 'Equipo Mina Central',
-      totalHelmets: 41,
-      activeHelmets: 39,
-      status: 'active',
-      alerts: 1,
-      location: 'Zona E-7',
-      lastUpdate: '3 min',
-      miners: [
-        { id: '13', name: 'Isabel C.', avatar: 'IC', status: 'online' },
-        { id: '14', name: 'Fernando R.', avatar: 'FR', status: 'online' },
-        { id: '15', name: 'Patricia M.', avatar: 'PM', status: 'alert' }
-      ]
-    },
-    {
-      id: '6',
-      name: 'Equipo Mina Profunda',
-      totalHelmets: 33,
-      activeHelmets: 30,
-      status: 'active',
-      alerts: 3,
-      location: 'Zona F-22',
-      lastUpdate: '4 min',
-      miners: [
-        { id: '16', name: 'Ricardo B.', avatar: 'RB', status: 'online' },
-        { id: '17', name: 'Lucía N.', avatar: 'LN', status: 'alert' },
-        { id: '18', name: 'Alberto K.', avatar: 'AK', status: 'online' }
-      ]
-    }
-  ];
-
-  filteredEquipments: Equipment[] = [];
+  isLoading = true;
+  equipments: TeamData[] = [];
+  filteredEquipments: TeamData[] = [];
   searchTerm = '';
   statusFilter = 'all';
-
-
+  dashboardStats: DashboardStats = {
+    totalTeams: 0,
+    totalHelmets: 0,
+    activeHelmets: 0,
+    totalAlerts: 0,
+    totalSupervisors: 0,
+    helmetsWithSupervisor: 0,
+    helmetsWithoutMiner: 0,
+    totalMiners: 0,
+    activeMiners: 0
+  };
 
   constructor(
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit() {
@@ -139,20 +42,35 @@ export class DashboardComponent implements OnInit {
     this.currentUser = this.authService.getCurrentUser();
     console.log('Dashboard: Usuario actual:', this.currentUser);
     this.loadDashboardData();
-    this.filteredEquipments = [...this.equipments];
+    this.isLoading = false;
     console.log('Dashboard: Componente inicializado correctamente');
   }
 
   loadDashboardData() {
-    // Filtrar datos según el rol del usuario
-    if (this.authService.isMinero()) {
-      // Minero solo ve su equipo específico (simulado - equipo 1)
-      this.equipments = this.equipments.filter(equipment => equipment.id === '1');
-    } else if (this.authService.isSupervisor()) {
-      // Supervisor ve equipos específicos (simulado - equipos 2 y 3)
-      this.equipments = this.equipments.filter(equipment => ['2', '3'].includes(equipment.id));
-    }
-    // Admin ve todos los equipos por defecto (no se filtra)
+    // Cargar estadísticas del dashboard
+    this.dashboardService.getDashboardStats().subscribe({
+      next: (stats) => {
+        this.dashboardStats = stats;
+        console.log('Dashboard stats loaded:', stats);
+      },
+      error: (error) => {
+        console.error('Error loading dashboard stats:', error);
+      }
+    });
+
+    // Cargar datos de equipos
+    this.dashboardService.getTeamsData().subscribe({
+      next: (teams) => {
+        this.equipments = teams;
+        this.filteredEquipments = [...teams];
+        console.log('Teams data loaded:', teams);
+      },
+      error: (error) => {
+        console.error('Error loading teams data:', error);
+        this.equipments = [];
+        this.filteredEquipments = [];
+      }
+    });
   }
 
   onSearchChange() {
@@ -200,32 +118,7 @@ export class DashboardComponent implements OnInit {
   }
 
   getTotalStats() {
-    if (this.authService.isAdmin()) {
-      return {
-        totalEquipments: this.equipments.length,
-        totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
-        activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
-        totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0),
-        totalSupervisors: 3, // Simulado
-        helmetsWithSupervisor: 120, // Simulado
-        helmetsWithoutMiner: 15 // Simulado
-      };
-    } else if (this.authService.isSupervisor()) {
-      return {
-        totalEquipments: this.equipments.length,
-        totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
-        activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
-        totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0)
-      };
-    } else {
-      // Minero
-      return {
-        totalEquipments: this.equipments.length,
-        totalHelmets: this.equipments.reduce((sum, eq) => sum + eq.totalHelmets, 0),
-        activeHelmets: this.equipments.reduce((sum, eq) => sum + eq.activeHelmets, 0),
-        totalAlerts: this.equipments.reduce((sum, eq) => sum + eq.alerts, 0)
-      };
-    }
+    return this.dashboardStats;
   }
 
   getDashboardTitle(): string {
@@ -256,7 +149,7 @@ export class DashboardComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
-  showDetail(equipment: Equipment) {
+  showDetail(equipment: TeamData) {
     this.router.navigate(['/equipment-detail', equipment.id]);
   }
 
@@ -265,5 +158,18 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  hasEquipmentData(): boolean {
+    return this.filteredEquipments.length > 0;
+  }
 
+  getEmptyStateMessage(): string {
+    if (this.searchTerm || this.statusFilter !== 'all') {
+      return 'No se encontraron equipos con los filtros aplicados.';
+    }
+    return 'No hay equipos disponibles en este momento.';
+  }
+
+  navigateToEquipments() {
+    this.router.navigate(['/equipments']);
+  }
 } 

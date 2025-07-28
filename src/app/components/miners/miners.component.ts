@@ -24,6 +24,9 @@ export class MinersComponent implements OnInit {
   showDetailModal = false;
   detailMinerData: Partial<Minero> = {};
   currentUser: any = null;
+  isLoading = true;
+  hasPermissionError = false;
+  permissionErrorMessage = '';
   minerStats: MineroStats = {
     totalMiners: 0,
     activeMiners: 0,
@@ -63,23 +66,43 @@ export class MinersComponent implements OnInit {
   }
 
   loadMiners() {
+    this.isLoading = true;
+    this.hasPermissionError = false;
+    
     this.mineroService.getAllMiners().subscribe({
       next: (miners) => {
         this.miners = miners;
         this.filteredMiners = [...miners];
+        this.isLoading = false;
         
         // Forzar detección de cambios
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('MinersComponent: Error al cargar mineros:', error);
+        this.isLoading = false;
+        
+        if (error.status === 403) {
+          this.hasPermissionError = true;
+          this.permissionErrorMessage = 'No tienes permisos para ver la lista de mineros. Solo los administradores pueden acceder a esta sección.';
+        } else {
+          this.permissionErrorMessage = 'Error al cargar los mineros. Por favor, intenta de nuevo.';
+        }
+        
+        this.cdr.detectChanges();
       }
     });
   }
 
   loadStats() {
-    this.mineroService.getMineroStats().subscribe((stats: MineroStats) => {
-      this.minerStats = stats;
+    this.mineroService.getMineroStats().subscribe({
+      next: (stats: MineroStats) => {
+        this.minerStats = stats;
+      },
+      error: (error) => {
+        console.error('MinersComponent: Error al cargar estadísticas:', error);
+        // No mostrar error de permisos para stats ya que loadMiners ya lo maneja
+      }
     });
   }
 
@@ -233,5 +256,22 @@ export class MinersComponent implements OnInit {
   getFullAddress(miner: Minero): string {
     // Since address is a string in the Minero interface, just return it as is
     return miner.address || 'Sin dirección';
+  }
+
+  hasAdminPermissions(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  getPermissionMessage(): string {
+    if (this.authService.isSupervisor()) {
+      return 'Como supervisor, solo puedes ver los mineros de tus equipos asignados.';
+    } else if (this.authService.isMinero()) {
+      return 'Como minero, no tienes acceso a la gestión de otros mineros.';
+    }
+    return 'No tienes permisos para acceder a esta sección.';
+  }
+
+  goToDashboard() {
+    this.router.navigate(['/dashboard']);
   }
 } 

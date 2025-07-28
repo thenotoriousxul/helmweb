@@ -254,13 +254,13 @@
             <label>Información del Código de Acceso:</label>
             <div class="code-container">
               <pre class="access-code" 
-                   [class.no-code]="generatedAccessCode?.includes('no tiene un código') || generatedAccessCode?.includes('No se encontró')"
-                   [class.error]="generatedAccessCode?.includes('Error al obtener')">
+                   [class.no-code]="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró')"
+                   [class.error]="generatedAccessCode.includes('Error al obtener')">
                 {{ generatedAccessCode }}
               </pre>
               <button class="btn btn-secondary" 
                       (click)="copyToClipboard()"
-                      [disabled]="generatedAccessCode?.includes('no tiene un código') || generatedAccessCode?.includes('No se encontró') || generatedAccessCode?.includes('Error al obtener')">
+                      [disabled]="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró') || generatedAccessCode.includes('Error al obtener')">
                 <i class="fas fa-copy"></i>
                 Copiar Código
               </button>
@@ -277,7 +277,7 @@
           <button type="button" 
                   class="btn btn-secondary" 
                   (click)="generateNewCode()"
-                  *ngIf="generatedAccessCode?.includes('no tiene un código') || generatedAccessCode?.includes('No se encontró')">
+                  *ngIf="generatedAccessCode.includes('no tiene un código') || generatedAccessCode.includes('No se encontró')">
             <i class="fas fa-plus"></i>
             Generar Nuevo Código
           </button>

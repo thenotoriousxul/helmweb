@@ -230,15 +230,23 @@ export class EquipmentsComponent implements OnInit {
         zona: this.newTeam.zona
       };
 
-      // Si el usuario es admin, puede necesitar especificar supervisorId
-      // Si es supervisor, el backend lo asignará automáticamente
+      // Siempre incluir supervisorId
       if (currentUser?.role === 'admin') {
-        // Por ahora, asignar al primer supervisor disponible o al usuario actual
+        // Si es admin, usar el supervisorId del formulario o el usuario actual
+        teamData.supervisorId = this.newTeam.supervisorId || currentUser.id;
+      } else if (currentUser?.role === 'supervisor') {
+        // Si es supervisor, usar su propio ID
         teamData.supervisorId = currentUser.id;
+      } else {
+        // Si no tiene rol válido, usar el usuario actual
+        teamData.supervisorId = currentUser?.id || '';
       }
+
+      console.log('Creating team with data:', teamData);
 
       this.teamService.createTeam(teamData).subscribe({
         next: (team) => {
+          console.log('Team created successfully:', team);
           // Recargar desde el servidor para asegurar sincronización
           this.loadTeams();
           this.loadStats();

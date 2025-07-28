@@ -35,7 +35,7 @@
         <i class="fas fa-hard-hat"></i>
       </div>
       <div class="stat-content">
-        <h3>{{ getTotalStats().totalEquipments }}</h3>
+        <h3>{{ getTotalStats().totalTeams }}</h3>
         <p>Total Equipos</p>
       </div>
     </div>
@@ -107,7 +107,7 @@
         <i class="fas fa-hard-hat"></i>
       </div>
       <div class="stat-content">
-        <h3>{{ getTotalStats().totalEquipments }}</h3>
+        <h3>{{ getTotalStats().totalTeams }}</h3>
         <p>Mis Equipos</p>
       </div>
     </div>
@@ -148,7 +148,7 @@
         <i class="fas fa-hard-hat"></i>
       </div>
       <div class="stat-content">
-        <h3>{{ getTotalStats().totalEquipments }}</h3>
+        <h3>{{ getTotalStats().totalTeams }}</h3>
         <p>Mi Equipo</p>
       </div>
     </div>
@@ -181,6 +181,19 @@
         <h3>36.5°C</h3>
         <p>Temperatura</p>
       </div>
+    </div>
+  </div>
+  
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && !hasEquipmentData()">
+    <div class="empty-content">
+      <i class="fas fa-hard-hat"></i>
+      <h3>No hay equipos disponibles</h3>
+      <p>{{ getEmptyStateMessage() }}</p>
+      <button class="btn btn-primary" *ngIf="canCreateEquipment()" (click)="navigateToEquipments()">
+        <i class="fas fa-plus"></i>
+        Crear Nuevo Equipo
+      </button>
     </div>
   </div>
 </section>
@@ -220,10 +233,19 @@
 <section class="equipment-section">
   <div class="section-header">
     <h2>Equipos de Minería</h2>
-    <span class="results-count">{{ filteredEquipments.length }} equipos encontrados</span>
+    <span class="results-count" *ngIf="!isLoading">{{ filteredEquipments.length }} equipos encontrados</span>
   </div>
   
-  <div class="equipment-grid">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando equipos...</p>
+    </div>
+  </div>
+  
+  <!-- Equipment Grid -->
+  <div class="equipment-grid" *ngIf="!isLoading && hasEquipmentData()">
     <div class="equipment-card glass" *ngFor="let equipment of filteredEquipments">
       <div class="card-header">
         <div class="equipment-info">

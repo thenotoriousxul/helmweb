@@ -94,8 +94,31 @@
     </div>
   </section>
 
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando mineros...</p>
+    </div>
+  </div>
+
+  <!-- Permission Error State -->
+  <div class="permission-error" *ngIf="hasPermissionError">
+    <div class="error-content">
+      <i class="fas fa-lock"></i>
+      <h3>Acceso Restringido</h3>
+      <p>{{ permissionErrorMessage }}</p>
+      <div class="error-actions">
+        <button class="btn btn-primary" (click)="goToDashboard()">
+          <i class="fas fa-arrow-left"></i>
+          Volver al Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Miners Grid -->
-  <section class="miners-section">
+  <section class="miners-section" *ngIf="!isLoading && !hasPermissionError">
     <div class="section-header" *ngIf="!authService.isMinero()">
       <h2>Lista de Mineros</h2>
       <span class="results-count">{{ filteredMiners.length }} mineros encontrados</span>

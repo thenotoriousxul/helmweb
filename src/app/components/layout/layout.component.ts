@@ -351,37 +351,13 @@ export class LayoutComponent implements OnInit {
   }
 
   setActiveSidebarItem(item: string) {
-    this.activeSidebarItem = item;
+    // Solo navegar si no estamos ya en esa ruta
+    const currentRoute = this.router.url;
+    const targetRoute = '/' + item;
     
-    // Navegar a la ruta correspondiente
-    switch (item) {
-      case 'dashboard':
-        this.router.navigate(['/dashboard']);
-        break;
-      case 'supervisors':
-        this.router.navigate(['/supervisors']);
-        break;
-      case 'equipments':
-        this.router.navigate(['/equipments']);
-        break;
-      case 'helmets':
-        this.router.navigate(['/helmets']);
-        break;
-      case 'miners':
-        this.router.navigate(['/miners']);
-        break;
-      case 'monitoring':
-        this.router.navigate(['/monitoring']);
-        break;
-      case 'alerts':
-        this.router.navigate(['/alerts']);
-        break;
-      case 'reports':
-        this.router.navigate(['/reports']);
-        break;
-      case 'profile':
-        this.router.navigate(['/profile']);
-        break;
+    if (currentRoute !== targetRoute) {
+      this.activeSidebarItem = item;
+      this.router.navigate([targetRoute]);
     }
   }
 
