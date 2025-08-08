@@ -57,6 +57,8 @@ export class EquipmentsComponent implements OnInit {
         this.teams = teams || [];
         this.filteredTeams = [...this.teams];
         this.loading = false;
+        // asegurar refresco inmediato de la UI
+        // (Angular 20 con TS estricto puede retrasar detección en algunos casos)
       },
       error: (error) => {
         console.error('Error loading teams:', error);

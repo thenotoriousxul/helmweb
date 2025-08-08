@@ -18,11 +18,9 @@ export const authGuard: CanActivateFn = (route, state) => {
   const requiredRoles = route.data?.['roles'] as string[] | undefined;
   console.log('AuthGuard: Roles requeridos:', requiredRoles);
 
-  // Valida sesión contra el backend (mejor práctica)
-  return http.get<any>('http://localhost:3333/me', { withCredentials: true }).pipe(
-    map(response => {
-      console.log('AuthGuard: Respuesta del endpoint /me:', response);
-      const user = response.data; // El usuario está directamente en data, no en data.user
+  // Evitar llamada redundante en cada navegación: usa ensureUser()
+  return authService.ensureUser().pipe(
+    map(user => {
       console.log('AuthGuard: Usuario encontrado:', user);
       
       if (!user) {
@@ -48,8 +46,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     }),
     catchError((error) => {
       console.error('AuthGuard: Error verificando autenticación:', error);
-      // Error de sesión/cookie/token inválido
-    return of(router.createUrlTree(['/login']));
+      return of(router.createUrlTree(['/login']));
     })
   );
 }; 

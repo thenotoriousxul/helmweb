@@ -55,9 +55,16 @@ export class HelmetsComponent implements OnInit {
   }
 
   loadHelmets() {
-    this.helmetService.getAllHelmets().subscribe(helmets => {
-      this.helmets = helmets;
-      this.filteredHelmets = [...helmets];
+    this.helmetService.getAllHelmets().subscribe({
+      next: (helmets) => {
+        this.helmets = helmets || [];
+        this.filteredHelmets = [...this.helmets];
+      },
+      error: (err) => {
+        console.error('Error loading helmets:', err);
+        this.helmets = [];
+        this.filteredHelmets = [];
+      }
     });
   }
 

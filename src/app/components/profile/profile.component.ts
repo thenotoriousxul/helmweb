@@ -35,7 +35,7 @@ interface UserProfile {
           <h1>Mi Perfil</h1>
           <p>Información personal</p>
         </div>
-          <div class="header-right" *ngIf="false">
+          <div class="header-right">
             <button class="btn btn-primary" *ngIf="canEdit" (click)="editProfile()">
             <i class="fas fa-edit"></i>
             Editar Perfil
@@ -47,7 +47,7 @@ interface UserProfile {
     <!-- Profile Content -->
     <div class="profile-container">
       <!-- Profile Card -->
-      <div class="profile-card glass" *ngIf="false">
+      <div class="profile-card glass">
         <div class="profile-header">
           <div class="profile-avatar">
             <div class="avatar-circle">
@@ -80,7 +80,7 @@ interface UserProfile {
       </div>
 
       <!-- Profile Details Grid -->
-      <div class="profile-grid" *ngIf="false">
+      <div class="profile-grid">
         <!-- Personal Information -->
         <div class="profile-section glass">
           <div class="section-header">
@@ -90,151 +90,27 @@ interface UserProfile {
             <div class="info-item">
               <span class="info-label">Nombre Completo</span>
               <span class="info-value" *ngIf="!isEditing">{{ userProfile.name }}</span>
-              <input class="edit-input" *ngIf="isEditing" [(ngModel)]="userProfile.name" placeholder="Nombre" />
+              <input class="edit-input" *ngIf="isEditing" [value]="userProfile.name" #nameInput (input)="onNameChange(nameInput.value)" placeholder="Nombre" />
             </div>
             <div class="info-item">
               <span class="info-label">Correo Electrónico</span>
               <span class="info-value" *ngIf="!isEditing">{{ userProfile.email }}</span>
-              <input class="edit-input" *ngIf="isEditing" [(ngModel)]="userProfile.email" placeholder="Email" />
+              <input class="edit-input" *ngIf="isEditing" [value]="userProfile.email" #emailInput (input)="onEmailChange(emailInput.value)" placeholder="Email" />
             </div>
             <div class="info-item">
               <span class="info-label">Teléfono</span>
               <span class="info-value" *ngIf="!isEditing">{{ userProfile.phone }}</span>
-              <input class="edit-input" *ngIf="isEditing" [(ngModel)]="userProfile.phone" placeholder="Teléfono" />
+              <input class="edit-input" *ngIf="isEditing" [value]="userProfile.phone" #phoneInput (input)="onPhoneChange(phoneInput.value)" placeholder="Teléfono" />
             </div>
           </div>
         </div>
 
-        <!-- Permissions -->
-        <div class="profile-section glass">
-          <div class="section-header">
-            <h3><i class="fas fa-shield-alt"></i> Permisos y Roles</h3>
-          </div>
-          <div class="permissions-list">
-            <div class="permission-item" *ngFor="let permission of userProfile.permissions">
-              <i class="fas fa-check-circle"></i>
-              <span>{{ permission }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Preferences -->
-        <div class="profile-section glass">
-          <div class="section-header">
-            <h3><i class="fas fa-cog"></i> Preferencias</h3>
-          </div>
-          <div class="preferences-list">
-            <div class="preference-item">
-              <div class="preference-info">
-                <span class="preference-label">Notificaciones Push</span>
-                <span class="preference-description">Recibir notificaciones en tiempo real</span>
-              </div>
-              <label class="toggle-switch">
-                <input type="checkbox" 
-                       [(ngModel)]="userProfile.preferences.notifications"
-                       (change)="updatePreference('notifications')">
-                <span class="slider"></span>
-              </label>
-            </div>
-            
-            <div class="preference-item">
-              <div class="preference-info">
-                <span class="preference-label">Alertas por Email</span>
-                <span class="preference-description">Recibir alertas críticas por correo</span>
-              </div>
-              <label class="toggle-switch">
-                <input type="checkbox" 
-                       [(ngModel)]="userProfile.preferences.emailAlerts"
-                       (change)="updatePreference('emailAlerts')">
-                <span class="slider"></span>
-              </label>
-            </div>
-            
-            <div class="preference-item">
-              <div class="preference-info">
-                <span class="preference-label">Modo Oscuro</span>
-                <span class="preference-description">Usar tema oscuro en la interfaz</span>
-              </div>
-              <label class="toggle-switch">
-                <input type="checkbox" 
-                       [(ngModel)]="userProfile.preferences.darkMode"
-                       (change)="updatePreference('darkMode')">
-                <span class="slider"></span>
-              </label>
-            </div>
-            
-            <div class="preference-item">
-              <div class="preference-info">
-                <span class="preference-label">Idioma</span>
-                <span class="preference-description">Idioma de la interfaz</span>
-              </div>
-              <select [(ngModel)]="userProfile.preferences.language" 
-                      (change)="updatePreference('language')"
-                      class="language-select">
-                <option value="es">Español</option>
-                <option value="en">English</option>
-                <option value="pt">Português</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Activity Stats -->
-        <div class="profile-section glass">
-          <div class="section-header">
-            <h3><i class="fas fa-chart-line"></i> Estadísticas de Actividad</h3>
-          </div>
-          <div class="stats-grid">
-            <div class="stat-item">
-              <div class="stat-icon">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div class="stat-content">
-                <h4>Horas Activo</h4>
-                <span class="stat-value">156 hrs</span>
-                <span class="stat-period">Este mes</span>
-              </div>
-            </div>
-            
-            <div class="stat-item">
-              <div class="stat-icon">
-                <i class="fas fa-eye"></i>
-              </div>
-              <div class="stat-content">
-                <h4>Equipos Monitoreados</h4>
-                <span class="stat-value">24</span>
-                <span class="stat-period">Actualmente</span>
-              </div>
-            </div>
-            
-            <div class="stat-item">
-              <div class="stat-icon">
-                <i class="fas fa-bell"></i>
-              </div>
-              <div class="stat-content">
-                <h4>Alertas Revisadas</h4>
-                <span class="stat-value">89</span>
-                <span class="stat-period">Este mes</span>
-              </div>
-            </div>
-            
-            <div class="stat-item">
-              <div class="stat-icon">
-                <i class="fas fa-file-alt"></i>
-              </div>
-              <div class="stat-content">
-                <h4>Reportes Generados</h4>
-                <span class="stat-value">12</span>
-                <span class="stat-period">Este mes</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
 
     <!-- Change Password Modal -->
-    <div class="modal-overlay" *ngIf="false && showPasswordModal" (click)="closePasswordModal()">
+    <div class="modal-overlay" *ngIf="showPasswordModal" (click)="closePasswordModal()">
       <div class="modal-content glass" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Cambiar Contraseña</h3>
@@ -247,38 +123,44 @@ interface UserProfile {
           <form (ngSubmit)="updatePassword()">
             <div class="form-group">
               <label for="currentPassword">Contraseña Actual</label>
-              <input 
-                type="password" 
-                id="currentPassword"
-                [(ngModel)]="passwordData.currentPassword" 
-                name="currentPassword"
-                placeholder="Ingresa tu contraseña actual"
-                required
-              >
+                <input 
+                 type="password" 
+                 id="currentPassword"
+                 [value]="passwordData.currentPassword"
+                 #currentPass
+                 (input)="onPasswordField('currentPassword', currentPass.value)"
+                 name="currentPassword"
+                 placeholder="Ingresa tu contraseña actual"
+                 required
+               >
             </div>
             
             <div class="form-group">
               <label for="newPassword">Nueva Contraseña</label>
-              <input 
-                type="password" 
-                id="newPassword"
-                [(ngModel)]="passwordData.newPassword" 
-                name="newPassword"
-                placeholder="Ingresa la nueva contraseña"
-                required
-              >
+                <input 
+                 type="password" 
+                 id="newPassword"
+                 [value]="passwordData.newPassword"
+                 #newPass
+                 (input)="onPasswordField('newPassword', newPass.value)"
+                 name="newPassword"
+                 placeholder="Ingresa la nueva contraseña"
+                 required
+               >
             </div>
             
             <div class="form-group">
               <label for="confirmPassword">Confirmar Contraseña</label>
-              <input 
-                type="password" 
-                id="confirmPassword"
-                [(ngModel)]="passwordData.confirmPassword" 
-                name="confirmPassword"
-                placeholder="Confirma la nueva contraseña"
-                required
-              >
+                <input 
+                 type="password" 
+                 id="confirmPassword"
+                 [value]="passwordData.confirmPassword"
+                 #confirmPass
+                 (input)="onPasswordField('confirmPassword', confirmPass.value)"
+                 name="confirmPassword"
+                 placeholder="Confirma la nueva contraseña"
+                 required
+               >
             </div>
             
             <div class="modal-actions">
@@ -413,6 +295,29 @@ export class ProfileComponent {
   updatePreference(preference: string) {
     // Implementar actualización de preferencias
     console.log('Actualizando preferencia:', preference, this.userProfile.preferences[preference as keyof typeof this.userProfile.preferences]);
+  }
+
+  togglePreference(key: 'notifications' | 'emailAlerts' | 'darkMode', checked: boolean) {
+    this.userProfile.preferences = {
+      ...this.userProfile.preferences,
+      [key]: checked,
+    } as any;
+    this.updatePreference(key);
+  }
+
+  setLanguage(lang: string) {
+    this.userProfile.preferences = {
+      ...this.userProfile.preferences,
+      language: lang,
+    };
+    this.updatePreference('language');
+  }
+
+  onNameChange(value: string) { this.userProfile.name = value; }
+  onEmailChange(value: string) { this.userProfile.email = value; }
+  onPhoneChange(value: string) { this.userProfile.phone = value; }
+  onPasswordField(field: 'currentPassword' | 'newPassword' | 'confirmPassword', value: string) {
+    this.passwordData[field] = value;
   }
 
   logout() {

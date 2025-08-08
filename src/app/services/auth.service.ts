@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError, shareReplay } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 
 export interface User {
   id: string;
@@ -95,6 +96,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private userCache: User | null = null;
+  private inFlightMe$?: Observable<User>;
 
   constructor(private http: HttpClient) {
     this.initializeUser();
@@ -199,6 +201,34 @@ export class AuthService {
   }
 
   // Perfil
+  getMe(): Observable<User> {
+    return this.http.get<any>('http://localhost:3333/me', { withCredentials: true }).pipe(
+      map(res => res.data),
+      map((user) => {
+        this.userCache = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return user;
+      })
+    );
+  }
+
+  ensureUser(): Observable<User> {
+    const cached = this.getCurrentUser();
+    if (cached) {
+      return of(cached);
+    }
+    if (this.inFlightMe$) {
+      return this.inFlightMe$;
+    }
+    this.inFlightMe$ = this.getMe().pipe(
+      shareReplay(1),
+      finalize(() => {
+        this.inFlightMe$ = undefined;
+      })
+    );
+    return this.inFlightMe$;
+  }
   getProfile(): Observable<User> {
     return this.http.get<any>('http://localhost:3333/profile', { withCredentials: true }).pipe(
       map(res => res.data),
