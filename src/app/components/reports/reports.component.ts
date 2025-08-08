@@ -270,7 +270,7 @@ export class ReportsComponent {
   getStatusIcon(status: string): string {
     switch (status) {
       case 'completed': return 'fas fa-check-circle';
-      case 'generating': return 'fas fa-spinner fa-spin';
+      case 'generating': return 'fas fa-hourglass-half';
       case 'failed': return 'fas fa-times-circle';
       default: return 'fas fa-question-circle';
     }

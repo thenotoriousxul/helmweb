@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService, User } from '../../services/auth.service';
 
 interface UserProfile {
   id: string;
@@ -32,10 +33,10 @@ interface UserProfile {
       <div class="header-content">
         <div class="header-left">
           <h1>Mi Perfil</h1>
-          <p>Gestiona tu información personal y preferencias</p>
+          <p>Información personal</p>
         </div>
-        <div class="header-right">
-          <button class="btn btn-primary" (click)="editProfile()">
+          <div class="header-right" *ngIf="false">
+            <button class="btn btn-primary" *ngIf="canEdit" (click)="editProfile()">
             <i class="fas fa-edit"></i>
             Editar Perfil
           </button>
@@ -46,7 +47,7 @@ interface UserProfile {
     <!-- Profile Content -->
     <div class="profile-container">
       <!-- Profile Card -->
-      <div class="profile-card glass">
+      <div class="profile-card glass" *ngIf="false">
         <div class="profile-header">
           <div class="profile-avatar">
             <div class="avatar-circle">
@@ -57,12 +58,18 @@ interface UserProfile {
           <div class="profile-info">
             <h2>{{ userProfile.name }}</h2>
             <p class="user-role">{{ userProfile.role }}</p>
-            <p class="user-department">{{ userProfile.department }}</p>
           </div>
           <div class="profile-actions">
             <button class="btn btn-secondary" (click)="changePassword()">
               <i class="fas fa-key"></i>
               Cambiar Contraseña
+            </button>
+            <button class="btn btn-primary" *ngIf="isEditing && canEdit" (click)="saveProfile()">
+              <i class="fas fa-save"></i>
+              Guardar
+            </button>
+            <button class="btn" *ngIf="isEditing && canEdit" (click)="isEditing = false">
+              Cancelar
             </button>
             <button class="btn btn-danger" (click)="logout()">
               <i class="fas fa-sign-out-alt"></i>
@@ -73,7 +80,7 @@ interface UserProfile {
       </div>
 
       <!-- Profile Details Grid -->
-      <div class="profile-grid">
+      <div class="profile-grid" *ngIf="false">
         <!-- Personal Information -->
         <div class="profile-section glass">
           <div class="section-header">
@@ -82,27 +89,18 @@ interface UserProfile {
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">Nombre Completo</span>
-              <span class="info-value">{{ userProfile.name }}</span>
+              <span class="info-value" *ngIf="!isEditing">{{ userProfile.name }}</span>
+              <input class="edit-input" *ngIf="isEditing" [(ngModel)]="userProfile.name" placeholder="Nombre" />
             </div>
             <div class="info-item">
               <span class="info-label">Correo Electrónico</span>
-              <span class="info-value">{{ userProfile.email }}</span>
+              <span class="info-value" *ngIf="!isEditing">{{ userProfile.email }}</span>
+              <input class="edit-input" *ngIf="isEditing" [(ngModel)]="userProfile.email" placeholder="Email" />
             </div>
             <div class="info-item">
               <span class="info-label">Teléfono</span>
-              <span class="info-value">{{ userProfile.phone }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Ubicación</span>
-              <span class="info-value">{{ userProfile.location }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Departamento</span>
-              <span class="info-value">{{ userProfile.department }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Último Acceso</span>
-              <span class="info-value">{{ userProfile.lastLogin }}</span>
+              <span class="info-value" *ngIf="!isEditing">{{ userProfile.phone }}</span>
+              <input class="edit-input" *ngIf="isEditing" [(ngModel)]="userProfile.phone" placeholder="Teléfono" />
             </div>
           </div>
         </div>
@@ -236,7 +234,7 @@ interface UserProfile {
     </div>
 
     <!-- Change Password Modal -->
-    <div class="modal-overlay" *ngIf="showPasswordModal" (click)="closePasswordModal()">
+    <div class="modal-overlay" *ngIf="false && showPasswordModal" (click)="closePasswordModal()">
       <div class="modal-content glass" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Cambiar Contraseña</h3>
@@ -301,23 +299,16 @@ interface UserProfile {
 })
 export class ProfileComponent {
   userProfile: UserProfile = {
-    id: '1',
-    name: 'Carlos Mendoza',
-    email: 'carlos.mendoza@helmmining.com',
-    role: 'Supervisor de Seguridad',
-    avatar: 'CM',
-    department: 'Seguridad Industrial',
-    phone: '+57 300 123 4567',
-    location: 'Mina Norte - Zona A',
-    lastLogin: 'Hace 2 horas',
-    permissions: [
-      'Ver equipos',
-      'Editar equipos',
-      'Gestionar alertas',
-      'Generar reportes',
-      'Configurar sistema',
-      'Administrar usuarios'
-    ],
+    id: '',
+    name: '',
+    email: '',
+    role: '',
+    avatar: '',
+    department: '',
+    phone: '',
+    location: '',
+    lastLogin: '',
+    permissions: [],
     preferences: {
       notifications: true,
       emailAlerts: true,
@@ -333,11 +324,66 @@ export class ProfileComponent {
     confirmPassword: ''
   };
 
-  constructor(private router: Router) {}
+  isEditing = false;
+  get canEdit() { return !this.auth.isAdmin(); }
+
+  constructor(private router: Router, private auth: AuthService) {
+    this.loadProfile();
+  }
+
+  private mapUserToProfile(user: User) {
+    const initials = (user.fullName || '')
+      .split(' ')
+      .map((p) => p[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+    this.userProfile = {
+      id: user.id,
+      name: user.fullName,
+      email: user.email,
+      role: user.role,
+      avatar: initials || 'U',
+      department: user.department || '',
+      phone: (user as any).phone || '',
+      location: '',
+      lastLogin: '',
+      permissions: [],
+      preferences: this.userProfile.preferences,
+    };
+  }
+
+  loadProfile() {
+    const cached = this.auth.getCurrentUser();
+    if (cached) {
+      this.mapUserToProfile(cached);
+    }
+    this.auth.getProfile().subscribe({
+      next: (user) => this.mapUserToProfile(user),
+      error: () => {}
+    });
+  }
 
   editProfile() {
-    // Implementar edición de perfil
-    console.log('Editar perfil');
+    if (!this.canEdit) return;
+    this.isEditing = true;
+  }
+
+  saveProfile() {
+    const payload = {
+      fullName: this.userProfile.name,
+      email: this.userProfile.email,
+      phone: this.userProfile.phone,
+      // Opcionales: rfc/address si agregas campos al UI
+    };
+    this.auth.updateProfile(payload).subscribe({
+      next: (user) => {
+        this.mapUserToProfile(user);
+        this.isEditing = false;
+        alert('Perfil actualizado');
+      },
+      error: (e) => alert(e.message || 'Error al actualizar perfil'),
+    });
   }
 
   changePassword() {

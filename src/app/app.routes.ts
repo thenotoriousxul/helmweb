@@ -23,7 +23,7 @@ export const routes: Routes = [
     path: '', 
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'equipments', pathMatch: 'full' },
+      { path: '', redirectTo: 'monitoring', pathMatch: 'full' },
       { path: 'equipments', component: EquipmentsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
       { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard] },
       { path: 'miners', component: MinersComponent, canActivate: [authGuard] },

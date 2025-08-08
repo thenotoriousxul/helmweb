@@ -89,14 +89,6 @@
     </div>
   </section>
 
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i>
-      <p>Cargando mineros...</p>
-    </div>
-  </div>
-
   <!-- Permission Error State -->
   <div class="permission-error" *ngIf="hasPermissionError">
     <div class="error-content">
@@ -113,13 +105,13 @@
   </div>
 
   <!-- Miners Grid -->
-  <section class="miners-section" *ngIf="!isLoading && !hasPermissionError">
+  <section class="miners-section" *ngIf="!hasPermissionError">
     <div class="section-header" *ngIf="!authService.isMinero()">
       <h2>Lista de Mineros</h2>
       <span class="results-count">{{ filteredMiners.length }} mineros encontrados</span>
     </div>
   
-    <div class="miners-grid">
+    <div class="miners-grid" *ngIf="filteredMiners.length > 0">
       <div class="miner-card glass" *ngFor="let miner of filteredMiners; let i = index">
         <div class="card-header">
           <div class="miner-info">
@@ -184,6 +176,9 @@
         </div>
       </div>
     </div>
+    <div *ngIf="filteredMiners.length === 0" style="padding: 2rem; text-align: center; color: #8892b0;">
+      No hay mineros
+    </div>
   </section>
 
   <!-- Create Miner Modal -->
@@ -235,6 +230,15 @@
                 required
               >
             </div>
+            <div class="form-group">
+              <label for="fechaContratacion">Fecha de Contratación</label>
+              <input 
+                type="date" 
+                id="fechaContratacion"
+                [(ngModel)]="newMiner.fechaContratacion" 
+                name="fechaContratacion"
+              >
+            </div>
           </div>
           
           <div class="form-group">
@@ -258,6 +262,27 @@
               placeholder="RFC del minero"
               required
             >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="genero">Género</label>
+              <select id="genero" name="genero" [(ngModel)]="newMiner.genero">
+                <option [ngValue]="undefined">No especificado</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="especialidadEnMineria">Especialidad en Minería</label>
+              <input 
+                type="text" 
+                id="especialidadEnMineria"
+                [(ngModel)]="newMiner.especialidadEnMineria" 
+                name="especialidadEnMineria"
+                placeholder="Ej. Perforación, Ventilación, Seguridad"
+              >
+            </div>
           </div>
           
           <div class="form-group">

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HelmetService, Helmet, HelmetStats } from '../../services/helmet.service';
 import { AuthService } from '../../services/auth.service';
+import { MineroService, Minero } from '../../services/minero.service';
 
 @Component({
   selector: 'app-helmets',
@@ -34,10 +35,18 @@ export class HelmetsComponent implements OnInit {
   showDeleteModal = false;
   helmetToDelete: Helmet | null = null;
 
+  // Modal de asignación
+  showAssignModal = false;
+  helmetToAssign: Helmet | null = null;
+  minersForAssign: Minero[] = [];
+  filteredMinersForAssign: Minero[] = [];
+  assignSearchTerm = '';
+
   constructor(
     private router: Router,
     private helmetService: HelmetService,
-    private authService: AuthService
+    private authService: AuthService,
+    private mineroService: MineroService
   ) {}
 
   ngOnInit() {
@@ -170,9 +179,60 @@ export class HelmetsComponent implements OnInit {
   }
 
   assignHelmet(helmet: Helmet) {
-    // TODO: Mostrar modal para seleccionar minero y luego llamar a:
-    // this.helmetService.assignHelmetToMiner(helmet.id, mineroId).subscribe(...)
-    console.log('Asignar casco:', helmet);
+    this.openAssignModal(helmet);
+  }
+
+  openAssignModal(helmet: Helmet) {
+    this.helmetToAssign = helmet;
+    this.showAssignModal = true;
+    // Cargar mineros disponibles (del supervisor/admin)
+    this.mineroService.getAllMiners().subscribe({
+      next: (miners) => {
+        this.minersForAssign = miners;
+        this.filteredMinersForAssign = [...miners];
+      },
+      error: (err) => {
+        console.error('Error cargando mineros para asignación:', err);
+        this.minersForAssign = [];
+        this.filteredMinersForAssign = [];
+      }
+    });
+  }
+
+  closeAssignModal() {
+    this.showAssignModal = false;
+    this.helmetToAssign = null;
+    this.assignSearchTerm = '';
+    this.minersForAssign = [];
+    this.filteredMinersForAssign = [];
+  }
+
+  onAssignSearchChange() {
+    const term = this.assignSearchTerm.trim().toLowerCase();
+    this.filteredMinersForAssign = this.minersForAssign.filter((m) => {
+      return (
+        (m.fullName || '').toLowerCase().includes(term) ||
+        (m.email || '').toLowerCase().includes(term) ||
+        (m.rfc || '').toLowerCase().includes(term) ||
+        (m.phone || '').toLowerCase().includes(term)
+      );
+    });
+  }
+
+  doAssignMiner(minero: Minero) {
+    if (!this.helmetToAssign) return;
+    this.helmetService.assignHelmet(this.helmetToAssign.id, minero.id).subscribe({
+      next: () => {
+        this.closeAssignModal();
+        this.loadHelmets();
+        this.loadStats();
+        alert('Casco asignado exitosamente');
+      },
+      error: (err) => {
+        console.error('Error al asignar casco:', err);
+        alert(err?.error?.message || 'Error al asignar casco');
+      }
+    });
   }
 
   unassignHelmet(helmet: Helmet) {

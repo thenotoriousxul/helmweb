@@ -36,9 +36,16 @@ export interface Helmet {
   location?: string;
   sensors?: {
     gps: { lat: number; lng: number };
-    temperature: number;
-    heartRate: number;
-    acceleration: { x: number; y: number; z: number };
+    gpsFix?: boolean;
+    sats?: number;
+    temperature?: number; // °C
+    tempC?: number; // °C (alias)
+    heartRate?: number; // bpm
+    bpm?: number; // alias
+    mq7?: number; // gas MQ7
+    red?: number; // PPG red
+    ir?: number;  // PPG IR
+    acceleration?: { x: number; y: number; z: number };
   };
 }
 
@@ -189,6 +196,31 @@ export class AuthService {
     this.userCache = null;
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
+  }
+
+  // Perfil
+  getProfile(): Observable<User> {
+    return this.http.get<any>('http://localhost:3333/profile', { withCredentials: true }).pipe(
+      map(res => res.data),
+      map((user) => {
+        this.userCache = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return user;
+      })
+    );
+  }
+
+  updateProfile(data: Partial<User & { phone?: string; rfc?: string; address?: string; birthDate?: string }>): Observable<User> {
+    return this.http.put<any>('http://localhost:3333/profile', data, { withCredentials: true }).pipe(
+      map(res => res.data),
+      map((user) => {
+        this.userCache = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return user;
+      })
+    );
   }
 
   getCurrentUser(): User | null {

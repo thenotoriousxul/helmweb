@@ -22,6 +22,8 @@ interface GPSLocation {
   timestamp: string;
   minerId: string;
   minerName: string;
+  gpsFix?: boolean;
+  sats?: number;
 }
 
 @Component({
@@ -197,23 +199,25 @@ export class MonitoringComponent implements OnInit, OnDestroy, AfterViewInit {
       const miner = this.miners.find(m => m.id === helmet.assignedToId);
       if (miner) {
         // Temperatura corporal
+        const temp = helmet.sensors?.tempC ?? helmet.sensors?.temperature ?? helmet.temperature ?? 36.5;
         this.realTimeData.push({
           id: `${helmet.id}-temp`,
           name: `Temperatura - ${miner.name}`,
-          value: helmet.sensors?.temperature || 36.5,
+          value: temp,
           unit: '°C',
-          status: this.getSensorStatus(helmet.sensors?.temperature || 36.5, 35, 38),
+          status: this.getSensorStatus(temp, 35, 38),
           timestamp: new Date().toISOString(),
           trend: 'stable'
         });
 
         // Frecuencia cardíaca
+        const hr = helmet.sensors?.bpm ?? helmet.sensors?.heartRate ?? 70;
         this.realTimeData.push({
           id: `${helmet.id}-hr`,
           name: `Frecuencia Cardíaca - ${miner.name}`,
-          value: helmet.sensors?.heartRate || 70,
+          value: hr,
           unit: 'bpm',
-          status: this.getSensorStatus(helmet.sensors?.heartRate || 70, 60, 100),
+          status: this.getSensorStatus(hr, 60, 100),
           timestamp: new Date().toISOString(),
           trend: 'stable'
         });
@@ -228,6 +232,45 @@ export class MonitoringComponent implements OnInit, OnDestroy, AfterViewInit {
           timestamp: new Date().toISOString(),
           trend: 'down'
         });
+
+        // MQ7 (Gas)
+        if (helmet.sensors?.mq7 !== undefined) {
+          this.realTimeData.push({
+            id: `${helmet.id}-mq7`,
+            name: `MQ7 - ${miner.name}`,
+            value: helmet.sensors.mq7,
+            unit: 'ppm',
+            status: 'normal',
+            timestamp: new Date().toISOString(),
+            trend: 'stable'
+          });
+        }
+
+        // PPG RED
+        if (helmet.sensors?.red !== undefined) {
+          this.realTimeData.push({
+            id: `${helmet.id}-ppg-red`,
+            name: `PPG Rojo - ${miner.name}`,
+            value: helmet.sensors.red,
+            unit: 'a.u.',
+            status: 'normal',
+            timestamp: new Date().toISOString(),
+            trend: 'stable'
+          });
+        }
+
+        // PPG IR
+        if (helmet.sensors?.ir !== undefined) {
+          this.realTimeData.push({
+            id: `${helmet.id}-ppg-ir`,
+            name: `PPG IR - ${miner.name}`,
+            value: helmet.sensors.ir,
+            unit: 'a.u.',
+            status: 'normal',
+            timestamp: new Date().toISOString(),
+            trend: 'stable'
+          });
+        }
       }
     });
   }
@@ -241,7 +284,9 @@ export class MonitoringComponent implements OnInit, OnDestroy, AfterViewInit {
         altitude: 500 + Math.random() * 100, // Altura simulada
         timestamp: new Date().toISOString(),
         minerId: helmet.assignedToId || '',
-        minerName: miner?.name + ' ' + miner?.lastName || 'Desconocido'
+        minerName: miner?.name + ' ' + miner?.lastName || 'Desconocido',
+        gpsFix: helmet.sensors?.gpsFix ?? false,
+        sats: helmet.sensors?.sats ?? 0
       };
     });
   }
@@ -363,7 +408,7 @@ export class MonitoringComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getSensorOptions(): { value: string; label: string }[] {
-    const sensors = ['Temperatura', 'Frecuencia Cardíaca', 'Batería'];
+    const sensors = ['Temperatura', 'Frecuencia Cardíaca', 'Batería', 'MQ7', 'PPG Rojo', 'PPG IR'];
     return [
       { value: 'all', label: 'Todos los sensores' },
       ...sensors.map(sensor => ({ value: sensor, label: sensor }))

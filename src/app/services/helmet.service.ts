@@ -10,6 +10,7 @@ export interface Helmet {
   status: 'inactivo' | 'activo' | 'activo-asignado' | 'activo-sin-asignar';
   assignedTo?: string;
   assignedToId?: string;
+  assignedToEmail?: string;
   equipmentId?: string;
   equipmentName?: string;
   supervisorId?: string;
@@ -55,6 +56,7 @@ export class HelmetService {
           status: item.isActive ? (item.isAssigned ? 'activo-asignado' : 'activo-sin-asignar') : 'inactivo',
           assignedTo: item.minero ? item.minero.fullName : undefined,
           assignedToId: item.minero ? item.minero.id : undefined,
+          assignedToEmail: item.minero ? item.minero.email : undefined,
           equipmentId: undefined, // Ajustar si hay campo en backend
           equipmentName: undefined, // Ajustar si hay campo en backend
           supervisorId: item.supervisorId,
@@ -97,9 +99,9 @@ export class HelmetService {
   /**
    * Activa un casco
    */
-  activateHelmet(id: string): Observable<Helmet> {
-    this.clearCache(); // Limpiar cache después de modificar
-    return this.http.put<any>(`${this.apiUrl}/cascos/${id}/activate`, {}, { withCredentials: true }).pipe(
+  activateHelmet(physicalId: string): Observable<any> {
+    this.clearCache();
+    return this.http.post<any>(`${this.apiUrl}/cascos/activate`, { physicalId }, { withCredentials: true }).pipe(
       map(response => response.data),
       catchError(error => {
         console.error('Error activating helmet:', error);
@@ -111,9 +113,9 @@ export class HelmetService {
   /**
    * Asigna un casco a un minero
    */
-  assignHelmet(helmetId: string, mineroId: string): Observable<Helmet> {
-    this.clearCache(); // Limpiar cache después de modificar
-    return this.http.put<any>(`${this.apiUrl}/cascos/${helmetId}/assign`, { mineroId }, { withCredentials: true }).pipe(
+  assignHelmet(helmetId: string, mineroId: string): Observable<any> {
+    this.clearCache();
+    return this.http.post<any>(`${this.apiUrl}/cascos/assign`, { cascoId: helmetId, mineroId }, { withCredentials: true }).pipe(
       map(response => response.data),
       catchError(error => {
         console.error('Error assigning helmet:', error);
@@ -125,9 +127,9 @@ export class HelmetService {
   /**
    * Desasigna un casco
    */
-  unassignHelmet(helmetId: string): Observable<Helmet> {
-    this.clearCache(); // Limpiar cache después de modificar
-    return this.http.put<any>(`${this.apiUrl}/cascos/${helmetId}/unassign`, {}, { withCredentials: true }).pipe(
+  unassignHelmet(helmetId: string): Observable<any> {
+    this.clearCache();
+    return this.http.post<any>(`${this.apiUrl}/cascos/unassign`, { cascoId: helmetId }, { withCredentials: true }).pipe(
       map(response => response.data),
       catchError(error => {
         console.error('Error unassigning helmet:', error);

@@ -224,6 +224,31 @@
   gap: 0.25rem;
 }
 
+.edit-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(61, 244, 244, 0.3);
+  border-radius: 8px;
+  background: rgba(48, 60, 85, 0.6);
+  color: #ccd6f6;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #3df4f4;
+  box-shadow: 0 0 0 3px rgba(61, 244, 244, 0.1);
+}
+
+.profile-actions .btn-primary {
+  box-shadow: 0 6px 16px rgba(100, 255, 218, 0.25);
+}
+
+.profile-actions .btn {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
 .info-label {
   color: #8892b0;
   font-size: 0.9rem;

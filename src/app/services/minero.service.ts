@@ -15,6 +15,10 @@ export interface Minero {
   address: string;
   photo: string;
   teamId?: string;
+  genero?: 'masculino' | 'femenino';
+  especialidadEnMineria?: string;
+  fechaContratacion?: string;
+  cascoId?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -58,6 +62,10 @@ export class MineroService {
             address: item.address || '',
             photo: '', // Ajustar si hay campo en backend
             teamId: undefined, // Ajustar si hay campo en backend
+            genero: item.genero || undefined,
+            especialidadEnMineria: item.especialidadEnMineria || undefined,
+            fechaContratacion: item.fechaContratacion || undefined,
+            cascoId: item.cascoId || undefined,
             status: item.estado || '',
             createdAt: item.createdAt || '',
             updatedAt: item.updatedAt || ''

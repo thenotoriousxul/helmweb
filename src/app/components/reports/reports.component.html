@@ -40,11 +40,11 @@
       
       <div class="stat-card glass">
         <div class="stat-icon generating">
-          <i class="fas fa-spinner"></i>
+          <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
           <h3>{{ generatingReports }}</h3>
-          <p>Generando</p>
+          <p>En cola</p>
         </div>
       </div>
       
@@ -223,11 +223,9 @@
             Descargar
           </button>
           
-          <button class="btn btn-secondary" 
-                  *ngIf="report.status === 'generating'"
-                  disabled>
-            <i class="fas fa-spinner fa-spin"></i>
-            Generando...
+          <button class="btn btn-secondary" *ngIf="report.status === 'generating'" disabled>
+            <i class="fas fa-hourglass-half"></i>
+            En proceso
           </button>
           
           <button class="btn btn-danger" (click)="deleteReport(report)">

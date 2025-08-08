@@ -110,7 +110,7 @@
       <span class="results-count">{{ filteredHelmets.length }} cascos encontrados</span>
     </div>
     
-    <div class="helmets-grid">
+    <div class="helmets-grid" *ngIf="filteredHelmets.length > 0; else noCascos">
       <div class="helmet-card glass" *ngFor="let helmet of filteredHelmets" [attr.data-status]="helmet.status">
         <div class="card-header">
           <div class="helmet-info">
@@ -230,6 +230,11 @@
         </div>
       </div>
     </div>
+    <ng-template #noCascos>
+      <div style="padding: 2rem; text-align: center; color: #8892b0;">
+        No hay cascos
+      </div>
+    </ng-template>
   </section>
 
   <!-- Create Helmet Modal -->
@@ -284,6 +289,8 @@
         <div class="detail-row"><strong>UUID:</strong> {{ detailHelmetData.uuid }}</div>
         <div class="detail-row"><strong>Estado:</strong> {{ getStatusText(detailHelmetData.status || 'inactivo') }}</div>
         <div class="detail-row"><strong>Asignado a:</strong> {{ detailHelmetData.assignedTo || 'Sin asignar' }}</div>
+        <div class="detail-row" *ngIf="detailHelmetData.assignedToEmail"><strong>Email del minero:</strong> {{ detailHelmetData.assignedToEmail }}</div>
+        <div class="detail-row" *ngIf="detailHelmetData.assignedToId"><strong>ID del minero:</strong> {{ detailHelmetData.assignedToId }}</div>
         <div class="detail-row"><strong>Supervisor:</strong> {{ detailHelmetData.supervisorId }}</div>
         <div class="detail-row"><strong>Última señal:</strong> {{ detailHelmetData.lastHeartbeat }}</div>
         <div class="detail-row"><strong>Temperatura:</strong> {{ detailHelmetData.temperature || 0 }}°C</div>
@@ -292,6 +299,68 @@
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Helmet Modal -->
+  <div class="modal-overlay" *ngIf="showAssignModal" (click)="closeAssignModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Asignar Casco</h3>
+        <button class="close-btn" (click)="closeAssignModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="search-box" style="margin-bottom: 1rem;">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            placeholder="Buscar minero por nombre, correo, RFC o teléfono..."
+            [(ngModel)]="assignSearchTerm"
+            (input)="onAssignSearchChange()"
+          >
+        </div>
+
+        <div class="miners-grid" *ngIf="filteredMinersForAssign.length > 0; else noMinersAssign">
+          <div class="miner-card glass" *ngFor="let miner of filteredMinersForAssign">
+            <div class="card-header">
+              <div class="miner-info">
+                <div class="miner-avatar">
+                  <span>{{ miner.fullName?.charAt(0) || 'M' }}</span>
+                </div>
+                <div class="miner-details">
+                  <h3>{{ miner.fullName }}</h3>
+                  <span class="miner-email">{{ miner.email }}</span>
+                  <span class="miner-rfc">{{ miner.rfc || 'RFC no especificado' }}</span>
+                </div>
+              </div>
+              <div class="status-badge">{{ miner.status || 'offline' }}</div>
+            </div>
+            <div class="card-body">
+              <div class="miner-details-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Teléfono:</span>
+                  <span class="detail-value">{{ miner.phone || 'No especificado' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Fecha Nacimiento:</span>
+                  <span class="detail-value">{{ miner.birthDate ? (miner.birthDate | date:'dd/MM/yyyy') : 'No especificada' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-primary" (click)="doAssignMiner(miner)">
+                <i class="fas fa-user-check"></i>
+                Asignar a este minero
+              </button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noMinersAssign>
+          <div style="padding: 2rem; text-align: center; color: #8892b0;">No hay mineros</div>
+        </ng-template>
       </div>
     </div>
   </div>

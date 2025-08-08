@@ -58,9 +58,8 @@
         class="btn btn-primary login-btn"
         [disabled]="isLoading"
       >
-        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
-        <i class="fas fa-sign-in-alt" *ngIf="!isLoading"></i>
-        {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+        <i class="fas fa-sign-in-alt"></i>
+        {{ 'Iniciar Sesión' }}
       </button>
     </form>
 

@@ -43,11 +43,11 @@
   <section class="map-section" *ngIf="showMap">
     <div class="section-header">
       <h2>Ubicación GPS</h2>
-      <span class="update-info">Actualizado: {{ formatTimestamp(gpsLocations[0].timestamp || '') }}</span>
+      <span class="update-info" *ngIf="gpsLocations.length > 0">Actualizado: {{ formatTimestamp(gpsLocations[0].timestamp || '') }}</span>
     </div>
     
     <div class="map-container glass">
-      <div id="map" class="map-content"></div>
+      <div id="map" class="map-content" *ngIf="gpsLocations.length > 0; else noGps"></div>
       
       <!-- Mensaje de estado del mapa -->
       <div class="map-status" *ngIf="mapStatus">
@@ -59,7 +59,7 @@
       
       <div class="gps-locations-panel">
         <h4>Ubicaciones GPS</h4>
-        <div class="gps-locations">
+        <div class="gps-locations" *ngIf="gpsLocations.length > 0; else noGps">
           <div class="location-item" *ngFor="let location of gpsLocations">
             <div class="location-marker" [style.background-color]="getStatusColor('normal')">
               <i class="fas fa-user"></i>
@@ -74,6 +74,9 @@
           </div>
         </div>
       </div>
+      <ng-template #noGps>
+        <div style="padding: 1rem; text-align: center; color: #8892b0;">No hay ubicaciones GPS</div>
+      </ng-template>
     </div>
   </section>
 
@@ -81,10 +84,10 @@
   <section class="sensors-section">
     <div class="section-header">
       <h2>Datos de Sensores</h2>
-      <span class="update-info">Actualizado: {{ formatTimestamp(realTimeData[0].timestamp || '') }}</span>
+      <span class="update-info" *ngIf="realTimeData.length > 0">Actualizado: {{ formatTimestamp(realTimeData[0].timestamp || '') }}</span>
     </div>
     
-    <div class="sensors-grid">
+    <div class="sensors-grid" *ngIf="getFilteredData().length > 0; else noSensores">
       <div class="sensor-card glass" *ngFor="let sensor of getFilteredData()">
         <div class="sensor-header">
           <div class="sensor-info">
@@ -109,6 +112,9 @@
         </div>
       </div>
     </div>
+    <ng-template #noSensores>
+      <div style="padding: 2rem; text-align: center; color: #8892b0;">No hay datos de sensores</div>
+    </ng-template>
   </section>
 
   <!-- Helmet Status Section -->
