@@ -195,9 +195,21 @@ export class AuthService {
   }
 
   logout(): void {
-    this.userCache = null;
-    localStorage.removeItem('currentUser');
-    this.currentUserSubject.next(null);
+    // Limpiar estado local primero para que los guards permitan navegar inmediatamente
+    this.userCache = null
+    localStorage.removeItem('currentUser')
+    this.currentUserSubject.next(null)
+
+    // Enviar logout al backend en segundo plano
+    this.http
+      .post<any>('http://localhost:3333/logout', {}, { withCredentials: true })
+      .pipe(
+        catchError((err) => {
+          console.error('AuthService: Error en logout backend:', err)
+          return of(null)
+        })
+      )
+      .subscribe()
   }
 
   // Perfil

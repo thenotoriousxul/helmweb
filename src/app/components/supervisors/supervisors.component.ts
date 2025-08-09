@@ -28,6 +28,8 @@ export class SupervisorsComponent implements OnInit {
   newSupervisor: Partial<SupervisorWithAccessCode> = {};
   generatedAccessCode = 'Cargando...';
   unusedAccessCodes: Array<{email: string, code: string, createdAt: string, status: string}> = [];
+  formError: string = '';
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -101,23 +103,30 @@ export class SupervisorsComponent implements OnInit {
   openCreateModal() {
     this.showCreateModal = true;
     this.newSupervisor = {};
+    this.formError = '';
   }
 
   closeCreateModal() {
     this.showCreateModal = false;
     this.newSupervisor = {};
+    this.formError = '';
   }
 
-  async createSupervisor() {
-    console.log(this.newSupervisor.email);
-    if (!this.newSupervisor.email) {
-      alert('Por favor, ingresa un correo electrónico válido');
+  async createSupervisor(form?: any) {
+    if (form && form.controls) Object.values(form.controls).forEach((c: any) => c.markAsTouched());
+    this.formError = '';
+    this.isLoading = true;
+    const email = (this.newSupervisor.email || '').toString().trim();
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || !re.test(email)) {
+      this.formError = 'Ingresa un correo electrónico válido';
+      this.isLoading = false;
       return;
     }
 
     try {
       // Llamar a la API para generar el código de acceso
-      const response: any = await firstValueFrom(this.supervisorService.generateAccessCode(this.newSupervisor.email));
+      const response: any = await firstValueFrom(this.supervisorService.generateAccessCode(email));
 
       console.log('Respuesta completa del servidor:', response);
       console.log('response.data:', response.data);
@@ -134,6 +143,7 @@ export class SupervisorsComponent implements OnInit {
       
       // Forzar la detección de cambios
       this.cdr.detectChanges();
+      this.isLoading = false;
       
       // Recargar la lista de supervisores para mostrar el nuevo supervisor si ya se registró
       this.loadSupervisors();
@@ -141,7 +151,8 @@ export class SupervisorsComponent implements OnInit {
     } catch (error: any) {
       console.error('Error completo:', error);
       const errorMessage = error.error?.message || error.message || 'Error desconocido';
-      alert('Error al generar código de acceso: ' + errorMessage);
+      this.formError = 'Error al generar código de acceso: ' + errorMessage;
+      this.isLoading = false;
     }
   }
 

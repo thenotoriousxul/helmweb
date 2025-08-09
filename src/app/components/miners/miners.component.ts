@@ -21,10 +21,13 @@ export class MinersComponent implements OnInit {
   newMiner: Partial<Minero> = {};
   showEditModal = false;
   editMinerData: Partial<Minero> = {};
+  originalEditMinerData: Partial<Minero> = {};
+  editFormError = '';
   showDetailModal = false;
   detailMinerData: Partial<Minero> = {};
   currentUser: any = null;
   isLoading = true;
+  errorMessage = '';
   hasPermissionError = false;
   permissionErrorMessage = '';
   minerStats: MineroStats = {
@@ -33,6 +36,8 @@ export class MinersComponent implements OnInit {
     inactiveMiners: 0,
     avgAge: 0
   };
+  yesterdayISO = '';
+  adultMaxISO = '';
 
   constructor(
     private router: Router,
@@ -44,6 +49,14 @@ export class MinersComponent implements OnInit {
   }
 
   ngOnInit() {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    yesterday.setHours(0,0,0,0);
+    this.yesterdayISO = yesterday.toISOString().slice(0,10);
+    const adultMax = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    adultMax.setHours(0,0,0,0);
+    this.adultMaxISO = adultMax.toISOString().slice(0,10);
     this.loadMiners();
     this.loadStats();
   }
@@ -104,6 +117,41 @@ export class MinersComponent implements OnInit {
         // No mostrar error de permisos para stats ya que loadMiners ya lo maneja
       }
     });
+  }
+
+  // Helpers de validación para plantillas (ngModel)
+  isInvalidBirthDate(dateStr?: string): boolean {
+    if (!dateStr) return true;
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return true;
+    const today = new Date();
+    const adultMax = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    // Normalizar a medianoche para comparar solo fechas
+    date.setHours(0, 0, 0, 0);
+    adultMax.setHours(0, 0, 0, 0);
+    // Fecha de nacimiento debe ser menor o igual a (hoy - 18 años)
+    return date > adultMax;
+  }
+
+  isValidEmail(value?: string): boolean {
+    const email = (value || '').trim()
+    if (!email) return false
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(email)
+  }
+
+  hasText(value?: string): boolean {
+    return (value || '').trim().length > 0
+  }
+
+  isEditUnchanged(): boolean {
+    const fields: (keyof Minero)[] = ['fullName','email','birthDate','phone','rfc','address']
+    for (const f of fields) {
+      if ((this.editMinerData as any)[f] !== (this.originalEditMinerData as any)[f]) {
+        return false
+      }
+    }
+    return true
   }
 
   onSearchChange() {
@@ -171,6 +219,9 @@ export class MinersComponent implements OnInit {
 
   openEditModal(miner: Minero) {
     this.editMinerData = { ...miner };
+    this.originalEditMinerData = { ...miner };
+    this.editFormError = '';
+    this.errorMessage = '';
     this.showEditModal = true;
   }
 
@@ -179,23 +230,57 @@ export class MinersComponent implements OnInit {
     this.editMinerData = {};
   }
 
-  saveEditMiner() {
-    if (this.editMinerData.id) {
-      this.mineroService.updateMinero(this.editMinerData.id, this.editMinerData).subscribe(() => {
-        this.mineroService.clearCache(); // Limpiar cache para mostrar datos actualizados
-        this.loadMiners();
-        this.loadStats();
-        this.closeEditModal();
-      });
+  saveEditMiner(form?: any) {
+    if (form && form.controls) {
+      Object.values(form.controls).forEach((c: any) => c.markAsTouched());
     }
+    this.editFormError = ''
+    this.errorMessage = ''
+    if (!this.editMinerData.id) return;
+
+    // Validaciones cliente
+    const nameOk = !!this.editMinerData.fullName && (this.editMinerData.fullName as string).trim().length >= 3 && /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/.test((this.editMinerData.fullName as string).trim())
+    if (!nameOk) { return }
+    if (!this.isValidEmail(this.editMinerData.email)) { this.errorMessage = 'Proporciona un correo válido.'; return }
+    if (this.isInvalidBirthDate(this.editMinerData.birthDate)) { this.errorMessage = 'La fecha de nacimiento debe ser anterior a hoy.'; return }
+    const rfcOk = !!this.editMinerData.rfc && /^[A-Z0-9]{12,13}$/.test((this.editMinerData.rfc as string).trim().toUpperCase())
+    const phoneOk = this.hasText(this.editMinerData.phone) && (this.editMinerData.phone as string).trim().length >= 10
+    const addressOk = this.hasText(this.editMinerData.address)
+    if (!rfcOk) { this.errorMessage = 'RFC inválido (12-13 caracteres alfanuméricos).'; return }
+    if (!phoneOk) { this.errorMessage = 'El teléfono es obligatorio (mín. 10 dígitos).'; return }
+    if (!addressOk) { this.errorMessage = 'La dirección es obligatoria.'; return }
+    if (this.isEditUnchanged()) { this.editFormError = 'No hay cambios para guardar.'; return }
+    this.isLoading = true;
+    this.mineroService.updateMinero(this.editMinerData.id, this.editMinerData).subscribe({
+        next: () => {
+          this.mineroService.clearCache();
+          this.loadMiners();
+          this.loadStats();
+          this.closeEditModal();
+          alert('Minero actualizado exitosamente');
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error al actualizar minero:', err);
+          this.errorMessage = err?.error?.message || 'Error al actualizar minero';
+          this.isLoading = false;
+        }
+      });
   }
 
   deleteMiner(miner: Minero) {
     if (confirm('¿Estás seguro de que quieres eliminar este minero?')) {
-      this.mineroService.deleteMinero(miner.id).subscribe(() => {
-        this.mineroService.clearCache(); // Limpiar cache para mostrar datos actualizados
-        this.loadMiners();
-        this.loadStats();
+      this.mineroService.deleteMinero(miner.id).subscribe({
+        next: () => {
+          this.mineroService.clearCache(); // Limpiar cache para mostrar datos actualizados
+          this.loadMiners();
+          this.loadStats();
+          alert('Minero eliminado exitosamente');
+        },
+        error: (err) => {
+          console.error('Error al eliminar minero:', err);
+          alert(err?.error?.message || 'Error al eliminar minero');
+        }
       });
     }
   }
@@ -203,6 +288,7 @@ export class MinersComponent implements OnInit {
   openCreateModal() {
     this.showCreateModal = true;
     this.newMiner = {};
+    this.errorMessage = '';
   }
 
   closeCreateModal() {
@@ -210,8 +296,22 @@ export class MinersComponent implements OnInit {
     this.newMiner = {};
   }
 
-  createMiner() {
-    if (this.newMiner.fullName && this.newMiner.email) {
+  createMiner(form?: any) {
+    if (form && form.controls) {
+      Object.values(form.controls).forEach((c: any) => c.markAsTouched());
+    }
+    this.errorMessage = '';
+    const nameOk = !!this.newMiner.fullName && (this.newMiner.fullName as string).trim().length >= 3 && /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/.test((this.newMiner.fullName as string).trim())
+    const emailOk = !!this.newMiner.email && this.isValidEmail(this.newMiner.email as string)
+    const birthOk = !this.isInvalidBirthDate(this.newMiner.birthDate)
+    const rfcOk = !!this.newMiner.rfc && /^[A-Z0-9]{12,13}$/.test((this.newMiner.rfc as string).trim().toUpperCase())
+    const phoneOk = !!this.newMiner.phone && (this.newMiner.phone as string).trim().length >= 10
+    const genderOk = !!this.newMiner.genero
+    const specialityOk = !!this.newMiner.especialidadEnMineria && (this.newMiner.especialidadEnMineria as string).trim().length >= 3
+    const addressOk = !!this.newMiner.address && (this.newMiner.address as string).trim().length > 0
+    const hireDateOk = !!this.newMiner.fechaContratacion
+    if (nameOk && emailOk && birthOk && rfcOk && phoneOk && genderOk && specialityOk && addressOk && hireDateOk) {
+      this.isLoading = true;
       console.log('Creando minero con datos:', this.newMiner);
       this.mineroService.createMinero(this.newMiner).subscribe({
         next: (response) => {
@@ -222,13 +322,28 @@ export class MinersComponent implements OnInit {
           setTimeout(() => {
             this.loadMiners();
             this.loadStats();
-          }, 100);
+            alert('Minero creado exitosamente');
+          }, 50);
+          this.isLoading = false;
         },
         error: (error) => {
           console.error('Error al crear minero:', error);
-          alert('Error al crear el minero. Por favor, inténtalo de nuevo.');
+          this.errorMessage = error?.error?.message || 'Error al crear el minero. Por favor, inténtalo de nuevo.';
+          this.isLoading = false;
         }
       });
+    } else {
+      if (!nameOk) {
+        // Mensaje ya se muestra debajo del campo por validación de plantilla
+      }
+      else if (!emailOk) this.errorMessage = 'Proporciona un correo válido.';
+      else if (!birthOk) this.errorMessage = 'La fecha de nacimiento debe ser anterior a hoy.';
+      else if (!rfcOk) this.errorMessage = 'RFC inválido (12-13 caracteres alfanuméricos).';
+      else if (!phoneOk) this.errorMessage = 'El teléfono es obligatorio (mín. 10 dígitos).';
+      else if (!genderOk) this.errorMessage = 'El género es obligatorio.';
+      else if (!specialityOk) this.errorMessage = 'La especialidad es obligatoria (mín. 3 caracteres).';
+      else if (!addressOk) this.errorMessage = 'La dirección es obligatoria.';
+      else if (!hireDateOk) this.errorMessage = 'La fecha de contratación es obligatoria.';
     }
   }
 

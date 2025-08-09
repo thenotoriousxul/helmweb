@@ -192,7 +192,10 @@
       </div>
       
       <div class="modal-body">
-        <form (ngSubmit)="createMiner()">
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+        <form (ngSubmit)="createMiner(createMinerForm)" #createMinerForm="ngForm">
           <div class="form-row">
             <div class="form-group">
               <label for="fullName">Nombre Completo</label>
@@ -201,22 +204,29 @@
                 id="fullName"
                 [(ngModel)]="newMiner.fullName" 
                 name="fullName"
+                #fullNameCtrl="ngModel"
+                pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$"
                 placeholder="Nombre completo del minero"
-                required
+                required minlength="3"
               >
+               <small class="error" *ngIf="(createMinerForm.submitted || fullNameCtrl.touched || fullNameCtrl.dirty) && !((newMiner.fullName || '').trim().length >= 3)">El nombre es obligatorio (mín. 3)</small>
+              <small class="error" *ngIf="(createMinerForm.submitted || fullNameCtrl.touched || fullNameCtrl.dirty) && fullNameCtrl.errors?.['pattern']">Solo letras y espacios</small>
             </div>
           </div>
           
-          <div class="form-group">
+           <div class="form-group">
             <label for="email">Correo Electrónico</label>
             <input 
               type="email" 
               id="email"
               [(ngModel)]="newMiner.email" 
               name="email"
+              #emailCtrl="ngModel"
               placeholder="correo@ejemplo.com"
-              required
+               required
             >
+            <small class="error" *ngIf="(createMinerForm.submitted || emailCtrl.touched || emailCtrl.dirty) && (newMiner.email || '').length === 0">El correo es obligatorio</small>
+            <small class="error" *ngIf="(createMinerForm.submitted || emailCtrl.touched || emailCtrl.dirty) && (newMiner.email || '').length > 0 && !isValidEmail(newMiner.email)">Correo inválido</small>
           </div>
           
           <div class="form-row">
@@ -227,8 +237,12 @@
                 id="birthDate"
                 [(ngModel)]="newMiner.birthDate" 
                 name="birthDate"
-                required
+               #birthDateCtrl="ngModel"
+               required
+               [max]="adultMaxISO"
               >
+              <small class="error" *ngIf="(createMinerForm.submitted || birthDateCtrl.touched || birthDateCtrl.dirty) && birthDateCtrl.errors?.['required']">La fecha de nacimiento es obligatoria</small>
+              <small class="error" *ngIf="(createMinerForm.submitted || birthDateCtrl.touched || birthDateCtrl.dirty) && isInvalidBirthDate(newMiner.birthDate)">La fecha de nacimiento debe ser anterior a hoy</small>
             </div>
             <div class="form-group">
               <label for="fechaContratacion">Fecha de Contratación</label>
@@ -237,7 +251,10 @@
                 id="fechaContratacion"
                 [(ngModel)]="newMiner.fechaContratacion" 
                 name="fechaContratacion"
+                #hireDateCtrl="ngModel"
+                required
               >
+              <small class="error" *ngIf="(createMinerForm.submitted || hireDateCtrl.touched || hireDateCtrl.dirty) && hireDateCtrl.errors?.['required']">La fecha de contratación es obligatoria</small>
             </div>
           </div>
           
@@ -248,30 +265,38 @@
               id="phone"
               [(ngModel)]="newMiner.phone" 
               name="phone"
+              #phoneCtrl="ngModel"
+              required minlength="10"
               placeholder="+52 55 1234 5678"
             >
+            <small class="error" *ngIf="(createMinerForm.submitted || phoneCtrl.touched || phoneCtrl.dirty) && phoneCtrl.errors?.['required']">El teléfono es obligatorio</small>
+            <small class="error" *ngIf="(createMinerForm.submitted || phoneCtrl.touched || phoneCtrl.dirty) && phoneCtrl.errors?.['minlength']">El teléfono debe tener al menos 10 dígitos</small>
           </div>
           
-          <div class="form-group">
+            <div class="form-group">
             <label for="rfc">RFC</label>
-            <input 
+             <input 
               type="text" 
               id="rfc"
               [(ngModel)]="newMiner.rfc" 
               name="rfc"
+               #rfcCtrl="ngModel"
               placeholder="RFC del minero"
-              required
+               required minlength="12" maxlength="13"
             >
+              <small class="error" *ngIf="(createMinerForm.submitted || rfcCtrl.touched || rfcCtrl.dirty) && (newMiner.rfc || '').trim().length === 0">El RFC es obligatorio</small>
+              <small class="error" *ngIf="(createMinerForm.submitted || rfcCtrl.touched || rfcCtrl.dirty) && (newMiner.rfc || '').trim().length > 0 && (newMiner.rfc || '').trim().length < 12">El RFC debe tener al menos 12 caracteres</small>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="genero">Género</label>
-              <select id="genero" name="genero" [(ngModel)]="newMiner.genero">
+              <select id="genero" name="genero" [(ngModel)]="newMiner.genero" #generoCtrl="ngModel" required>
                 <option [ngValue]="undefined">No especificado</option>
                 <option value="masculino">Masculino</option>
                 <option value="femenino">Femenino</option>
               </select>
+              <small class="error" *ngIf="(createMinerForm.submitted || generoCtrl.touched || generoCtrl.dirty) && generoCtrl.errors?.['required']">El género es obligatorio</small>
             </div>
             <div class="form-group">
               <label for="especialidadEnMineria">Especialidad en Minería</label>
@@ -280,8 +305,12 @@
                 id="especialidadEnMineria"
                 [(ngModel)]="newMiner.especialidadEnMineria" 
                 name="especialidadEnMineria"
+                #especialidadCtrl="ngModel"
+                required minlength="3"
                 placeholder="Ej. Perforación, Ventilación, Seguridad"
               >
+              <small class="error" *ngIf="(createMinerForm.submitted || especialidadCtrl.touched || especialidadCtrl.dirty) && especialidadCtrl.errors?.['required']">La especialidad es obligatoria</small>
+              <small class="error" *ngIf="(createMinerForm.submitted || especialidadCtrl.touched || especialidadCtrl.dirty) && especialidadCtrl.errors?.['minlength']">La especialidad debe tener al menos 3 caracteres</small>
             </div>
           </div>
           
@@ -291,16 +320,19 @@
               id="address"
               [(ngModel)]="newMiner.address" 
               name="address"
+              #addressCtrl="ngModel"
+              required
               placeholder="Dirección completa del minero"
               rows="3"
             ></textarea>
+            <small class="error" *ngIf="(createMinerForm.submitted || addressCtrl.touched || addressCtrl.dirty) && addressCtrl.errors?.['required']">La dirección es obligatoria</small>
           </div>
           
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
               Cancelar
             </button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
               <i class="fas fa-save"></i>
               Registrar Minero
             </button>
@@ -320,38 +352,77 @@
         </button>
       </div>
       <div class="modal-body">
-        <form (ngSubmit)="saveEditMiner()">
+        <form (ngSubmit)="saveEditMiner(editMinerForm)" #editMinerForm="ngForm">
           <div class="form-row">
             <div class="form-group">
               <label for="editFullName">Nombre Completo</label>
-              <input type="text" id="editFullName" [(ngModel)]="editMinerData.fullName" name="editFullName" required>
+              <input type="text" id="editFullName" [(ngModel)]="editMinerData.fullName" name="editFullName" #editFullNameCtrl="ngModel" pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$" required minlength="3">
+              @if ((editMinerForm.submitted || editFullNameCtrl.touched || editFullNameCtrl.dirty) && editFullNameCtrl.errors?.['pattern']) {
+                <div class="error-message">Solo letras y espacios</div>
+              }
+              @if ((editMinerForm.submitted || editFullNameCtrl.touched || editFullNameCtrl.dirty) && !((editMinerData.fullName || '').trim().length >= 3)) {
+                <div class="error-message">El nombre es obligatorio (mín. 3)</div>
+              }
             </div>
           </div>
-          <div class="form-group">
+           <div class="form-group">
             <label for="editEmail">Correo Electrónico</label>
-            <input type="email" id="editEmail" [(ngModel)]="editMinerData.email" name="editEmail" required>
+            <input type="email" id="editEmail" [(ngModel)]="editMinerData.email" name="editEmail" #editEmailCtrl="ngModel" required>
+            @if ((editMinerForm.submitted || editEmailCtrl.touched || editEmailCtrl.dirty) && editEmailCtrl.errors?.['required']) {
+              <div class="error-message">El correo es obligatorio</div>
+            }
+            @if ((editMinerForm.submitted || editEmailCtrl.touched || editEmailCtrl.dirty) && (editMinerData.email || '').length > 0 && !isValidEmail(editMinerData.email)) {
+              <div class="error-message">Correo inválido</div>
+            }
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="editBirthDate">Fecha de Nacimiento</label>
-              <input type="date" id="editBirthDate" [(ngModel)]="editMinerData.birthDate" name="editBirthDate">
+              <input type="date" id="editBirthDate" [(ngModel)]="editMinerData.birthDate" name="editBirthDate" #editBirthDateCtrl="ngModel" required [max]="adultMaxISO">
+              @if ((editMinerForm.submitted || editBirthDateCtrl.touched || editBirthDateCtrl.dirty) && editBirthDateCtrl.errors?.['required']) {
+                <div class="error-message">La fecha de nacimiento es obligatoria</div>
+              }
+              @if ((editMinerForm.submitted || editBirthDateCtrl.touched || editBirthDateCtrl.dirty) && isInvalidBirthDate(editMinerData.birthDate)) {
+                <div class="error-message">La fecha de nacimiento debe ser anterior a hoy</div>
+              }
             </div>
           </div>
           <div class="form-group">
             <label for="editPhone">Teléfono</label>
-            <input type="tel" id="editPhone" [(ngModel)]="editMinerData.phone" name="editPhone">
+            <input type="tel" id="editPhone" [(ngModel)]="editMinerData.phone" name="editPhone" #editPhoneCtrl="ngModel" required minlength="10">
+            @if ((editMinerForm.submitted || editPhoneCtrl.touched || editPhoneCtrl.dirty) && editPhoneCtrl.errors?.['required']) {
+              <div class="error-message">El teléfono es obligatorio</div>
+            }
+            @if ((editMinerForm.submitted || editPhoneCtrl.touched || editPhoneCtrl.dirty) && editPhoneCtrl.errors?.['minlength']) {
+              <div class="error-message">El teléfono debe tener al menos 10 dígitos</div>
+            }
           </div>
           <div class="form-group">
             <label for="editRfc">RFC</label>
-            <input type="text" id="editRfc" [(ngModel)]="editMinerData.rfc" name="editRfc">
+            <input type="text" id="editRfc" [(ngModel)]="editMinerData.rfc" name="editRfc" #editRfcCtrl="ngModel" required minlength="10" maxlength="13">
+            @if ((editMinerForm.submitted || editRfcCtrl.touched || editRfcCtrl.dirty) && editRfcCtrl.errors?.['required']) {
+              <div class="error-message">El RFC es obligatorio</div>
+            }
+            @if ((editMinerForm.submitted || editRfcCtrl.touched || editRfcCtrl.dirty) && editRfcCtrl.errors?.['minlength']) {
+              <div class="error-message">El RFC debe tener al menos 10 caracteres</div>
+            }
           </div>
           <div class="form-group">
             <label for="editAddress">Dirección</label>
-            <textarea id="editAddress" [(ngModel)]="editMinerData.address" name="editAddress" rows="3"></textarea>
+            <textarea id="editAddress" [(ngModel)]="editMinerData.address" name="editAddress" rows="3" #editAddressCtrl="ngModel" required></textarea>
+            @if ((editMinerForm.submitted || editAddressCtrl.touched || editAddressCtrl.dirty) && editAddressCtrl.errors?.['required']) {
+              <div class="error-message">La dirección es obligatoria</div>
+            }
           </div>
+          @if (errorMessage) {
+            <div class="error-message">{{ errorMessage }}</div>
+          }
           <div class="modal-actions">
+             @if (editFormError) {
+               <div class="error-message">{{ editFormError }}</div>
+             }
             <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
               <i class="fas fa-save"></i>
               Guardar Cambios
             </button>
@@ -377,7 +448,6 @@
         <div class="detail-row"><strong>Teléfono:</strong> {{ detailMinerData.phone }}</div>
         <div class="detail-row"><strong>Dirección:</strong> {{ detailMinerData.address }}</div>
         <div class="detail-row"><strong>Fecha de Nacimiento:</strong> {{ detailMinerData.birthDate | date:'dd/MM/yyyy' }}</div>
-        <div class="detail-row"><strong>Estado:</strong> {{ detailMinerData.status }}</div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
         </div>

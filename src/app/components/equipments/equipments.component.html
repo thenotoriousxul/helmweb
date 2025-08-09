@@ -171,7 +171,6 @@
     </div>
   </section>
 
-  <!-- Create Equipment Modal -->
   <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
     <div class="modal-content glass" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -182,7 +181,7 @@
       </div>
       
       <div class="modal-body">
-        <form (ngSubmit)="createTeam()">
+        <form (ngSubmit)="createTeam(createTeamForm)" #createTeamForm="ngForm">
           <div class="form-group">
             <label for="nombre">Nombre del Equipo</label>
             <input 
@@ -190,9 +189,13 @@
               id="nombre"
               [(ngModel)]="newTeam.nombre" 
               name="nombre"
+              #nombreCtrl="ngModel"
               placeholder="Ej: Equipo Mina Norte"
               required
             >
+            @if ((createTeamForm.submitted || nombreCtrl.touched || nombreCtrl.dirty) && nombreCtrl.errors?.['required']) {
+              <div class="error-message">El nombre es obligatorio</div>
+            }
           </div>
           
           <div class="form-group">
@@ -202,16 +205,21 @@
               id="zona"
               [(ngModel)]="newTeam.zona" 
               name="zona"
+              #zonaCtrl="ngModel"
               placeholder="Ej: Zona A-12"
               required
             >
+            @if ((createTeamForm.submitted || zonaCtrl.touched || zonaCtrl.dirty) && zonaCtrl.errors?.['required']) {
+              <div class="error-message">La zona es obligatoria</div>
+            }
+
           </div>
           
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
               Cancelar
             </button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
               <i class="fas fa-plus"></i>
               Crear Equipo
             </button>
@@ -253,21 +261,32 @@
         </button>
       </div>
       <div class="modal-body">
-        <form (ngSubmit)="saveEditTeam()">
+        <form (ngSubmit)="saveEditTeam(editTeamForm)" #editTeamForm="ngForm">
+          
           <div class="form-group">
             <label for="editNombre">Nombre</label>
-            <input type="text" id="editNombre" [(ngModel)]="editTeamData.nombre" name="editNombre" required>
+            <input type="text" id="editNombre" [(ngModel)]="editTeamData.nombre" name="editNombre" #editNombreCtrl="ngModel" required>
+            @if ((editTeamForm.submitted || editNombreCtrl.touched || editNombreCtrl.dirty) && editNombreCtrl.errors?.['required']) {
+              <div class="error-message">El nombre es obligatorio</div>
+            }
           </div>
           <div class="form-group">
             <label for="editZona">Zona</label>
-            <input type="text" id="editZona" [(ngModel)]="editTeamData.zona" name="editZona" required>
+            <input type="text" id="editZona" [(ngModel)]="editTeamData.zona" name="editZona" #editZonaCtrl="ngModel" required>
+            @if ((editTeamForm.submitted || editZonaCtrl.touched || editZonaCtrl.dirty) && editZonaCtrl.errors?.['required']) {
+              <div class="error-message">La zona es obligatoria</div>
+            }
           </div>
+          @if (editFormError) {
+            <div class="error-message">{{ editFormError }}</div>
+          }
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
               <i class="fas fa-save"></i>
               Guardar Cambios
             </button>
+            
           </div>
         </form>
       </div>

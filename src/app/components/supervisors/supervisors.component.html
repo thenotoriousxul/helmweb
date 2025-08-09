@@ -198,7 +198,7 @@
       </div>
       
       <div class="modal-body">
-        <form (ngSubmit)="createSupervisor()">
+        <form (ngSubmit)="createSupervisor(inviteForm)" #inviteForm="ngForm">
           <div class="form-group">
             <label for="email">Correo Electrónico</label>
             <input 
@@ -206,19 +206,20 @@
               id="email"
               [(ngModel)]="newSupervisor.email" 
               name="email"
+              #emailCtrl="ngModel"
               placeholder="correo@ejemplo.com"
               required
             >
-            <small class="form-help">
-              Se enviará un código de acceso único al correo proporcionado
-            </small>
+            @if (formError) {
+              <div class="error-message">{{ formError }}</div>
+            }
           </div>
           
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
               Cancelar
             </button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
               <i class="fas fa-paper-plane"></i>
               Enviar Invitación
             </button>

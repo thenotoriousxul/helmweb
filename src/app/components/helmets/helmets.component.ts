@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -32,8 +32,11 @@ export class HelmetsComponent implements OnInit {
   detailHelmetData: Partial<Helmet> = {};
   showEditModal = false;
   editHelmetData: Partial<Helmet> = {};
+  originalEditHelmetData: Partial<Helmet> = {};
   showDeleteModal = false;
   helmetToDelete: Helmet | null = null;
+  errorMessage = '';
+  isLoading = false;
 
   // Modal de asignación
   showAssignModal = false;
@@ -46,7 +49,8 @@ export class HelmetsComponent implements OnInit {
     private router: Router,
     private helmetService: HelmetService,
     private authService: AuthService,
-    private mineroService: MineroService
+    private mineroService: MineroService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -59,11 +63,13 @@ export class HelmetsComponent implements OnInit {
       next: (helmets) => {
         this.helmets = helmets || [];
         this.filteredHelmets = [...this.helmets];
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading helmets:', err);
         this.helmets = [];
         this.filteredHelmets = [];
+        this.cdr.detectChanges();
       }
     });
   }
@@ -71,6 +77,7 @@ export class HelmetsComponent implements OnInit {
   loadStats() {
     this.helmetService.getHelmetStats().subscribe(stats => {
       this.helmetStats = stats;
+      this.cdr.detectChanges();
     });
   }
 
@@ -138,6 +145,7 @@ export class HelmetsComponent implements OnInit {
 
   editHelmet(helmet: Helmet) {
     this.editHelmetData = { ...helmet };
+    this.originalEditHelmetData = { ...helmet };
     this.showEditModal = true;
   }
 
@@ -146,12 +154,47 @@ export class HelmetsComponent implements OnInit {
     this.editHelmetData = {};
   }
 
-  saveEditHelmet() {
+  private isEditUnchanged(): boolean {
+    const serialNow = (this.editHelmetData.serialNumber || '').trim();
+    const serialOrig = (this.originalEditHelmetData.serialNumber || '').trim();
+    const uuidNow = (this.editHelmetData.uuid || '').trim();
+    const uuidOrig = (this.originalEditHelmetData.uuid || '').trim();
+    const statusNow = (this.editHelmetData.status || '').toString();
+    const statusOrig = (this.originalEditHelmetData.status || '').toString();
+    return serialNow === serialOrig && uuidNow === uuidOrig && statusNow === statusOrig;
+  }
+
+  editFormError = '';
+
+  saveEditHelmet(form?: any) {
+    if (form && form.controls) Object.values(form.controls).forEach((c: any) => c.markAsTouched());
+    this.editFormError = '';
+    if (!this.editHelmetData.id) return;
+
+    const serialOk = !!this.editHelmetData.serialNumber && (this.editHelmetData.serialNumber as string).trim().length >= 3;
+    const uuidOk = !!this.editHelmetData.uuid && (this.editHelmetData.uuid as string).trim().length > 0;
+    const statusOk = !!this.editHelmetData.status && (this.editHelmetData.status as string).trim().length > 0;
+
+    if (!serialOk) { this.editFormError = 'El serial es obligatorio (mín. 3 caracteres)'; return; }
+    if (!uuidOk) { this.editFormError = 'El UUID es obligatorio'; return; }
+    if (!statusOk) { this.editFormError = 'El estado es obligatorio'; return; }
+    if (this.isEditUnchanged()) { this.editFormError = 'No hay cambios para guardar.'; return; }
+
     if (this.editHelmetData.id) {
-      this.helmetService.updateHelmet(this.editHelmetData.id, this.editHelmetData).subscribe(() => {
-        this.loadHelmets();
-        this.loadStats();
-        this.closeEditModal();
+      this.isLoading = true;
+      this.helmetService.updateHelmet(this.editHelmetData.id, this.editHelmetData).subscribe({
+        next: () => {
+          this.loadHelmets();
+          this.loadStats();
+          this.closeEditModal();
+          alert('Casco actualizado exitosamente');
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error actualizando casco:', err);
+          this.editFormError = err?.error?.message || 'Error al actualizar casco';
+          this.isLoading = false;
+        }
       });
     }
   }
@@ -163,10 +206,17 @@ export class HelmetsComponent implements OnInit {
 
   confirmDeleteHelmet() {
     if (this.helmetToDelete) {
-      this.helmetService.deleteHelmet(this.helmetToDelete.id).subscribe(() => {
-        this.loadHelmets();
-        this.loadStats();
-        this.closeDeleteModal();
+      this.helmetService.deleteHelmet(this.helmetToDelete.id).subscribe({
+        next: () => {
+          this.loadHelmets();
+          this.loadStats();
+          this.closeDeleteModal();
+          alert('Casco eliminado exitosamente');
+        },
+        error: (err) => {
+          console.error('Error eliminando casco:', err);
+          alert(err?.error?.message || 'Error al eliminar casco');
+        }
       });
     }
   }
@@ -178,9 +228,16 @@ export class HelmetsComponent implements OnInit {
 
   activateHelmet(helmet: Helmet) {
     if (helmet.status === 'inactivo') {
-      this.helmetService.activateHelmet(helmet.serialNumber).subscribe(() => {
-        this.loadHelmets();
-        this.loadStats();
+      this.helmetService.activateHelmet(helmet.serialNumber).subscribe({
+        next: () => {
+          this.loadHelmets();
+          this.loadStats();
+          alert('Casco activado exitosamente');
+        },
+        error: (err) => {
+          console.error('Error activando casco:', err);
+          alert(err?.error?.message || 'Error al activar casco');
+        }
       });
     }
   }
@@ -244,9 +301,16 @@ export class HelmetsComponent implements OnInit {
 
   unassignHelmet(helmet: Helmet) {
     if (helmet.status === 'activo-asignado') {
-      this.helmetService.unassignHelmet(helmet.id).subscribe(() => {
-        this.loadHelmets();
-        this.loadStats();
+      this.helmetService.unassignHelmet(helmet.id).subscribe({
+        next: () => {
+          this.loadHelmets();
+          this.loadStats();
+          alert('Casco desasignado exitosamente');
+        },
+        error: (err) => {
+          console.error('Error al desasignar casco:', err);
+          alert(err?.error?.message || 'Error al desasignar casco');
+        }
       });
     }
   }
@@ -261,17 +325,32 @@ export class HelmetsComponent implements OnInit {
     this.newHelmet = {};
   }
 
-  createHelmet() {
-    if (this.newHelmet.serialNumber) {
+  createHelmet(form?: any) {
+    if (form && form.controls) Object.values(form.controls).forEach((c: any) => c.markAsTouched());
+    this.errorMessage = '';
+    const serialOk = !!this.newHelmet.serialNumber && (this.newHelmet.serialNumber as string).trim().length >= 3
+    if (serialOk) {
+      this.isLoading = true;
       const currentUser = this.authService.getCurrentUser();
       if (currentUser) {
         this.newHelmet.supervisorId = currentUser.id;
-        this.helmetService.createHelmet(this.newHelmet).subscribe(() => {
-          this.loadHelmets();
-          this.loadStats();
-          this.closeCreateModal();
+        this.helmetService.createHelmet(this.newHelmet).subscribe({
+          next: () => {
+            this.loadHelmets();
+            this.loadStats();
+            this.closeCreateModal();
+            alert('Casco creado exitosamente');
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('Error creando casco:', err);
+            this.errorMessage = err?.error?.message || 'Error al crear casco';
+            this.isLoading = false;
+          }
         });
       }
+    } else {
+      this.errorMessage = 'Ingresa un identificador válido (mínimo 3 caracteres).';
     }
   }
 
@@ -298,5 +377,10 @@ export class HelmetsComponent implements OnInit {
       { value: 'activo-sin-asignar', label: 'Activo Sin Asignar' },
       { value: 'activo-asignado', label: 'Activo Asignado' }
     ];
+  }
+
+  getUnassignedCount(): number {
+    const value = (this.helmetStats.active || 0) - (this.helmetStats.assigned || 0)
+    return value < 0 ? 0 : value
   }
 } 

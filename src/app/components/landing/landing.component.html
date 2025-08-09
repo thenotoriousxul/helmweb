@@ -110,30 +110,19 @@
                     </div>
                   </div>
                   
-                  <div class="sensor-widget movement" [class.expanded]="expandedSensor === 'movement'" (click)="toggleSensor('movement')">
-                    <span class="sensor-value" [class.changing]="movement !== lastMovement">{{ movement }}</span>
-                    <span class="sensor-label">Movimiento</span>
+                  <!-- Sustituir Movimiento por Frecuencia Cardíaca -->
+                  <div class="sensor-widget hr" [class.expanded]="expandedSensor === 'hr'" (click)="toggleSensor('hr')">
+                    <span class="sensor-value">72 bpm</span>
+                    <span class="sensor-label">Frecuencia Cardíaca</span>
                     
-                    <!-- Datos expandidos de movimiento -->
-                    <div class="sensor-details" *ngIf="expandedSensor === 'movement'">
+                    <div class="sensor-details" *ngIf="expandedSensor === 'hr'">
                       <div class="detail-row">
-                        <span class="detail-label">Normal:</span>
-                        <span class="detail-value">{{ getSensorData('movement')?.normalPercentage }}%</span>
+                        <span class="detail-label">Rango Normal:</span>
+                        <span class="detail-value">60 - 100 bpm</span>
                       </div>
                       <div class="detail-row">
-                        <span class="detail-label">Alertas:</span>
-                        <span class="detail-value">{{ getSensorData('movement')?.alerts }}</span>
-                      </div>
-                      <div class="detail-row">
-                        <span class="detail-label">Última alerta:</span>
-                        <span class="detail-value">{{ getSensorData('movement')?.lastAlert }}</span>
-                      </div>
-                      <!-- Gráfico de estado -->
-                      <div class="status-chart">
-                        <div class="status-bar">
-                          <div class="status-fill normal" [style.width.%]="getSensorData('movement')?.normalPercentage"></div>
-                          <div class="status-fill alert" [style.width.%]="100 - (getSensorData('movement')?.normalPercentage || 0)"></div>
-                        </div>
+                        <span class="detail-label">Promedio:</span>
+                        <span class="detail-value">74 bpm</span>
                       </div>
                     </div>
                   </div>
@@ -173,47 +162,24 @@
                     </div>
                   </div>
                   
-                  <div class="sensor-widget environmental" [class.expanded]="expandedSensor === 'environmental'" (click)="toggleSensor('environmental')">
-                    <span class="sensor-value">Ambiental</span>
-                    <span class="sensor-label">Presión/Humedad</span>
+                  <!-- Sustituir Ambiental por MQ7 (Gas) -->
+                  <div class="sensor-widget mq7" [class.expanded]="expandedSensor === 'mq7'" (click)="toggleSensor('mq7')">
+                    <span class="sensor-value">3977 ppm</span>
+                    <span class="sensor-label">MQ7 Gas</span>
                     
-                    <!-- Datos expandidos ambientales -->
-                    <div class="sensor-details" *ngIf="expandedSensor === 'environmental'">
+                    <div class="sensor-details" *ngIf="expandedSensor === 'mq7'">
                       <div class="detail-row">
-                        <span class="detail-label">Presión:</span>
-                        <span class="detail-value">1013 hPa</span>
+                        <span class="detail-label">Nivel:</span>
+                        <span class="detail-value">Moderado</span>
                       </div>
                       <div class="detail-row">
-                        <span class="detail-label">Humedad:</span>
-                        <span class="detail-value">65%</span>
-                      </div>
-                      <div class="detail-row">
-                        <span class="detail-label">Estado:</span>
-                        <span class="detail-value">Óptimo</span>
+                        <span class="detail-label">Última lectura:</span>
+                        <span class="detail-value">Hace 3s</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div class="sensor-widget battery" [class.expanded]="expandedSensor === 'battery'" (click)="toggleSensor('battery')">
-                    <span class="sensor-value">85%</span>
-                    <span class="sensor-label">Batería</span>
-                    
-                    <!-- Datos expandidos de batería -->
-                    <div class="sensor-details" *ngIf="expandedSensor === 'battery'">
-                      <div class="detail-row">
-                        <span class="detail-label">Tiempo restante:</span>
-                        <span class="detail-value">32h</span>
-                      </div>
-                      <div class="detail-row">
-                        <span class="detail-label">Estado:</span>
-                        <span class="detail-value">Cargando</span>
-                      </div>
-                      <div class="detail-row">
-                        <span class="detail-label">Ciclos:</span>
-                        <span class="detail-value">127</span>
-                      </div>
-                    </div>
-                  </div>
+                  <!-- Quitar Batería -->
                   
                 
                   

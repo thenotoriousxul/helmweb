@@ -53,7 +53,7 @@
           <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ helmetStats.active - helmetStats.assigned }}</h3>
+          <h3>{{ getUnassignedCount() }}</h3>
           <p>Sin Asignar</p>
         </div>
       </div>
@@ -125,41 +125,6 @@
         </div>
         
         <div class="card-body">
-          <div class="sensor-readings">
-            <div class="sensor-item">
-              <div class="sensor-icon">
-                <i class="fas fa-thermometer-half"></i>
-              </div>
-              <div class="sensor-data">
-                <span class="sensor-value" [style.color]="getTemperatureColor(helmet.temperature || 0)">
-                  {{ helmet.temperature || 0 }}°C
-                </span>
-                <span class="sensor-label">Temperatura</span>
-              </div>
-            </div>
-            
-            <div class="sensor-item">
-              <div class="sensor-icon">
-                <i class="fas fa-battery-three-quarters"></i>
-              </div>
-              <div class="sensor-data">
-                <span class="sensor-value" [style.color]="getBatteryColor(helmet.batteryLevel || 0)">
-                  {{ helmet.batteryLevel || 0 }}%
-                </span>
-                <span class="sensor-label">Batería</span>
-              </div>
-            </div>
-            
-            <div class="sensor-item">
-              <div class="sensor-icon">
-                <i class="fas fa-map-marker-alt"></i>
-              </div>
-              <div class="sensor-data">
-                <span class="sensor-value">{{ helmet.location || 'N/A' }}</span>
-                <span class="sensor-label">Ubicación</span>
-              </div>
-            </div>
-          </div>
           
           <div class="helmet-details">
             <div class="detail-item" *ngIf="helmet.equipmentName">
@@ -248,7 +213,7 @@
       </div>
       
       <div class="modal-body">
-        <form (ngSubmit)="createHelmet()">
+        <form (ngSubmit)="createHelmet(createHelmetForm)" #createHelmetForm="ngForm">
           <div class="form-group">
             <label for="serialNumber">Identificador Físico del Casco</label>
             <input 
@@ -256,16 +221,20 @@
               id="serialNumber"
               [(ngModel)]="newHelmet.serialNumber" 
               name="serialNumber"
+              #serialCtrl="ngModel"
               placeholder="Ej: HELM-001"
-              required
+              required minlength="3"
             >
+            @if (errorMessage) {
+              <div class="error-message">{{ errorMessage }}</div>
+            }
           </div>
           
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
               Cancelar
             </button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
               <i class="fas fa-save"></i>
               Registrar Casco
             </button>
@@ -294,8 +263,7 @@
         <div class="detail-row"><strong>Supervisor:</strong> {{ detailHelmetData.supervisorId }}</div>
         <div class="detail-row"><strong>Última señal:</strong> {{ detailHelmetData.lastHeartbeat }}</div>
         <div class="detail-row"><strong>Temperatura:</strong> {{ detailHelmetData.temperature || 0 }}°C</div>
-        <div class="detail-row"><strong>Batería:</strong> {{ detailHelmetData.batteryLevel || 0 }}%</div>
-        <div class="detail-row"><strong>Ubicación:</strong> {{ detailHelmetData.location || 'N/A' }}</div>
+        <!-- Se eliminan Batería y Ubicación por no formar parte de los sensores activos -->
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
         </div>
@@ -328,7 +296,7 @@
             <div class="card-header">
               <div class="miner-info">
                 <div class="miner-avatar">
-                  <span>{{ miner.fullName?.charAt(0) || 'M' }}</span>
+                  <span>{{ miner.fullName.charAt(0) || 'M' }}</span>
                 </div>
                 <div class="miner-details">
                   <h3>{{ miner.fullName }}</h3>
@@ -336,7 +304,7 @@
                   <span class="miner-rfc">{{ miner.rfc || 'RFC no especificado' }}</span>
                 </div>
               </div>
-              <div class="status-badge">{{ miner.status || 'offline' }}</div>
+              <!-- Se elimina visualización de estado -->
             </div>
             <div class="card-body">
               <div class="miner-details-grid">
@@ -375,27 +343,44 @@
         </button>
       </div>
       <div class="modal-body">
-        <form (ngSubmit)="saveEditHelmet()">
+        <form (ngSubmit)="saveEditHelmet(editHelmetForm)" #editHelmetForm="ngForm">
           <div class="form-group">
             <label for="editSerialNumber">Serial</label>
-            <input type="text" id="editSerialNumber" [(ngModel)]="editHelmetData.serialNumber" name="editSerialNumber" required>
+            <input type="text" id="editSerialNumber" [(ngModel)]="editHelmetData.serialNumber" name="editSerialNumber" #editSerialCtrl="ngModel" required minlength="3">
+            @if ((editHelmetForm.submitted || editSerialCtrl.touched || editSerialCtrl.dirty) && editSerialCtrl.errors?.['required']) {
+              <div class="error-message">El serial es obligatorio</div>
+            }
+            @if ((editHelmetForm.submitted || editSerialCtrl.touched || editSerialCtrl.dirty) && editSerialCtrl.errors?.['minlength']) {
+              <div class="error-message">El serial debe tener al menos 3 caracteres</div>
+            }
           </div>
           <div class="form-group">
             <label for="editUuid">UUID</label>
-            <input type="text" id="editUuid" [(ngModel)]="editHelmetData.uuid" name="editUuid">
+            <input type="text" id="editUuid" [(ngModel)]="editHelmetData.uuid" name="editUuid" #editUuidCtrl="ngModel" required>
+            @if ((editHelmetForm.submitted || editUuidCtrl.touched || editUuidCtrl.dirty) && editUuidCtrl.errors?.['required']) {
+              <div class="error-message">El UUID es obligatorio</div>
+            }
           </div>
           <div class="form-group">
             <label for="editStatus">Estado</label>
-            <select id="editStatus" [(ngModel)]="editHelmetData.status" name="editStatus">
+            <select id="editStatus" [(ngModel)]="editHelmetData.status" name="editStatus" #editStatusCtrl="ngModel" required>
               <option value="inactivo">Inactivo</option>
               <option value="activo">Activo</option>
               <option value="activo-sin-asignar">Activo Sin Asignar</option>
               <option value="activo-asignado">Activo Asignado</option>
             </select>
+            @if ((editHelmetForm.submitted || editStatusCtrl.touched || editStatusCtrl.dirty) && editStatusCtrl.errors?.['required']) {
+              <div class="error-message">El estado es obligatorio</div>
+            }
           </div>
+
+          @if (editFormError) {
+            <div class="error-message">{{ editFormError }}</div>
+          }
+
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
               <i class="fas fa-save"></i>
               Guardar Cambios
             </button>

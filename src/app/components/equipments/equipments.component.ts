@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -31,18 +31,22 @@ export class EquipmentsComponent implements OnInit {
   detailTeamData: Partial<Team> = {};
   showEditModal = false;
   editTeamData: Partial<Team> = {};
+  originalEditTeamData: Partial<Team> = {};
   showDeleteModal = false;
   teamToDelete: Team | null = null;
   showAssignMinerModal = false;
   teamToAssignMiner: Team | null = null;
   availableMiners: any[] = [];
   selectedMinerId: string = '';
+  formError = '';
+  editFormError = '';
 
   constructor(
     private router: Router,
     private teamService: TeamService,
     private authService: AuthService,
-    private mineroService: MineroService
+    private mineroService: MineroService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -58,13 +62,14 @@ export class EquipmentsComponent implements OnInit {
         this.filteredTeams = [...this.teams];
         this.loading = false;
         // asegurar refresco inmediato de la UI
-        // (Angular 20 con TS estricto puede retrasar detección en algunos casos)
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading teams:', error);
         this.teams = [];
         this.filteredTeams = [];
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -73,6 +78,7 @@ export class EquipmentsComponent implements OnInit {
     this.teamService.getTeamStats().subscribe({
       next: (stats) => {
         this.stats = stats;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading stats:', error);
@@ -164,6 +170,8 @@ export class EquipmentsComponent implements OnInit {
 
   editTeam(team: Team) {
     this.editTeamData = { ...team };
+    this.originalEditTeamData = { ...team };
+    this.editFormError = '';
     this.showEditModal = true;
   }
 
@@ -172,16 +180,39 @@ export class EquipmentsComponent implements OnInit {
     this.editTeamData = {};
   }
 
-  saveEditTeam() {
+  private isEditUnchanged(): boolean {
+    const nameNow = (this.editTeamData.nombre || '').trim();
+    const nameOrig = (this.originalEditTeamData.nombre || '').trim();
+    const zoneNow = (this.editTeamData.zona || '').trim();
+    const zoneOrig = (this.originalEditTeamData.zona || '').trim();
+    return nameNow === nameOrig && zoneNow === zoneOrig;
+  }
+
+  saveEditTeam(form?: any) {
+    if (form && form.controls) Object.values(form.controls).forEach((c: any) => c.markAsTouched());
+    this.editFormError = '';
+    if (!this.editTeamData.id) return;
+    const nombreOk = !!this.editTeamData.nombre && (this.editTeamData.nombre as string).trim().length > 0;
+    const zonaOk = !!this.editTeamData.zona && (this.editTeamData.zona as string).trim().length > 0;
+
+    if(!nombreOk) { this.editFormError = 'El nombre es obligatorio'; return; }
+    if(!zonaOk) { this.editFormError = 'La zona es obligatoria'; return; }
+    if (this.isEditUnchanged()) { this.editFormError = 'No hay cambios para guardar.'; return; }
+
     if (this.editTeamData.id) {
+      this.loading = true;
       this.teamService.updateTeam(this.editTeamData.id, this.editTeamData).subscribe({
         next: () => {
           this.loadTeams();
           this.loadStats();
           this.closeEditModal();
+          alert('Equipo actualizado exitosamente');
+          this.loading = false;
         },
-        error: () => {
-          alert('Error al actualizar el equipo.');
+        error: (err) => {
+          console.error('Error al actualizar equipo:', err);
+          this.editFormError = err?.error?.message || 'Error al actualizar el equipo.';
+          this.loading = false;
         }
       });
     }
@@ -199,9 +230,11 @@ export class EquipmentsComponent implements OnInit {
           this.loadTeams();
           this.loadStats();
           this.closeDeleteModal();
+          alert('Equipo eliminado exitosamente');
         },
-        error: () => {
-          alert('Error al eliminar el equipo.');
+        error: (err) => {
+          console.error('Error al eliminar equipo:', err);
+          alert(err?.error?.message || 'Error al eliminar el equipo.');
         }
       });
     }
@@ -222,8 +255,13 @@ export class EquipmentsComponent implements OnInit {
     this.newTeam = {};
   }
 
-  createTeam() {
-    if (this.newTeam.nombre && this.newTeam.zona) {
+  createTeam(form?: any) {
+    if (form && form.controls) Object.values(form.controls).forEach((c: any) => c.markAsTouched());
+    this.formError = '';
+    const nombreOk = !!this.newTeam.nombre && (this.newTeam.nombre as string).trim().length > 0
+    const zonaOk = !!this.newTeam.zona && (this.newTeam.zona as string).trim().length > 0
+    if (nombreOk && zonaOk) {
+      this.loading = true;
       const currentUser = this.authService.getCurrentUser();
       
       // Preparar los datos del equipo
@@ -253,14 +291,17 @@ export class EquipmentsComponent implements OnInit {
           this.loadTeams();
           this.loadStats();
           this.closeCreateModal();
+          this.loading = false;
         },
         error: (error) => {
           console.error('Error creating team:', error);
-          alert('Error al crear el equipo: ' + (error.error?.message || error.message || 'Error desconocido'));
+          this.formError = error?.error?.message || 'Error al crear el equipo';
+          this.loading = false;
         }
       });
     } else {
-      alert('Por favor completa todos los campos requeridos');
+      if (!nombreOk) this.formError = 'El nombre es obligatorio';
+      else if (!zonaOk) this.formError = 'La zona es obligatoria';
     }
   }
 
@@ -288,9 +329,11 @@ export class EquipmentsComponent implements OnInit {
         next: () => {
           this.loadTeams();
           this.closeAssignMinerModal();
+          alert('Minero asignado al equipo');
         },
-        error: () => {
-          alert('Error al asignar minero al equipo.');
+        error: (err) => {
+          console.error('Error asignando minero:', err);
+          alert(err?.error?.message || 'Error al asignar minero al equipo.');
         }
       });
     }

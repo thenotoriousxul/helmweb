@@ -14,11 +14,10 @@ import { AuthService } from '../../services/auth.service';
 export class LandingComponent implements OnInit, OnDestroy {
   temperature: number = 36.5;
   displayedTemperature: number = 36.5;
-  movement: string = 'Normal';
-  lastMovement: string = 'Normal';
+  // Reemplazar "movimiento" por HR/MQ7 en el mock, mantenemos solo temperatura/gps en demo
   gps: { x: number, y: number } = { x: 50, y: 50 };
   displayedGps: { x: number, y: number } = { x: 50, y: 50 };
-  private movementStates = ['Normal', 'Caída', 'Inactivo', 'Movimiento'];
+  private movementStates: string[] = [];
   private gpsDirection = 1;
   private animationFrameId: any;
   private movementIntervalId: any;
@@ -38,43 +37,29 @@ export class LandingComponent implements OnInit, OnDestroy {
     {
       iconClass: 'fas fa-thermometer-half',
       iconType: 'temp',
-      title: 'Monitoreo de Temperatura',
-      description: 'Control en tiempo real de la temperatura corporal de cada minero con alertas automáticas.',
+      title: 'Temperatura Corporal',
+      description: 'Lectura en tiempo real (tempC) con umbrales y alertas configurables.',
       toggled: false
     },
     {
-      iconClass: 'fas fa-running',
-      iconType: 'movement',
-      title: 'Detección de Movimiento',
-      description: 'Sensores de acelerómetro que detectan caídas y movimientos anómalos instantáneamente.',
+      iconClass: 'fas fa-heartbeat',
+      iconType: 'hr',
+      title: 'Frecuencia Cardíaca',
+      description: 'Monitoreo de ritmo cardiaco (bpm) para detectar anomalías y fatiga.',
+      toggled: false
+    },
+    {
+      iconClass: 'fas fa-burn',
+      iconType: 'mq7',
+      title: 'Gas MQ7 (CO)',
+      description: 'Medición de MQ7 (ppm) para alerta temprana por presencia de monóxido de carbono.',
       toggled: false
     },
     {
       iconClass: 'fas fa-map-marker-alt',
       iconType: 'gps',
       title: 'Rastreo GPS',
-      description: 'Ubicación precisa de cada minero en tiempo real con geofencing inteligente.',
-      toggled: false
-    },
-    {
-      iconClass: 'fas fa-tachometer-alt',
-      iconType: 'pressure',
-      title: 'Monitoreo Ambiental',
-      description: 'Control de presión atmosférica y humedad para condiciones óptimas de trabajo.',
-      toggled: false
-    },
-    {
-      iconClass: 'fas fa-battery-three-quarters',
-      iconType: 'battery',
-      title: 'Batería de Larga Duración',
-      description: 'Hasta 48 horas de autonomía con alertas de batería baja y carga rápida.',
-      toggled: false
-    },
-    {
-      iconClass: 'fas fa-chart-line',
-      iconType: 'analytics',
-      title: 'Analytics Avanzados',
-      description: 'Reportes detallados y análisis predictivo para optimizar la seguridad.',
+      description: 'Ubicación con gpsFix, satélites y coordenadas para visualización en mapa.',
       toggled: false
     }
   ];
@@ -108,18 +93,14 @@ export class LandingComponent implements OnInit, OnDestroy {
     animate();
 
     this.movementIntervalId = setInterval(() => {
-      console.log('Actualizando valores...');
+      // Simular solo temperatura y un ligero movimiento del GPS
       this.temperature = +(35.5 + Math.random() * 3).toFixed(1);
-      this.lastMovement = this.movement;
-      this.movement = this.movementStates[Math.floor(Math.random() * this.movementStates.length)];
       if (this.gps.x > 80) this.gpsDirection = -1;
       if (this.gps.x < 20) this.gpsDirection = 1;
       this.gps.x += this.gpsDirection * (Math.random() * 2 + 0.5);
       this.gps.y += (Math.random() - 0.5) * 2;
       if (this.gps.y < 20) this.gps.y = 20;
       if (this.gps.y > 80) this.gps.y = 80;
-
-      console.log('Nueva temperatura:', this.temperature, 'Nuevo movimiento:', this.movement);
       this.cdr.detectChanges();
     }, 2000);
   }
@@ -179,15 +160,22 @@ export class LandingComponent implements OnInit, OnDestroy {
           max: Math.max(...this.sensorHistory.temperature).toFixed(1),
           trend: this.sensorHistory.temperature[this.sensorHistory.temperature.length - 1] > this.sensorHistory.temperature[0] ? '↑' : '↓'
         };
-      case 'movement':
-        const normalCount = this.sensorHistory.movement.filter(m => m === 'Normal').length;
-        const totalCount = this.sensorHistory.movement.length;
+      case 'hr':
         return {
-          current: this.movement,
-          normalPercentage: Math.round((normalCount / totalCount) * 100),
-          alerts: this.sensorHistory.movement.filter(m => m !== 'Normal').length,
-          lastAlert: this.sensorHistory.movement.find(m => m !== 'Normal') || 'Ninguna'
-        };
+          current: 72,
+          average: 74,
+          min: 60,
+          max: 100,
+          trend: 'stable'
+        } as any;
+      case 'mq7':
+        return {
+          current: 3977,
+          average: 4000,
+          min: 3500,
+          max: 4500,
+          trend: 'stable'
+        } as any;
       case 'gps':
         const lastPos = this.sensorHistory.gps[this.sensorHistory.gps.length - 1];
         const firstPos = this.sensorHistory.gps[0];

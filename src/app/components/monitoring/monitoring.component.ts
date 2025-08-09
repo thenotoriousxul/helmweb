@@ -210,8 +210,8 @@ export class MonitoringComponent implements OnInit, OnDestroy, AfterViewInit {
           trend: 'stable'
         });
 
-        // Frecuencia cardíaca
-        const hr = helmet.sensors?.bpm ?? helmet.sensors?.heartRate ?? 70;
+        // Frecuencia cardíaca (solo bpm)
+        const hr = helmet.sensors?.bpm ?? 70;
         this.realTimeData.push({
           id: `${helmet.id}-hr`,
           name: `Frecuencia Cardíaca - ${miner.name}`,
@@ -222,16 +222,7 @@ export class MonitoringComponent implements OnInit, OnDestroy, AfterViewInit {
           trend: 'stable'
         });
 
-        // Nivel de batería
-        this.realTimeData.push({
-          id: `${helmet.id}-battery`,
-          name: `Batería - ${miner.name}`,
-          value: helmet.batteryLevel || 85,
-          unit: '%',
-          status: this.getBatteryStatus(helmet.batteryLevel || 85),
-          timestamp: new Date().toISOString(),
-          trend: 'down'
-        });
+        // Quitar batería (no se utiliza)
 
         // MQ7 (Gas)
         if (helmet.sensors?.mq7 !== undefined) {
@@ -408,7 +399,7 @@ export class MonitoringComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getSensorOptions(): { value: string; label: string }[] {
-    const sensors = ['Temperatura', 'Frecuencia Cardíaca', 'Batería', 'MQ7', 'PPG Rojo', 'PPG IR'];
+    const sensors = ['Temperatura', 'Frecuencia Cardíaca', 'MQ7'];
     return [
       { value: 'all', label: 'Todos los sensores' },
       ...sensors.map(sensor => ({ value: sensor, label: sensor }))

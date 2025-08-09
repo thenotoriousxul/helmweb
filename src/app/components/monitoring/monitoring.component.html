@@ -136,19 +136,7 @@
         </div>
         
         <div class="helmet-details">
-          <div class="detail-row">
-            <span class="detail-label">Batería:</span>
-            <div class="battery-indicator">
-              <div class="battery-bar">
-                <div class="battery-fill" 
-                     [style.width.%]="helmet.batteryLevel"
-                     [style.background-color]="getBatteryStatus(helmet.batteryLevel || 0) === 'danger' ? '#dc3545' : 
-                                              getBatteryStatus(helmet.batteryLevel || 0) === 'warning' ? '#ffc107' : '#28a745'">
-                </div>
-              </div>
-              <span class="battery-text">{{ helmet.batteryLevel }}%</span>
-            </div>
-          </div>
+          <!-- Se elimina indicador de batería -->
           
           <div class="detail-row">
             <span class="detail-label">Temperatura:</span>
@@ -160,10 +148,7 @@
             <span class="detail-value">{{ formatTimestamp(helmet.lastHeartbeat || '') }}</span>
           </div>
           
-          <div class="detail-row">
-            <span class="detail-label">Ubicación:</span>
-            <span class="detail-value">{{ helmet.location }}</span>
-          </div>
+          <!-- Se elimina ubicación en tarjeta de casco (GPS ya está en su sección) -->
         </div>
         
         <div class="helmet-actions">
