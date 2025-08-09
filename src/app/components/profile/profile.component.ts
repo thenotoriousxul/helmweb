@@ -36,10 +36,6 @@ interface UserProfile {
           <p>Información personal</p>
         </div>
           <div class="header-right">
-            <button class="btn btn-primary" *ngIf="canEdit" (click)="editProfile()">
-            <i class="fas fa-edit"></i>
-            Editar Perfil
-          </button>
         </div>
       </div>
     </header>
