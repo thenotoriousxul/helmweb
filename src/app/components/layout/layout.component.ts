@@ -69,10 +69,10 @@ interface UserProfile {
               </a>
             </li>
             
-            <!-- Opciones para Admin -->
+            <!-- Cascos: visible para Admin y Supervisor -->
             <li class="nav-item" 
                 [class.active]="activeSidebarItem === 'helmets'"
-                *ngIf="authService.canCreateHelmet()">
+                *ngIf="authService.canViewHelmets()">
               <a (click)="setActiveSidebarItem('helmets')">
                 <i class="fas fa-shield-alt"></i>
                 <span>Cascos</span>

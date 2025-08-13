@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HelmetService, Helmet, HelmetStats } from '../../services/helmet.service';
+import { SensorService, SensorReading } from '../../services/sensor.service';
 import { AuthService } from '../../services/auth.service';
 import { MineroService, Minero } from '../../services/minero.service';
 
@@ -20,6 +21,7 @@ export class HelmetsComponent implements OnInit {
   statusFilter = 'all';
   equipmentFilter = 'all';
   showCreateModal = false;
+  showActivateModal = false;
   newHelmet: Partial<Helmet> = {};
   helmetStats: HelmetStats = {
     total: 0,
@@ -30,6 +32,7 @@ export class HelmetsComponent implements OnInit {
   };
   showDetailModal = false;
   detailHelmetData: Partial<Helmet> = {};
+  detailHelmetDataReadings: SensorReading[] = [];
   showEditModal = false;
   editHelmetData: Partial<Helmet> = {};
   originalEditHelmetData: Partial<Helmet> = {};
@@ -50,6 +53,7 @@ export class HelmetsComponent implements OnInit {
     private helmetService: HelmetService,
     private authService: AuthService,
     private mineroService: MineroService,
+    private sensorService: SensorService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -131,6 +135,23 @@ export class HelmetsComponent implements OnInit {
       next: (data) => {
         this.detailHelmetData = data;
         this.showDetailModal = true;
+        // Cargar lecturas recientes por createdAt para este casco
+        const cascoId = (data.id || '').toString();
+        const start = new Date('1970-01-01T00:00:00Z');
+        const end = new Date('2100-01-01T00:00:00Z');
+        this.sensorService
+          .getReadingsByCreated('cascoId', cascoId, start.toISOString(), end.toISOString(), 5000)
+          .subscribe({
+            next: (readings: SensorReading[]) => {
+              // Adjuntar al detalle para renderizar
+              (this as any).detailHelmetDataReadings = readings;
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              (this as any).detailHelmetDataReadings = [];
+              this.cdr.detectChanges();
+            },
+          });
       },
       error: () => {
         alert('No se pudo obtener el detalle del casco.');
@@ -141,6 +162,7 @@ export class HelmetsComponent implements OnInit {
   closeDetailModal() {
     this.showDetailModal = false;
     this.detailHelmetData = {};
+    this.detailHelmetDataReadings = [];
   }
 
   editHelmet(helmet: Helmet) {
@@ -320,8 +342,18 @@ export class HelmetsComponent implements OnInit {
     this.newHelmet = {};
   }
 
+  openActivateModal() {
+    this.showActivateModal = true;
+    this.newHelmet = {};
+  }
+
   closeCreateModal() {
     this.showCreateModal = false;
+    this.newHelmet = {};
+  }
+
+  closeActivateModal() {
+    this.showActivateModal = false;
     this.newHelmet = {};
   }
 
@@ -354,6 +386,34 @@ export class HelmetsComponent implements OnInit {
     }
   }
 
+  activateNewHelmet(form?: any) {
+    if (form && form.controls) Object.values(form.controls).forEach((c: any) => c.markAsTouched());
+    this.errorMessage = '';
+    const serial = (this.newHelmet.serialNumber || '').toString().trim();
+    const serialOk = serial.length >= 3;
+    if (!serialOk) {
+      this.errorMessage = 'Ingresa un identificador válido (mínimo 3 caracteres).';
+      return;
+    }
+    this.isLoading = true;
+    this.helmetService.activateHelmet(serial).subscribe({
+      next: () => {
+        this.loadHelmets();
+        this.loadStats();
+        this.closeActivateModal();
+        alert('Casco activado exitosamente');
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error activando casco:', err);
+        const msg = (err?.error?.message) || (err?.message) || 'Error al activar casco';
+        alert(msg);
+        this.errorMessage = msg;
+        this.isLoading = false;
+      }
+    });
+  }
+
   getEquipmentTypes(): string[] {
     const equipmentNames = this.helmets
       .map(helmet => helmet.equipmentName)
@@ -367,6 +427,10 @@ export class HelmetsComponent implements OnInit {
 
   canModifyHelmet(): boolean {
     return this.authService.isSupervisor() || this.authService.isAdmin();
+  }
+
+  canActivateHelmet(): boolean {
+    return this.authService.isSupervisor();
   }
 
   getStatusOptions(): { value: string; label: string }[] {

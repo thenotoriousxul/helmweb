@@ -6,10 +6,14 @@
         <h1>Gestión de Cascos</h1>
         <p>Monitorea y administra todos los cascos inteligentes</p>
       </div>
-      <div class="header-right" *ngIf="canCreateHelmet()">
-        <button class="btn btn-primary" (click)="openCreateModal()">
+      <div class="header-right">
+        <button class="btn btn-primary" *ngIf="canCreateHelmet()" (click)="openCreateModal()">
           <i class="fas fa-plus"></i>
-          Nuevo Casco
+          Crear Casco
+        </button>
+        <button class="btn btn-success" *ngIf="canActivateHelmet()" (click)="openActivateModal()">
+          <i class="fas fa-play"></i>
+          Activar Casco
         </button>
       </div>
     </div>
@@ -244,6 +248,44 @@
     </div>
   </div>
 
+  <!-- Activate Helmet Modal (Supervisor) -->
+  <div class="modal-overlay" *ngIf="showActivateModal" (click)="closeActivateModal()">
+    <div class="modal-content glass" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Activar Casco</h3>
+        <button class="close-btn" (click)="closeActivateModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="activateNewHelmet(activateHelmetForm)" #activateHelmetForm="ngForm">
+          <div class="form-group">
+            <label for="serialNumberActivate">Identificador Físico del Casco</label>
+            <input 
+              type="text" 
+              id="serialNumberActivate"
+              [(ngModel)]="newHelmet.serialNumber" 
+              name="serialNumberActivate"
+              #serialActivateCtrl="ngModel"
+              placeholder="Ej: HELM-001"
+              required minlength="3"
+            >
+            @if (errorMessage) {
+              <div class="error-message">{{ errorMessage }}</div>
+            }
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeActivateModal()">Cancelar</button>
+            <button type="submit" class="btn btn-success" [disabled]="isLoading">
+              <i class="fas fa-play"></i>
+              Activar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Detail Helmet Modal -->
   <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
     <div class="modal-content glass" (click)="$event.stopPropagation()">
@@ -264,6 +306,37 @@
         <div class="detail-row"><strong>Última señal:</strong> {{ detailHelmetData.lastHeartbeat }}</div>
         <div class="detail-row"><strong>Temperatura:</strong> {{ detailHelmetData.temperature || 0 }}°C</div>
         <!-- Se eliminan Batería y Ubicación por no formar parte de los sensores activos -->
+
+        <div style="margin-top: 1rem;">
+          <h4>Lecturas de Sensores (última hora)</h4>
+          <div *ngIf="(detailHelmetDataReadings?.length || 0) > 0; else noReadings">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Hora (Local)</th>
+                    <th>Sensor</th>
+                    <th>Valor</th>
+                    <th>Unidad</th>
+                    <th>Alerta</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of detailHelmetDataReadings">
+                    <td>{{ r.timestampLocal || r.createdAtLocal }}</td>
+                    <td>{{ r.sensorId }}</td>
+                    <td>{{ r.value }}</td>
+                    <td>{{ r.unit }}</td>
+                    <td>{{ r.isAlert ? 'Sí' : 'No' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <ng-template #noReadings>
+            <div style="padding: .5rem 0; color: #8892b0;">Sin lecturas recientes</div>
+          </ng-template>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
         </div>
