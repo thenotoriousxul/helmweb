@@ -426,15 +426,6 @@ export class HelmetsComponent implements OnInit {
       this.isLoading = true;
       const currentUser = this.authService.getCurrentUser();
       if (currentUser) {
-        // Si es admin y eligió supervisor, usarlo; si es supervisor, asignar a sí mismo
-        if (this.authService.isAdmin()) {
-          // Mantener el supervisorId seleccionado en el select; si no hay, fallback a admin actual (no ideal) o dejar undefined
-          if (!this.newHelmet.supervisorId) {
-            this.newHelmet.supervisorId = currentUser.id;
-          }
-        } else {
-          this.newHelmet.supervisorId = currentUser.id;
-        }
         this.helmetService.createHelmet(this.newHelmet).subscribe({
           next: () => {
             this.loadHelmets();

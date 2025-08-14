@@ -42,7 +42,7 @@ export class HelmetService {
   private apiUrl = environment.apiUrl;
   private helmetsCache$: Observable<Helmet[]> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Obtiene todos los cascos con cache
@@ -143,6 +143,7 @@ export class HelmetService {
    * Crea un nuevo casco
    */
   createHelmet(helmet: Partial<Helmet>): Observable<Helmet> {
+    console.log('Creating helmet:', helmet);
     this.clearCache(); // Limpiar cache después de modificar
     // Mapear serialNumber a physicalId para el backend
     const payload: any = { ...helmet };
@@ -186,7 +187,7 @@ export class HelmetService {
   deleteHelmet(id: string): Observable<void> {
     this.clearCache();
     return this.http.delete<any>(`${this.apiUrl}/cascos/${id}`, { withCredentials: true }).pipe(
-      map(() => {}),
+      map(() => { }),
       catchError(error => {
         console.error('Error deleting helmet:', error);
         throw error;
