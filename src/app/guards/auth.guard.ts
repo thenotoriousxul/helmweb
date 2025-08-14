@@ -37,7 +37,15 @@ export const authGuard: CanActivateFn = (route, state) => {
       // Si hay roles requeridos, verifica
       if (requiredRoles && !requiredRoles.includes(user.role)) {
         console.log('AuthGuard: Usuario no tiene rol requerido, redirigiendo por rol');
-        return router.createUrlTree(user.role === 'minero' ? ['/my-helmet'] : ['/equipments']);
+        // Redirección específica por rol
+        if (user.role === 'minero') {
+          return router.createUrlTree(['/my-helmet']);
+        } else if (user.role === 'supervisor') {
+          return router.createUrlTree(['/equipments']);
+        } else if (user.role === 'admin') {
+          return router.createUrlTree(['/supervisors']);
+        }
+        return router.createUrlTree(['/equipments']);
       }
       
       console.log('AuthGuard: Acceso permitido');
@@ -60,7 +68,15 @@ export const guestGuard = (route: any, state: any) => {
   if (authService.isAuthenticated()) {
     const user = authService.getCurrentUser();
     console.log('GuestGuard: Usuario ya autenticado, redirigiendo por rol');
-    return router.createUrlTree(user?.role === 'minero' ? ['/my-helmet'] : ['/equipments']);
+    // Redirección específica por rol
+    if (user?.role === 'minero') {
+      return router.createUrlTree(['/my-helmet']);
+    } else if (user?.role === 'supervisor') {
+      return router.createUrlTree(['/equipments']);
+    } else if (user?.role === 'admin') {
+      return router.createUrlTree(['/supervisors']);
+    }
+    return router.createUrlTree(['/equipments']);
   }
 
   console.log('GuestGuard: Acceso permitido para invitados');

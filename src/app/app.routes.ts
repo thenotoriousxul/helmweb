@@ -21,11 +21,11 @@ export const routes: Routes = [
     path: '', 
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'equipments', pathMatch: 'full' },
-      { path: 'equipments', component: EquipmentsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
-      { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
+      { path: '', redirectTo: 'supervisors', pathMatch: 'full' },
+      { path: 'equipments', component: EquipmentsComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
+      { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
       { path: 'my-helmet', component: MyHelmetComponent, canActivate: [authGuard], data: { roles: ['minero'] } },
-      { path: 'miners', component: MinersComponent, canActivate: [authGuard] },
+      { path: 'miners', component: MinersComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
       { path: 'supervisors', component: SupervisorsComponent, canActivate: [authGuard], data: { roles: ['admin'] } },
       // Alerts/Reports removidos
       { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },

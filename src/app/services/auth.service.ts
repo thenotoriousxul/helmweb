@@ -315,32 +315,32 @@ export class AuthService {
   }
 
   canCreateEquipment(): boolean {
-    return this.isSupervisor() || this.isAdmin();
+    return this.isSupervisor(); // Solo supervisores pueden crear equipos
   }
 
   canCreateMiner(): boolean {
-    return this.isSupervisor() || this.isAdmin();
+    return this.isSupervisor(); // Solo supervisores pueden crear mineros
   }
 
   canCreateHelmet(): boolean {
-    // Solo admin crea cascos. Supervisor solo puede activar.
-    return this.isAdmin();
+    // Solo supervisores pueden crear cascos.
+    return this.isSupervisor();
   }
 
   canViewHelmets(): boolean {
-    return this.isSupervisor() || this.isAdmin();
+    return this.isSupervisor(); // Solo supervisores pueden ver cascos
   }
 
   canModifyEquipment(): boolean {
-    return this.isSupervisor() || this.isAdmin();
+    return this.isSupervisor(); // Solo supervisores pueden modificar equipos
   }
 
   canViewAllEquipments(): boolean {
-    return this.isSupervisor() || this.isAdmin();
+    return this.isSupervisor(); // Solo supervisores pueden ver equipos
   }
 
   canViewAllMiners(): boolean {
-    return this.isSupervisor() || this.isAdmin();
+    return this.isSupervisor(); // Solo supervisores pueden ver mineros
   }
 
   getToken(): string | null {

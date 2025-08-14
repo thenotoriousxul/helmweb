@@ -16,50 +16,7 @@
     </div>
   </header>
 
-  <!-- Stats Cards -->
-  <section class="stats-section" *ngIf="!authService.isMinero()">
-    <div class="stats-grid">
-      <div class="stat-card glass">
-        <div class="stat-icon">
-          <i class="fas fa-users"></i>
-        </div>
-        <div class="stat-content">
-          <h3>{{ totalMiners }}</h3>
-          <p>Total Mineros</p>
-        </div>
-      </div>
-      
-      <div class="stat-card glass">
-        <div class="stat-icon active">
-          <i class="fas fa-wifi"></i>
-        </div>
-        <div class="stat-content">
-          <h3>{{ activeMiners }}</h3>
-          <p>Activos</p>
-        </div>
-      </div>
-      
-      <div class="stat-card glass">
-        <div class="stat-icon warning">
-          <i class="fas fa-user-slash"></i>
-        </div>
-        <div class="stat-content">
-          <h3>{{ inactiveMiners }}</h3>
-          <p>Inactivos</p>
-        </div>
-      </div>
-      
-      <div class="stat-card glass">
-        <div class="stat-icon">
-          <i class="fas fa-birthday-cake"></i>
-        </div>
-        <div class="stat-content">
-          <h3>{{ avgAge | number:'1.0-0' }}</h3>
-          <p>Edad Promedio</p>
-        </div>
-      </div>
-    </div>
-  </section>
+
 
   <!-- Filters Section -->
   <section class="filters-section" *ngIf="!authService.isMinero()">
