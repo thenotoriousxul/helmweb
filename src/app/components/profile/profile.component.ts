@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
 
 interface UserProfile {
   id: string;
@@ -205,7 +206,7 @@ export class ProfileComponent {
   isEditing = false;
   get canEdit() { return !this.auth.isAdmin(); }
 
-  constructor(private router: Router, private auth: AuthService) {
+  constructor(private router: Router, private auth: AuthService, private alert: AlertService) {
     this.loadProfile();
   }
 
@@ -258,9 +259,9 @@ export class ProfileComponent {
       next: (user) => {
         this.mapUserToProfile(user);
         this.isEditing = false;
-        alert('Perfil actualizado');
+        this.alert.success('Perfil actualizado');
       },
-      error: (e) => alert(e.message || 'Error al actualizar perfil'),
+      error: (e) => this.alert.error(e.message || 'Error al actualizar perfil'),
     });
   }
 
@@ -279,7 +280,7 @@ export class ProfileComponent {
 
   updatePassword() {
     if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      this.alert.warning('Las contraseñas no coinciden');
       return;
     }
     

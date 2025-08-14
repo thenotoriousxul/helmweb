@@ -122,6 +122,9 @@
             <span class="uuid-text">{{ helmet.uuid }}</span>
             <span class="assigned-to" *ngIf="helmet.assignedTo">{{ helmet.assignedTo }}</span>
             <span class="not-assigned" *ngIf="!helmet.assignedTo">Sin asignar</span>
+            <span class="assigned-supervisor" *ngIf="authService.isAdmin() && helmet.supervisorId">
+              Supervisor: {{ getSupervisorNameById(helmet.supervisorId) }}
+            </span>
           </div>
           <div class="status-badge" [style.background-color]="getStatusColor(helmet.status)">
             {{ getStatusText(helmet.status) }}
@@ -233,6 +236,14 @@
               <div class="error-message">{{ errorMessage }}</div>
             }
           </div>
+
+          <div class="form-group" *ngIf="canCreateHelmet()">
+            <label for="supervisorSelect">Supervisor asignado</label>
+            <select id="supervisorSelect" [(ngModel)]="newHelmet.supervisorId" name="supervisorId">
+              <option [ngValue]="undefined">Selecciona un supervisor</option>
+              <option *ngFor="let s of supervisorsForCreate" [ngValue]="s.id">{{ s.fullName }}</option>
+            </select>
+          </div>
           
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
@@ -302,7 +313,7 @@
         <div class="detail-row"><strong>Asignado a:</strong> {{ detailHelmetData.assignedTo || 'Sin asignar' }}</div>
         <div class="detail-row" *ngIf="detailHelmetData.assignedToEmail"><strong>Email del minero:</strong> {{ detailHelmetData.assignedToEmail }}</div>
         <div class="detail-row" *ngIf="detailHelmetData.assignedToId"><strong>ID del minero:</strong> {{ detailHelmetData.assignedToId }}</div>
-        <div class="detail-row"><strong>Supervisor:</strong> {{ detailHelmetData.supervisorId }}</div>
+        <div class="detail-row"><strong>Supervisor:</strong> {{ detailHelmetData.supervisorName || detailHelmetData.supervisorId }}</div>
         <div class="detail-row"><strong>Última señal:</strong> {{ detailHelmetData.lastHeartbeat }}</div>
         <div class="detail-row"><strong>Temperatura:</strong> {{ detailHelmetData.temperature || 0 }}°C</div>
         <!-- Se eliminan Batería y Ubicación por no formar parte de los sensores activos -->
@@ -364,17 +375,22 @@
           >
         </div>
 
-        <div class="miners-grid" *ngIf="filteredMinersForAssign.length > 0; else noMinersAssign">
+        <div class="miners-grid assign-scroll" *ngIf="filteredMinersForAssign.length > 0; else noMinersAssign">
           <div class="miner-card glass" *ngFor="let miner of filteredMinersForAssign">
             <div class="card-header">
               <div class="miner-info">
                 <div class="miner-avatar">
-                  <span>{{ miner.fullName.charAt(0) || 'M' }}</span>
+                  <ng-container *ngIf="miner.photo; else initialsAvatar">
+                    <img [src]="miner.photo" [alt]="miner.fullName || miner.email" />
+                  </ng-container>
+                  <ng-template #initialsAvatar>
+                    <span>{{ (miner.fullName || miner.email || 'M').charAt(0) | uppercase }}</span>
+                  </ng-template>
                 </div>
                 <div class="miner-details">
                   <h3>{{ miner.fullName }}</h3>
-                  <span class="miner-email">{{ miner.email }}</span>
-                  <span class="miner-rfc">{{ miner.rfc || 'RFC no especificado' }}</span>
+                  <div class="miner-email">Email: {{ miner.email }}</div>
+                  <div class="miner-rfc">RFC: {{ miner.rfc || 'No especificado' }}</div>
                 </div>
               </div>
               <!-- Se elimina visualización de estado -->

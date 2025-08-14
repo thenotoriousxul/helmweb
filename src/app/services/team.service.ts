@@ -28,7 +28,10 @@ export interface TeamMiner {
     fullName: string;
     email: string;
     status: string;
+    rfc?: string;
+    phone?: string;
   };
+  fechaAsignacion?: string;
 }
 
 export interface TeamStats {
@@ -46,6 +49,17 @@ export class TeamService {
   private statsCache$: Observable<TeamStats> | null = null;
 
   constructor(private http: HttpClient) {}
+
+  private generateUuid(): string {
+    // Usa crypto.randomUUID si está disponible, si no, fallback
+    const g = (window as any)?.crypto?.randomUUID?.();
+    if (g) return g;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
 
   /**
    * Obtiene todos los equipos con cache
@@ -132,7 +146,10 @@ export class TeamService {
    */
   assignMinerToTeam(teamId: string, mineroId: string): Observable<any> {
     this.clearCache();
-    return this.http.post<any>(`${this.apiUrl}/teams/${teamId}/assign-miner`, { teamId, mineroId }, { withCredentials: true }).pipe(
+    const payload: any = { teamId, mineroId };
+    // Proveer un id generado por cliente por si el backend lo acepta
+    payload.id = this.generateUuid();
+    return this.http.post<any>(`${this.apiUrl}/teams/${teamId}/assign-miner`, payload, { withCredentials: true }).pipe(
       map(response => response.data),
       catchError(error => {
         console.error('Error asignando minero a equipo:', error);

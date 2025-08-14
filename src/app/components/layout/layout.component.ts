@@ -3,6 +3,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../services/auth.service';
+import { ToastContainerComponent } from '../toast/toast.component';
 
 interface Equipment {
   id: string;
@@ -33,7 +34,7 @@ interface UserProfile {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet],
+  imports: [CommonModule, FormsModule, RouterOutlet, ToastContainerComponent],
   template: `
     <div class="dashboard-container">
       <!-- Sidebar -->
@@ -58,7 +59,15 @@ interface UserProfile {
                 <span>Supervisores</span>
               </a>
             </li>
-            
+            <!-- Solo Minero: Mi Casco -->
+            <li class="nav-item" 
+                *ngIf="authService.isMinero()"
+                [class.active]="activeSidebarItem === 'my-helmet'">
+              <a (click)="setActiveSidebarItem('my-helmet')">
+                <i class="fas fa-hard-hat"></i>
+                <span>Mi Casco</span>
+              </a>
+            </li>
             <!-- Opciones para Supervisor y Admin -->
             <li class="nav-item" 
                 [class.active]="activeSidebarItem === 'equipments'"
@@ -89,29 +98,9 @@ interface UserProfile {
               </a>
             </li>
             
-            <!-- Opciones para Supervisor, Minero y Admin -->
-            <li class="nav-item" 
-                [class.active]="activeSidebarItem === 'monitoring'">
-              <a (click)="setActiveSidebarItem('monitoring')">
-                <i class="fas fa-chart-line"></i>
-                <span>{{ authService.isMinero() ? 'Mi Casco' : 'Monitoreo' }}</span>
-              </a>
-            </li>
             
-            <li class="nav-item" [class.active]="activeSidebarItem === 'alerts'">
-              <a (click)="setActiveSidebarItem('alerts')">
-                <i class="fas fa-bell"></i>
-                <span>Alertas</span>
-                <span class="alert-badge" *ngIf="getTotalStats().totalAlerts > 0">{{ getTotalStats().totalAlerts }}</span>
-              </a>
-            </li>
             
-            <li class="nav-item" [class.active]="activeSidebarItem === 'reports'">
-              <a (click)="setActiveSidebarItem('reports')">
-                <i class="fas fa-chart-bar"></i>
-                <span>Reportes</span>
-              </a>
-            </li>
+            
             
           </ul>
         </nav>
@@ -156,6 +145,7 @@ interface UserProfile {
           <i class="fas fa-bars"></i>
         </button>
         <router-outlet></router-outlet>
+        <app-toast-container></app-toast-container>
       </main>
     </div>
 
@@ -330,8 +320,8 @@ export class LayoutComponent implements OnInit {
       this.activeSidebarItem = 'helmets';
     } else if (currentRoute.includes('/miners')) {
       this.activeSidebarItem = 'miners';
-    } else if (currentRoute.includes('/monitoring')) {
-      this.activeSidebarItem = 'monitoring';
+    } else if (currentRoute.includes('/my-helmet')) {
+      this.activeSidebarItem = 'my-helmet';
     } else if (currentRoute.includes('/alerts')) {
       this.activeSidebarItem = 'alerts';
     } else if (currentRoute.includes('/reports')) {

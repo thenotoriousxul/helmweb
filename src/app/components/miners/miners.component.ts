@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
 import { MineroService, Minero, MineroStats } from '../../services/minero.service';
 
 @Component({
@@ -43,7 +44,8 @@ export class MinersComponent implements OnInit {
     private router: Router,
     public authService: AuthService,
     private mineroService: MineroService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alert: AlertService
   ) {
     this.currentUser = this.authService.getCurrentUser();
   }
@@ -203,7 +205,7 @@ export class MinersComponent implements OnInit {
         this.showDetailModal = true;
       },
       error: (err) => {
-        alert('No se pudo obtener el detalle del minero.');
+        this.alert.error('No se pudo obtener el detalle del minero.');
       }
     });
   }
@@ -257,7 +259,7 @@ export class MinersComponent implements OnInit {
           this.loadMiners();
           this.loadStats();
           this.closeEditModal();
-          alert('Minero actualizado exitosamente');
+          this.alert.success('Minero actualizado exitosamente');
           this.isLoading = false;
         },
         error: (err) => {
@@ -268,18 +270,18 @@ export class MinersComponent implements OnInit {
       });
   }
 
-  deleteMiner(miner: Minero) {
-    if (confirm('¿Estás seguro de que quieres eliminar este minero?')) {
+  async deleteMiner(miner: Minero) {
+    if (await this.alert.confirm('¿Estás seguro de que quieres eliminar este minero?')) {
       this.mineroService.deleteMinero(miner.id).subscribe({
         next: () => {
           this.mineroService.clearCache(); // Limpiar cache para mostrar datos actualizados
           this.loadMiners();
           this.loadStats();
-          alert('Minero eliminado exitosamente');
+          this.alert.success('Minero eliminado exitosamente');
         },
         error: (err) => {
           console.error('Error al eliminar minero:', err);
-          alert(err?.error?.message || 'Error al eliminar minero');
+          this.alert.error(err?.error?.message || 'Error al eliminar minero');
         }
       });
     }
@@ -322,7 +324,7 @@ export class MinersComponent implements OnInit {
           setTimeout(() => {
             this.loadMiners();
             this.loadStats();
-            alert('Minero creado exitosamente');
+            this.alert.success('Minero creado exitosamente');
           }, 50);
           this.isLoading = false;
         },

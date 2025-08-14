@@ -37,7 +37,7 @@ export const authGuard: CanActivateFn = (route, state) => {
       // Si hay roles requeridos, verifica
       if (requiredRoles && !requiredRoles.includes(user.role)) {
         console.log('AuthGuard: Usuario no tiene rol requerido, redirigiendo por rol');
-        return router.createUrlTree(user.role === 'minero' ? ['/monitoring'] : ['/equipments']);
+        return router.createUrlTree(user.role === 'minero' ? ['/my-helmet'] : ['/equipments']);
       }
       
       console.log('AuthGuard: Acceso permitido');
@@ -60,7 +60,7 @@ export const guestGuard = (route: any, state: any) => {
   if (authService.isAuthenticated()) {
     const user = authService.getCurrentUser();
     console.log('GuestGuard: Usuario ya autenticado, redirigiendo por rol');
-    return router.createUrlTree(user?.role === 'minero' ? ['/monitoring'] : ['/equipments']);
+    return router.createUrlTree(user?.role === 'minero' ? ['/my-helmet'] : ['/equipments']);
   }
 
   console.log('GuestGuard: Acceso permitido para invitados');

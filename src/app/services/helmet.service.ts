@@ -53,9 +53,9 @@ export class HelmetService {
           id: item.id,
           uuid: item.physicalId || item.uuid || '',
           serialNumber: item.serial || item.serialNumber || '',
-          status: item.isActive ? (item.isAssigned ? 'activo-asignado' : 'activo-sin-asignar') : 'inactivo',
+          status: (item.isActive === 1 || item.isActive === true) ? ((item.asignadoMinero === 1 || item.asignadoMinero === true) ? 'activo-asignado' : 'activo-sin-asignar') : 'inactivo',
           assignedTo: item.minero ? item.minero.fullName : undefined,
-          assignedToId: item.minero ? item.minero.id : undefined,
+          assignedToId: (item.minero ? item.minero.id : undefined) || item.mineroId || undefined,
           assignedToEmail: item.minero ? item.minero.email : undefined,
           equipmentId: undefined, // Ajustar si hay campo en backend
           equipmentName: undefined, // Ajustar si hay campo en backend
@@ -148,6 +148,9 @@ export class HelmetService {
     if (helmet.serialNumber) {
       payload.physicalId = helmet.serialNumber;
       delete payload.serialNumber;
+    }
+    if (helmet.supervisorId) {
+      payload.supervisorId = helmet.supervisorId;
     }
     return this.http.post<any>(`${this.apiUrl}/cascos`, payload, { withCredentials: true }).pipe(
       map(response => response.data),

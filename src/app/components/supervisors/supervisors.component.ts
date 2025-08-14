@@ -5,6 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService, User, Helmet } from '../../services/auth.service';
 import { SupervisorService, Supervisor } from '../../services/supervisor.service';
+import { AlertService } from '../../services/alert.service';
 import { firstValueFrom } from 'rxjs';
 
 interface SupervisorWithAccessCode extends Supervisor {
@@ -36,7 +37,8 @@ export class SupervisorsComponent implements OnInit {
     private http: HttpClient,
     public authService: AuthService,
     private supervisorService: SupervisorService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alert: AlertService
   ) {}
 
   ngOnInit() {
@@ -47,7 +49,7 @@ export class SupervisorsComponent implements OnInit {
         this.loadSupervisors();
         this.loadUnusedAccessCodes();
       } else {
-        alert('No tienes permisos para acceder a esta sección');
+        this.alert.error('No tienes permisos para acceder a esta sección');
         this.router.navigate(['/equipments']);
       }
     } else {
@@ -73,13 +75,13 @@ export class SupervisorsComponent implements OnInit {
       },
       error: (error) => {
         if (error.status === 401) {
-          alert('No estás autenticado. Por favor, inicia sesión.');
+          this.alert.error('No estás autenticado. Por favor, inicia sesión.');
           this.router.navigate(['/login']);
         } else if (error.status === 403) {
-          alert('No tienes permisos para ver supervisores. Se requieren permisos de administrador.');
+          this.alert.error('No tienes permisos para ver supervisores. Se requieren permisos de administrador.');
           this.router.navigate(['/equipments']);
         } else {
-          alert('Error al cargar la lista de supervisores: ' + (error.error?.message || error.message || 'Error desconocido'));
+          this.alert.error('Error al cargar la lista de supervisores: ' + (error.error?.message || error.message || 'Error desconocido'));
         }
       }
     });
@@ -202,7 +204,7 @@ export class SupervisorsComponent implements OnInit {
 
   async generateNewCode() {
     if (!this.selectedSupervisor?.email) {
-      alert('No se puede generar código sin email del supervisor');
+      this.alert.warning('No se puede generar código sin email del supervisor');
       return;
     }
 
@@ -229,7 +231,7 @@ export class SupervisorsComponent implements OnInit {
     } catch (error: any) {
       console.error('Error completo (generateNewCode):', error);
       const errorMessage = error.error?.message || error.message || 'Error desconocido';
-      alert('Error al generar código de acceso: ' + errorMessage);
+      this.alert.error('Error al generar código de acceso: ' + errorMessage);
     }
   }
 
@@ -245,6 +247,36 @@ export class SupervisorsComponent implements OnInit {
     // Implementar navegación al detalle del supervisor
   }
 
+  async deleteSupervisor(supervisor: SupervisorWithAccessCode) {
+    if (!this.authService.isAdmin()) return;
+    if (!(await this.alert.confirm(`¿Estás seguro de que quieres eliminar al supervisor "${supervisor.fullName}"?`))) return;
+    this.supervisorService.deleteSupervisor(supervisor.id).subscribe({
+      next: () => {
+        this.alert.success('Supervisor eliminado exitosamente');
+        this.loadSupervisors();
+        this.loadUnusedAccessCodes();
+      },
+      error: (err) => {
+        console.error('Error al eliminar supervisor:', err);
+        this.alert.error(err?.error?.message || 'Error al eliminar supervisor');
+      }
+    });
+  }
+
+  async deleteUnusedAccessCode(code: string) {
+    if (!this.authService.isAdmin()) return;
+    if (!(await this.alert.confirm(`¿Eliminar el código de acceso "${code}"?`))) return;
+    this.supervisorService.deleteAccessCode(code).subscribe({
+      next: () => {
+        this.alert.success('Código de acceso eliminado');
+        this.loadUnusedAccessCodes();
+      },
+      error: (err) => {
+        console.error('Error al eliminar código de acceso:', err);
+        this.alert.error(err?.error?.message || 'Error al eliminar código de acceso');
+      }
+    });
+  }
 
 
   getTotalHelmets(): number {
@@ -262,27 +294,27 @@ export class SupervisorsComponent implements OnInit {
       const codeToCopy = codeMatch ? codeMatch[1] : this.generatedAccessCode;
       
       navigator.clipboard.writeText(codeToCopy).then(() => {
-        alert('Código copiado al portapapeles');
+        this.alert.success('Código copiado al portapapeles');
       }).catch(() => {
-        alert('Error al copiar al portapapeles');
+        this.alert.error('Error al copiar al portapapeles');
       });
     } else {
-      alert('No hay código disponible para copiar');
+      this.alert.info('No hay código disponible para copiar');
     }
   }
 
   copyCodeToClipboard(code: string) {
     navigator.clipboard.writeText(code).then(() => {
-      alert('Código copiado al portapapeles');
+      this.alert.success('Código copiado al portapapeles');
     }).catch(() => {
-      alert('Error al copiar al portapapeles');
+      this.alert.error('Error al copiar al portapapeles');
     });
   }
 
   resendCode(email: string) {
     // Aquí puedes implementar la lógica para reenviar el código
     // Por ahora solo mostraremos un mensaje
-    alert(`Reenviando código de acceso a ${email}`);
+    this.alert.info(`Reenviando código de acceso a ${email}`);
   }
 
   checkAccessCodes() {
@@ -292,13 +324,13 @@ export class SupervisorsComponent implements OnInit {
           const codes = response.data.map((code: any) => 
             `${code.correoSupervisor}: ${code.codigo} (${code.usado ? 'Usado' : 'No usado'})`
           ).join('\n');
-          alert('Códigos existentes:\n' + codes);
+          this.alert.info('Códigos existentes:\n' + codes);
         } else {
-          alert('No hay códigos de acceso en la base de datos');
+          this.alert.info('No hay códigos de acceso en la base de datos');
         }
       },
       error: (error) => {
-        alert('Error al obtener códigos de acceso');
+        this.alert.error('Error al obtener códigos de acceso');
       }
     });
   }
@@ -334,10 +366,10 @@ export class SupervisorsComponent implements OnInit {
     
     this.http.get(`http://localhost:3333/access-codes/test/${encodeURIComponent(testEmail)}`, { withCredentials: true }).subscribe({
       next: (response: any) => {
-        alert('Test completado. Revisa la consola para detalles.');
+        this.alert.success('Test completado. Revisa la consola para detalles.');
       },
       error: (error) => {
-        alert('Error en test. Revisa la consola para detalles.');
+        this.alert.error('Error en test. Revisa la consola para detalles.');
       }
     });
   }

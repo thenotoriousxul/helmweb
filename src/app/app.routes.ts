@@ -7,13 +7,11 @@ import { EquipmentsComponent } from './components/equipments/equipments.componen
 import { HelmetsComponent } from './components/helmets/helmets.component';
 import { MinersComponent } from './components/miners/miners.component';
 import { SupervisorsComponent } from './components/supervisors/supervisors.component';
-import { MonitoringComponent } from './components/monitoring/monitoring.component';
-import { AlertsComponent } from './components/alerts/alerts.component';
-import { ReportsComponent } from './components/reports/reports.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { EquipmentDetailComponent } from './components/equipment-detail/equipment-detail.component';
 import { EquipmentEditComponent } from './components/equipment-edit/equipment-edit.component';
 import { authGuard, guestGuard } from './guards/auth.guard';
+import { MyHelmetComponent } from './components/my-helmet/my-helmet.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -23,14 +21,13 @@ export const routes: Routes = [
     path: '', 
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'monitoring', pathMatch: 'full' },
+      { path: '', redirectTo: 'equipments', pathMatch: 'full' },
       { path: 'equipments', component: EquipmentsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
-      { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard] },
+      { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
+      { path: 'my-helmet', component: MyHelmetComponent, canActivate: [authGuard], data: { roles: ['minero'] } },
       { path: 'miners', component: MinersComponent, canActivate: [authGuard] },
       { path: 'supervisors', component: SupervisorsComponent, canActivate: [authGuard], data: { roles: ['admin'] } },
-      { path: 'monitoring', component: MonitoringComponent, canActivate: [authGuard] },
-      { path: 'alerts', component: AlertsComponent, canActivate: [authGuard] },
-      { path: 'reports', component: ReportsComponent, canActivate: [authGuard] },
+      // Alerts/Reports removidos
       { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
       { path: 'equipment-detail/:id', component: EquipmentDetailComponent, canActivate: [authGuard] },
       { path: 'equipment-edit/:id', component: EquipmentEditComponent, canActivate: [authGuard] },

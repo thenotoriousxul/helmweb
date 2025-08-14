@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { AlertService } from '../../services/alert.service';
+import { TeamService, Team, TeamMiner as ApiTeamMiner } from '../../services/team.service';
+import { MineroService, Minero } from '../../services/minero.service';
 
 interface TeamMiner {
   id: number;
@@ -114,7 +117,10 @@ export class EquipmentDetailComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private alert: AlertService,
+    private teamService: TeamService,
+    private mineroService: MineroService,
   ) {}
 
   ngOnInit() {
@@ -125,61 +131,58 @@ export class EquipmentDetailComponent implements OnInit {
   }
 
   loadEquipmentData(equipmentId: string) {
-    this.equipment = {
-      id: equipmentId,
-      nombre: 'Equipo Mina Norte',
-      zona: 'Zona A-12',
-      supervisor: { fullName: 'Carlos Mendoza' },
-      createdAt: '2024-01-15T08:00:00.000Z',
-      updatedAt: '2024-01-15T08:00:00.000Z',
-      mineros: [
-        {
-          id: 1,
-          mineroId: '1',
-          equipoId: equipmentId,
-          activo: true,
-          fechaAsignacion: '2024-01-15T08:00:00.000Z',
-          fechaSalida: null,
-          createdAt: '2024-01-15T08:00:00.000Z',
-          updatedAt: '2024-01-15T08:00:00.000Z',
-          minero: {
-            id: '1',
-            fullName: 'Carlos M.',
-            email: 'carlos.m@example.com',
-            especialidadEnMineria: 'Perforación',
-          }
-        },
-        {
-          id: 2,
-          mineroId: '2',
-          equipoId: equipmentId,
-          activo: true,
-          fechaAsignacion: '2024-01-15T08:00:00.000Z',
-          fechaSalida: null,
-          createdAt: '2024-01-15T08:00:00.000Z',
-          updatedAt: '2024-01-15T08:00:00.000Z',
-          minero: {
-            id: '2',
-            fullName: 'Ana R.',
-            email: 'ana.r@example.com',
-            especialidadEnMineria: 'Explosivos',
-          }
-        }
-      ]
-    };
+    this.teamService.getTeamById(equipmentId).subscribe({
+      next: (team: Team) => {
+        const mappedMiners = (team.mineros || []).map((tm: any) => ({
+          id: Number(tm.id) || Date.now(),
+          mineroId: tm.mineroId,
+          equipoId: tm.equipoId || team.id,
+          activo: tm.activo !== false,
+          fechaAsignacion: tm.fechaAsignacion || tm.createdAt || '',
+          fechaSalida: tm.fechaSalida || null,
+          createdAt: tm.createdAt || '',
+          updatedAt: tm.updatedAt || null,
+          minero: tm.minero ? {
+            id: tm.minero.id,
+            fullName: tm.minero.fullName,
+            email: tm.minero.email,
+            especialidadEnMineria: tm.minero.especialidadEnMineria,
+            genero: tm.minero.genero,
+            fechaContratacion: tm.minero.fechaContratacion,
+            birthDate: tm.minero.birthDate,
+            phone: tm.minero.phone,
+            address: tm.minero.address,
+            rfc: tm.minero.rfc,
+          } : undefined
+        }));
 
-    // Simulación de datos de cascos
-    this.helmets = [
-      { id: 'H001', minerId: '1', minerName: 'Carlos M.', status: 'active', batteryLevel: 85, lastSignal: '2 min', location: 'Zona A-12', alerts: 0 },
-      { id: 'H002', minerId: '2', minerName: 'Ana R.', status: 'active', batteryLevel: 92, lastSignal: '1 min', location: 'Zona A-12', alerts: 0 },
-      { id: 'H003', minerId: '3', minerName: 'Miguel T.', status: 'warning', batteryLevel: 15, lastSignal: '5 min', location: 'Zona A-12', alerts: 2 }
-    ];
+        this.equipment = {
+          id: team.id,
+          nombre: team.nombre,
+          zona: team.zona,
+          supervisor: team.supervisor?.fullName || team.supervisorId,
+          createdAt: team.createdAt || '',
+          updatedAt: team.updatedAt || '',
+          mineros: mappedMiners as any
+        };
+      },
+      error: (err) => {
+        this.alert.error('No se pudo cargar el equipo');
+      }
+    });
+  }
 
-    // Simulación de alertas
-    this.alerts = [
-      { id: '1', type: 'battery', severity: 'high', message: 'Batería baja en casco H003', timestamp: '2024-01-15 14:30', status: 'active', minerId: '3', minerName: 'Miguel T.' },
-      { id: '2', type: 'signal', severity: 'medium', message: 'Señal débil en casco H003', timestamp: '2024-01-15 14:25', status: 'acknowledged', minerId: '3', minerName: 'Miguel T.' }
-    ];
+  removeMiner(tm: TeamMiner) {
+    if (!this.equipment) return;
+    this.teamService.removeMinerFromTeam(this.equipment.id, tm.mineroId).subscribe({
+      next: () => {
+        this.equipment!.mineros = this.equipment!.mineros.filter(m => m.mineroId !== tm.mineroId);
+        this.alert.success('Minero desasignado del equipo');
+      },
+      error: (err) => {
+        this.alert.error('No se pudo desasignar al minero');
+      }
+    });
   }
 
   getStatusColor(status: string): string {
@@ -232,8 +235,8 @@ export class EquipmentDetailComponent implements OnInit {
     this.router.navigate(['/equipment-edit', this.equipment?.id]);
   }
 
-  deleteEquipment() {
-    if (confirm(`¿Estás seguro de que quieres eliminar el equipo "${this.equipment?.nombre}"?`)) {
+  async deleteEquipment() {
+    if (await this.alert.confirm(`¿Estás seguro de que quieres eliminar el equipo "${this.equipment?.nombre}"?`)) {
       this.router.navigate(['/equipments']);
     }
   }

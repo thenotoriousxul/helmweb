@@ -61,8 +61,8 @@ export class LoginComponent {
             console.error('Error en navegación para supervisor:', err);
           });
         } else if (user.role === 'minero') {
-          console.log('Redirigiendo minero a monitoring');
-          this.router.navigate(['/monitoring']).then(() => {
+          console.log('Redirigiendo minero a my-helmet');
+          this.router.navigate(['/my-helmet']).then(() => {
             console.log('Navegación completada para minero');
           }).catch(err => {
             console.error('Error en navegación para minero:', err);

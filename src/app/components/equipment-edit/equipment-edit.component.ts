@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { AlertService } from '../../services/alert.service';
 
 interface Equipment {
   id: string;
@@ -41,7 +42,8 @@ export class EquipmentEditComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private alert: AlertService
   ) {}
 
   ngOnInit() {
@@ -83,7 +85,7 @@ export class EquipmentEditComponent implements OnInit {
     // Simulación de guardado
     setTimeout(() => {
       this.isSaving = false;
-      alert('Equipo actualizado correctamente');
+      this.alert.success('Equipo actualizado correctamente');
       this.router.navigate(['/equipment-detail', this.equipment?.id]);
     }, 1000);
   }
@@ -104,7 +106,7 @@ export class EquipmentEditComponent implements OnInit {
     // Simulación de eliminación
     setTimeout(() => {
       this.showDeleteConfirm = false;
-      alert('Equipo eliminado correctamente');
+      this.alert.success('Equipo eliminado correctamente');
       this.router.navigate(['/equipments']);
     }, 1000);
   }

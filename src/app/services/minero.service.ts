@@ -51,7 +51,25 @@ export class MineroService {
       
       this.minersCache$ = this.http.get<any>(`${this.apiUrl}${endpoint}`, { withCredentials: true }).pipe(
         map(response => {
-          return (response.data || []).map((item: any) => ({
+          return (response.data || []).map((item: any) => {
+            const rawPhoto: string = (
+              item.photo ||
+              item.photoUrl ||
+              item.photoURL ||
+              item.profilePhoto ||
+              item.profilePhotoUrl ||
+              item.avatarUrl ||
+              item.avatar_url ||
+              item.avatar ||
+              item.imageUrl ||
+              item.image ||
+              item.pictureUrl ||
+              ''
+            );
+            const photo: string = rawPhoto && /^https?:\/\//i.test(rawPhoto)
+              ? rawPhoto
+              : (rawPhoto ? `${this.apiUrl}${rawPhoto.startsWith('/') ? '' : '/'}${rawPhoto}` : '');
+            return ({
             id: item.id,
             fullName: item.fullName || '',
             email: item.email || '',
@@ -60,7 +78,7 @@ export class MineroService {
             phone: item.phone || '',
             rfc: item.rfc || '',
             address: item.address || '',
-            photo: '', // Ajustar si hay campo en backend
+            photo,
             teamId: undefined, // Ajustar si hay campo en backend
             genero: item.genero || undefined,
             especialidadEnMineria: item.especialidadEnMineria || undefined,
@@ -69,7 +87,8 @@ export class MineroService {
             status: item.estado || '',
             createdAt: item.createdAt || '',
             updatedAt: item.updatedAt || ''
-          }));
+          });
+          });
         }),
         catchError(error => {
           console.error('Error fetching miners:', error);

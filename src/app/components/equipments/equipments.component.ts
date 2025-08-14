@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TeamService, Team, TeamStats } from '../../services/team.service';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
 import { MineroService } from '../../services/minero.service';
 
 @Component({
@@ -38,6 +39,12 @@ export class EquipmentsComponent implements OnInit {
   teamToAssignMiner: Team | null = null;
   availableMiners: any[] = [];
   selectedMinerId: string = '';
+  isAssigning = false;
+  // Modal para desasignar minero
+  showRemoveMinerModal = false;
+  teamToRemoveMiner: Team | null = null;
+  currentMinersForRemove: any[] = [];
+  selectedMinerToRemoveId = '';
   formError = '';
   editFormError = '';
 
@@ -46,7 +53,8 @@ export class EquipmentsComponent implements OnInit {
     private teamService: TeamService,
     private authService: AuthService,
     private mineroService: MineroService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alert: AlertService
   ) {}
 
   ngOnInit() {
@@ -158,7 +166,7 @@ export class EquipmentsComponent implements OnInit {
         this.showDetailModal = true;
       },
       error: () => {
-        alert('No se pudo obtener el detalle del equipo.');
+        this.alert.error('No se pudo obtener el detalle del equipo.');
       }
     });
   }
@@ -206,38 +214,40 @@ export class EquipmentsComponent implements OnInit {
           this.loadTeams();
           this.loadStats();
           this.closeEditModal();
-          alert('Equipo actualizado exitosamente');
+          this.alert.success('Equipo actualizado exitosamente');
           this.loading = false;
         },
         error: (err) => {
           console.error('Error al actualizar equipo:', err);
           this.editFormError = err?.error?.message || 'Error al actualizar el equipo.';
+          this.alert.error(this.editFormError);
           this.loading = false;
         }
       });
     }
   }
 
-  deleteTeam(team: Team) {
+  async deleteTeam(team: Team) {
     this.teamToDelete = team;
-    this.showDeleteModal = true;
+    await this.confirmDeleteTeam();
   }
 
-  confirmDeleteTeam() {
-    if (this.teamToDelete) {
-      this.teamService.deleteTeam(this.teamToDelete.id).subscribe({
-        next: () => {
-          this.loadTeams();
-          this.loadStats();
-          this.closeDeleteModal();
-          alert('Equipo eliminado exitosamente');
-        },
-        error: (err) => {
-          console.error('Error al eliminar equipo:', err);
-          alert(err?.error?.message || 'Error al eliminar el equipo.');
-        }
-      });
-    }
+  async confirmDeleteTeam() {
+    if (!this.teamToDelete) return;
+    const confirmed = await this.alert.confirm('¿Estás seguro de que quieres eliminar este equipo?');
+    if (!confirmed) return;
+    this.teamService.deleteTeam(this.teamToDelete.id).subscribe({
+      next: () => {
+        this.loadTeams();
+        this.loadStats();
+        this.closeDeleteModal();
+        this.alert.success('Equipo eliminado exitosamente');
+      },
+      error: (err) => {
+        console.error('Error al eliminar equipo:', err);
+        this.alert.error(err?.error?.message || 'Error al eliminar el equipo.');
+      }
+    });
   }
 
   closeDeleteModal() {
@@ -308,11 +318,14 @@ export class EquipmentsComponent implements OnInit {
   openAssignMinerModal(team: Team) {
     this.teamToAssignMiner = team;
     this.selectedMinerId = '';
+    this.isAssigning = false;
     this.showAssignMinerModal = true;
     this.mineroService.getAllMiners().subscribe(miners => {
-      // Filtrar mineros ya asignados a algún equipo
-      const assignedIds = (team.mineros || []).map(m => m.id);
-      this.availableMiners = miners.filter((m: any) => !assignedIds.includes(m.id));
+      // Filtrar mineros ya asignados a ESTE equipo (evita mostrar los que ya están)
+      const assignedIds = (team.mineros || [])
+        .map((tm: any) => tm?.minero?.id || tm?.mineroId)
+        .filter((id: any) => !!id);
+      this.availableMiners = (miners || []).filter((m: any) => !assignedIds.includes(m.id));
     });
   }
 
@@ -324,16 +337,54 @@ export class EquipmentsComponent implements OnInit {
   }
 
   assignMinerToTeam() {
+    if (this.isAssigning) return;
     if (this.teamToAssignMiner && this.selectedMinerId) {
+      this.isAssigning = true;
       this.teamService.assignMinerToTeam(this.teamToAssignMiner.id, this.selectedMinerId).subscribe({
         next: () => {
           this.loadTeams();
           this.closeAssignMinerModal();
-          alert('Minero asignado al equipo');
+          this.alert.success('Minero asignado al equipo');
+          this.isAssigning = false;
         },
         error: (err) => {
           console.error('Error asignando minero:', err);
-          alert(err?.error?.message || 'Error al asignar minero al equipo.');
+          this.alert.error(err?.error?.message || 'Error al asignar minero al equipo.');
+          this.isAssigning = false;
+        }
+      });
+    }
+  }
+
+  // Desasignar minero (listado)
+  openRemoveMinerModal(team: Team) {
+    this.teamToRemoveMiner = team;
+    this.selectedMinerToRemoveId = '';
+    this.showRemoveMinerModal = true;
+    // Tomar los mineros actuales del equipo
+    this.currentMinersForRemove = (team.mineros || [])
+      .map((tm: any) => tm.minero)
+      .filter((m: any) => !!m);
+  }
+
+  closeRemoveMinerModal() {
+    this.showRemoveMinerModal = false;
+    this.teamToRemoveMiner = null;
+    this.currentMinersForRemove = [];
+    this.selectedMinerToRemoveId = '';
+  }
+
+  removeMinerFromTeamConfirm() {
+    if (this.teamToRemoveMiner && this.selectedMinerToRemoveId) {
+      this.teamService.removeMinerFromTeam(this.teamToRemoveMiner.id, this.selectedMinerToRemoveId).subscribe({
+        next: () => {
+          this.loadTeams();
+          this.closeRemoveMinerModal();
+          this.alert.success('Minero desasignado del equipo');
+        },
+        error: (err) => {
+          console.error('Error desasignando minero:', err);
+          this.alert.error(err?.error?.message || 'Error al desasignar minero del equipo.');
         }
       });
     }

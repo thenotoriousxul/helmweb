@@ -66,10 +66,7 @@
         <i class="fas fa-hard-hat"></i>
         Cascos
       </button>
-      <button class="tab" [class.active]="activeTab === 'alerts'" (click)="activeTab = 'alerts'">
-        <i class="fas fa-exclamation-triangle"></i>
-        Alertas
-      </button>
+      
     </div>
 
     <!-- Tab Content -->
@@ -125,6 +122,12 @@
               <span *ngIf="tm.minero?.rfc"><br>RFC: {{ tm.minero?.rfc }}</span>
               <span *ngIf="tm.fechaAsignacion"><br>Asignado desde: {{ tm.fechaAsignacion | date:'short' }}</span>
             </div>
+            <div class="minero-actions">
+              <button class="btn btn-danger" (click)="removeMiner(tm)">
+                <i class="fas fa-user-minus"></i>
+                Desasignar
+              </button>
+            </div>
           </div>
         </div>
         <ng-template #sinMineros>
@@ -164,27 +167,7 @@
         </div>
       </div>
 
-      <!-- Alerts Tab -->
-      <div class="tab-pane" *ngIf="activeTab === 'alerts'">
-        <div class="alerts-list">
-          <div class="alert-item" *ngFor="let alert of alerts">
-            <div class="alert-header">
-              <span class="alert-type">{{ getAlertTypeText(alert.type) }}</span>
-              <span class="alert-severity" [style.background-color]="getSeverityColor(alert.severity)">
-                {{ alert.severity.toUpperCase() }}
-              </span>
-            </div>
-            <div class="alert-content">
-              <p class="alert-message">{{ alert.message }}</p>
-              <div class="alert-meta">
-                <span class="alert-miner">{{ alert.minerName }}</span>
-                <span class="alert-time">{{ alert.timestamp }}</span>
-                <span class="alert-status">{{ alert.status }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      
     </div>
   </div>
 </div> 

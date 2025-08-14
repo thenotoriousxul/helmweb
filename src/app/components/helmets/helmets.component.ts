@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HelmetService, Helmet, HelmetStats } from '../../services/helmet.service';
 import { SensorService, SensorReading } from '../../services/sensor.service';
+import { SupervisorService, Supervisor } from '../../services/supervisor.service';
 import { AuthService } from '../../services/auth.service';
 import { MineroService, Minero } from '../../services/minero.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-helmets',
@@ -31,7 +33,7 @@ export class HelmetsComponent implements OnInit {
     utilizationRate: 0
   };
   showDetailModal = false;
-  detailHelmetData: Partial<Helmet> = {};
+  detailHelmetData: Partial<Helmet> & { supervisorName?: string } = {};
   detailHelmetDataReadings: SensorReading[] = [];
   showEditModal = false;
   editHelmetData: Partial<Helmet> = {};
@@ -48,18 +50,47 @@ export class HelmetsComponent implements OnInit {
   filteredMinersForAssign: Minero[] = [];
   assignSearchTerm = '';
 
+  // Supervisores para crear casco (solo admin)
+  supervisorsForCreate: Supervisor[] = [];
+  private supervisorsLoaded = false;
+
   constructor(
     private router: Router,
     private helmetService: HelmetService,
-    private authService: AuthService,
+    public authService: AuthService,
     private mineroService: MineroService,
     private sensorService: SensorService,
-    private cdr: ChangeDetectorRef
+    private supervisorService: SupervisorService,
+    private cdr: ChangeDetectorRef,
+    private alert: AlertService,
   ) {}
 
   ngOnInit() {
     this.loadHelmets();
     this.loadStats();
+    // Cargar supervisores para el formulario de creación (solo admin)
+    this.loadSupervisorsForCreate();
+  }
+
+  private loadSupervisorsForCreate() {
+    if (!this.authService.isAdmin()) return;
+    if (this.supervisorsLoaded) return;
+    this.supervisorService.getSupervisors().subscribe({
+      next: (list) => {
+        this.supervisorsForCreate = list || [];
+        this.supervisorsLoaded = true;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.supervisorsForCreate = [];
+      }
+    });
+  }
+
+  getSupervisorNameById(id?: string): string {
+    if (!id) return '';
+    const sup = this.supervisorsForCreate.find(s => s.id === id);
+    return sup ? (sup.fullName || sup.email || id) : id;
   }
 
   loadHelmets() {
@@ -132,18 +163,48 @@ export class HelmetsComponent implements OnInit {
 
   showDetail(helmet: Helmet) {
     this.helmetService.getHelmetById(helmet.id).subscribe({
-      next: (data) => {
-        this.detailHelmetData = data;
+      next: (apiData: any) => {
+        const mapped: Partial<Helmet> & { supervisorName?: string } = {
+          id: apiData?.id || helmet.id,
+          serialNumber: apiData?.serial || apiData?.serialNumber || helmet.serialNumber,
+          uuid: apiData?.physicalId || apiData?.uuid || helmet.uuid,
+          status: apiData?.isActive ? (apiData?.asignadoMinero ? 'activo-asignado' : 'activo') : 'inactivo',
+          assignedTo: apiData?.minero?.fullName || undefined,
+          assignedToEmail: apiData?.minero?.email || undefined,
+          assignedToId: apiData?.minero?.id || undefined,
+          supervisorId: apiData?.supervisorId || apiData?.supervisor?.id || undefined,
+          supervisorName: apiData?.supervisor?.fullName || undefined,
+          lastHeartbeat: apiData?.updatedAt || helmet.lastHeartbeat || '',
+          temperature: apiData?.temperature ?? helmet.temperature ?? 0
+        };
+
+        this.detailHelmetData = mapped;
         this.showDetailModal = true;
+
+        // Enriquecer con nombre de supervisor si solo tenemos el ID
+        if (!this.detailHelmetData.supervisorName && this.detailHelmetData.supervisorId && this.authService.isAdmin()) {
+          this.supervisorService.getSupervisors().subscribe({
+            next: (list: any[]) => {
+              const match = (list || []).find((s: any) => s.id === this.detailHelmetData.supervisorId);
+              if (match) {
+                this.detailHelmetData.supervisorName = match.fullName || match.name;
+                this.cdr.detectChanges();
+              }
+            },
+            error: () => {
+              // Ignorar; no disponible
+            }
+          });
+        }
+
         // Cargar lecturas recientes por createdAt para este casco
-        const cascoId = (data.id || '').toString();
+        const cascoId = (this.detailHelmetData?.id || '').toString();
         const start = new Date('1970-01-01T00:00:00Z');
         const end = new Date('2100-01-01T00:00:00Z');
         this.sensorService
           .getReadingsByCreated('cascoId', cascoId, start.toISOString(), end.toISOString(), 5000)
           .subscribe({
             next: (readings: SensorReading[]) => {
-              // Adjuntar al detalle para renderizar
               (this as any).detailHelmetDataReadings = readings;
               this.cdr.detectChanges();
             },
@@ -154,7 +215,7 @@ export class HelmetsComponent implements OnInit {
           });
       },
       error: () => {
-        alert('No se pudo obtener el detalle del casco.');
+        this.alert.error('No se pudo obtener el detalle del casco.');
       }
     });
   }
@@ -209,7 +270,7 @@ export class HelmetsComponent implements OnInit {
           this.loadHelmets();
           this.loadStats();
           this.closeEditModal();
-          alert('Casco actualizado exitosamente');
+          this.alert.success('Casco actualizado exitosamente');
           this.isLoading = false;
         },
         error: (err) => {
@@ -221,27 +282,25 @@ export class HelmetsComponent implements OnInit {
     }
   }
 
-  deleteHelmet(helmet: Helmet) {
+  async deleteHelmet(helmet: Helmet) {
     this.helmetToDelete = helmet;
-    this.showDeleteModal = true;
+    const confirmed = await this.alert.confirm('¿Estás seguro de que quieres eliminar este casco?');
+    if (!confirmed || !this.helmetToDelete) return;
+    this.helmetService.deleteHelmet(this.helmetToDelete.id).subscribe({
+      next: () => {
+        this.loadHelmets();
+        this.loadStats();
+        this.closeDeleteModal();
+        this.alert.success('Casco eliminado exitosamente');
+      },
+      error: (err) => {
+        console.error('Error eliminando casco:', err);
+        this.alert.error(err?.error?.message || 'Error al eliminar casco');
+      }
+    });
   }
 
-  confirmDeleteHelmet() {
-    if (this.helmetToDelete) {
-      this.helmetService.deleteHelmet(this.helmetToDelete.id).subscribe({
-        next: () => {
-          this.loadHelmets();
-          this.loadStats();
-          this.closeDeleteModal();
-          alert('Casco eliminado exitosamente');
-        },
-        error: (err) => {
-          console.error('Error eliminando casco:', err);
-          alert(err?.error?.message || 'Error al eliminar casco');
-        }
-      });
-    }
-  }
+  confirmDeleteHelmet() { /* Obsoleto, flujo unificado con deleteHelmet() */ }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
@@ -254,11 +313,11 @@ export class HelmetsComponent implements OnInit {
         next: () => {
           this.loadHelmets();
           this.loadStats();
-          alert('Casco activado exitosamente');
+          this.alert.success('Casco activado exitosamente');
         },
         error: (err) => {
           console.error('Error activando casco:', err);
-          alert(err?.error?.message || 'Error al activar casco');
+          this.alert.error(err?.error?.message || 'Error al activar casco');
         }
       });
     }
@@ -309,14 +368,14 @@ export class HelmetsComponent implements OnInit {
     if (!this.helmetToAssign) return;
     this.helmetService.assignHelmet(this.helmetToAssign.id, minero.id).subscribe({
       next: () => {
-        this.closeAssignModal();
-        this.loadHelmets();
-        this.loadStats();
-        alert('Casco asignado exitosamente');
+          this.closeAssignModal();
+          this.loadHelmets();
+          this.loadStats();
+          this.alert.success('Casco asignado exitosamente');
       },
       error: (err) => {
         console.error('Error al asignar casco:', err);
-        alert(err?.error?.message || 'Error al asignar casco');
+          this.alert.error(err?.error?.message || 'Error al asignar casco');
       }
     });
   }
@@ -327,11 +386,11 @@ export class HelmetsComponent implements OnInit {
         next: () => {
           this.loadHelmets();
           this.loadStats();
-          alert('Casco desasignado exitosamente');
+          this.alert.success('Casco desasignado exitosamente');
         },
         error: (err) => {
           console.error('Error al desasignar casco:', err);
-          alert(err?.error?.message || 'Error al desasignar casco');
+          this.alert.error(err?.error?.message || 'Error al desasignar casco');
         }
       });
     }
@@ -340,6 +399,8 @@ export class HelmetsComponent implements OnInit {
   openCreateModal() {
     this.showCreateModal = true;
     this.newHelmet = {};
+    // asegurar carga de supervisores al abrir el modal
+    this.loadSupervisorsForCreate();
   }
 
   openActivateModal() {
@@ -365,13 +426,21 @@ export class HelmetsComponent implements OnInit {
       this.isLoading = true;
       const currentUser = this.authService.getCurrentUser();
       if (currentUser) {
-        this.newHelmet.supervisorId = currentUser.id;
+        // Si es admin y eligió supervisor, usarlo; si es supervisor, asignar a sí mismo
+        if (this.authService.isAdmin()) {
+          // Mantener el supervisorId seleccionado en el select; si no hay, fallback a admin actual (no ideal) o dejar undefined
+          if (!this.newHelmet.supervisorId) {
+            this.newHelmet.supervisorId = currentUser.id;
+          }
+        } else {
+          this.newHelmet.supervisorId = currentUser.id;
+        }
         this.helmetService.createHelmet(this.newHelmet).subscribe({
           next: () => {
             this.loadHelmets();
             this.loadStats();
             this.closeCreateModal();
-            alert('Casco creado exitosamente');
+            this.alert.success('Casco creado exitosamente');
             this.isLoading = false;
           },
           error: (err) => {
@@ -401,13 +470,13 @@ export class HelmetsComponent implements OnInit {
         this.loadHelmets();
         this.loadStats();
         this.closeActivateModal();
-        alert('Casco activado exitosamente');
+        this.alert.success('Casco activado exitosamente');
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error activando casco:', err);
         const msg = (err?.error?.message) || (err?.message) || 'Error al activar casco';
-        alert(msg);
+        this.alert.error(msg);
         this.errorMessage = msg;
         this.isLoading = false;
       }

@@ -37,7 +37,18 @@ export class SupervisorService {
    * Obtiene todos los supervisores
    */
   getSupervisors(): Observable<Supervisor[]> {
-    return this.http.get<Supervisor[]>(`${this.apiUrl}/supervisors`, { withCredentials: true });
+    return this.http
+      .get<any>(`${this.apiUrl}/supervisors`, { withCredentials: true })
+      .pipe((source) => new Observable<Supervisor[]>(subscriber => {
+        source.subscribe({
+          next: (res) => {
+            const list = Array.isArray(res) ? res : (res?.data || []);
+            subscriber.next(list as Supervisor[]);
+            subscriber.complete();
+          },
+          error: (err) => subscriber.error(err)
+        });
+      }));
   }
 
   /**
@@ -73,5 +84,20 @@ export class SupervisorService {
    */
   getAllAccessCodes(): Observable<any> {
     return this.http.get(`${this.apiUrl}/access-codes`, { withCredentials: true });
+  }
+
+  /**
+   * Elimina un supervisor por ID (solo admin)
+   */
+  deleteSupervisor(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/supervisors/${id}`, { withCredentials: true });
+  }
+
+  /**
+   * Elimina un código de acceso por su valor (solo admin)
+   * Nota: asumimos endpoint DELETE /access-codes/:code
+   */
+  deleteAccessCode(code: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/access-codes/${encodeURIComponent(code)}`, { withCredentials: true });
   }
 } 
