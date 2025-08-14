@@ -49,7 +49,7 @@ export class HelmetService {
    */
   getAllHelmets(): Observable<Helmet[]> {
     if (!this.helmetsCache$) {
-      this.helmetsCache$ = this.http.get<any>(`${this.apiUrl}/cascos/my-helmets`, { withCredentials: true }).pipe(
+      this.helmetsCache$ = this.http.get<any>(`${this.apiUrl}/cascos`, { withCredentials: true }).pipe(
         map(response => (response.data || []).map((item: any) => ({
           id: item.id,
           uuid: item.physicalId || item.uuid || '',

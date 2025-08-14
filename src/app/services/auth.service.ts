@@ -323,12 +323,20 @@ export class AuthService {
   }
 
   canCreateHelmet(): boolean {
-    // Solo supervisores pueden crear cascos.
-    return this.isSupervisor();
+    // Solo admin puede crear cascos, supervisor los activa
+    return this.isAdmin();
   }
 
   canViewHelmets(): boolean {
-    return this.isSupervisor(); // Solo supervisores pueden ver cascos
+    return this.isSupervisor() || this.isAdmin(); // Admin crea, supervisor activa
+  }
+
+  canActivateHelmet(): boolean {
+    return this.isSupervisor(); // Solo supervisor puede activar cascos
+  }
+
+  canModifyHelmet(): boolean {
+    return this.isSupervisor() || this.isAdmin(); // Ambos pueden modificar
   }
 
   canModifyEquipment(): boolean {

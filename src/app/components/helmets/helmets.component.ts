@@ -486,11 +486,11 @@ export class HelmetsComponent implements OnInit {
   }
 
   canModifyHelmet(): boolean {
-    return this.authService.isSupervisor() || this.authService.isAdmin();
+    return this.authService.canModifyHelmet();
   }
 
   canActivateHelmet(): boolean {
-    return this.authService.isSupervisor();
+    return this.authService.canActivateHelmet();
   }
 
   getStatusOptions(): { value: string; label: string }[] {

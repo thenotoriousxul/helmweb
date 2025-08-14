@@ -23,7 +23,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'supervisors', pathMatch: 'full' },
       { path: 'equipments', component: EquipmentsComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
-      { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
+      { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
       { path: 'my-helmet', component: MyHelmetComponent, canActivate: [authGuard], data: { roles: ['minero'] } },
       { path: 'miners', component: MinersComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
       { path: 'supervisors', component: SupervisorsComponent, canActivate: [authGuard], data: { roles: ['admin'] } },
