@@ -3,6 +3,7 @@ import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError, shareReplay } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 export interface Minero {
   id: string;
@@ -35,7 +36,7 @@ export interface MineroStats {
   providedIn: 'root'
 })
 export class MineroService {
-  private apiUrl = 'http://localhost:3333';
+  private apiUrl = environment.apiUrl;
   private minersCache$: Observable<Minero[]> | null = null;
   private statsCache$: Observable<MineroStats> | null = null;
 

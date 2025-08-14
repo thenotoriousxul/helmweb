@@ -99,6 +99,7 @@
         <span class="results-count">{{ filteredTeams.length }} equipos encontrados</span>
       </div>
       
+      <!-- Desktop Table View -->
       <div class="table-responsive" *ngIf="filteredTeams.length > 0">
         <table class="equipment-table">
           <thead>
@@ -167,6 +168,58 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="equipment-cards" *ngIf="filteredTeams.length > 0">
+        <div class="equipment-card-mobile" *ngFor="let team of filteredTeams">
+          <div class="equipment-card-header">
+            <div class="equipment-card-title">
+              <h3>{{ team.nombre }}</h3>
+              <span class="equipment-id">ID: {{ team.id }}</span>
+            </div>
+            <span class="status-badge" [style.background-color]="getStatusColor(getTeamStatus(team))">
+              {{ getStatusText(getTeamStatus(team)) }}
+            </span>
+          </div>
+          
+          <div class="equipment-card-details">
+            <div class="equipment-detail-item">
+              <span class="equipment-detail-label">Zona</span>
+              <span class="equipment-detail-value zone-badge">{{ team.zona }}</span>
+            </div>
+            <div class="equipment-detail-item">
+              <span class="equipment-detail-label">Mineros</span>
+              <span class="equipment-detail-value">{{ team.mineros?.length || 0 }}/10</span>
+            </div>
+            <div class="equipment-detail-item">
+              <span class="equipment-detail-label">Supervisor</span>
+              <span class="equipment-detail-value">{{ team.supervisor?.fullName || 'Sin asignar' }}</span>
+            </div>
+            <div class="equipment-detail-item">
+              <span class="equipment-detail-label">Fecha Creación</span>
+              <span class="equipment-detail-value">{{ team.createdAt | date:'short' }}</span>
+            </div>
+          </div>
+          
+          <div class="equipment-card-actions">
+            <button class="btn-icon" (click)="showDetail(team)" title="Ver detalle">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn-icon" (click)="editTeam(team)" title="Editar" *ngIf="canModifyTeam()">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn-icon" (click)="openAssignMinerModal(team)" title="Asignar minero" *ngIf="canModifyTeam()">
+              <i class="fas fa-user-plus"></i>
+            </button>
+            <button class="btn-icon" title="Desasignar minero" *ngIf="canModifyTeam() && (team.mineros?.length || 0) > 0" (click)="openRemoveMinerModal(team)">
+              <i class="fas fa-user-minus"></i>
+            </button>
+            <button class="btn-icon danger" (click)="deleteTeam(team)" title="Eliminar" *ngIf="canModifyTeam()">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
       </div>
       <div *ngIf="filteredTeams.length === 0" style="padding: 2rem; text-align: center; color: #8892b0;">
         No hay equipos

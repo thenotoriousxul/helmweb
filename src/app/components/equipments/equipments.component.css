@@ -221,6 +221,89 @@
   margin-bottom: 2rem;
 }
 
+/* Mobile Card Layout (hidden by default) */
+.equipment-cards {
+  display: none;
+  gap: 1rem;
+}
+
+.equipment-card-mobile {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.equipment-card-mobile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.equipment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.equipment-card-title {
+  flex: 1;
+}
+
+.equipment-card-title h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.equipment-card-title .equipment-id {
+  font-size: 0.75rem;
+  color: #8892b0;
+}
+
+.equipment-card-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.equipment-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.equipment-detail-label {
+  font-size: 0.75rem;
+  color: #8892b0;
+  font-weight: 500;
+}
+
+.equipment-detail-value {
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.equipment-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.equipment-card-actions .btn-icon {
+  flex: 1;
+  min-width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
 .table-container {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -522,52 +605,169 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .equipment-table {
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .equipments-container {
+    padding: 1rem;
+  }
+  
+  .page-header {
+    padding: 1.5rem 0;
+  }
+  
   .header-content {
     flex-direction: column;
     gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .header-left h1 {
+    font-size: 1.75rem;
+  }
+  
+  .header-right {
+    align-self: stretch;
+  }
+  
+  .header-right .btn {
+    width: 100%;
+    justify-content: center;
   }
   
   .filters-container {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
   }
   
   .search-box {
     min-width: auto;
+    order: 1;
   }
   
   .filter-controls {
-    justify-content: space-between;
+    order: 2;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .filter-controls select {
+    width: 100%;
   }
   
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
   
-  .equipment-table {
-    font-size: 0.9rem;
+  .stat-card {
+    padding: 1.25rem;
   }
   
-  .equipment-table th,
-  .equipment-table td {
-    padding: 0.75rem 0.5rem;
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .stat-content h3 {
+    font-size: 1.75rem;
+  }
+  
+  /* Table becomes card layout on mobile */
+  .table-responsive {
+    display: none;
+  }
+  
+  .equipment-cards {
+    display: block;
   }
   
   .modal-overlay {
     padding: 1rem;
   }
+  
+  .modal-content {
+    max-width: calc(100vw - 2rem);
+  }
 }
 
 @media (max-width: 480px) {
+  .equipments-container {
+    padding: 0.75rem;
+  }
+  
+  .page-header {
+    padding: 1rem 0;
+  }
+  
+  .header-left h1 {
+    font-size: 1.5rem;
+  }
+  
+  .header-left p {
+    font-size: 0.9rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .stat-content h3 {
+    font-size: 1.5rem;
+  }
+  
+  .stat-content p {
+    font-size: 0.85rem;
+  }
+  
   .table-header {
     flex-direction: column;
     gap: 0.5rem;
     align-items: flex-start;
+    padding: 1rem;
+  }
+  
+  .table-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .results-count {
+    font-size: 0.85rem;
+  }
+  
+  .modal-overlay {
+    padding: 0.5rem;
   }
   
   .modal-actions {
     flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .modal-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 } 
 

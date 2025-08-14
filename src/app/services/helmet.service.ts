@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError, shareReplay } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Helmet {
   id: string;
@@ -38,7 +39,7 @@ export interface HelmetStats {
   providedIn: 'root'
 })
 export class HelmetService {
-  private apiUrl = 'http://localhost:3333';
+  private apiUrl = environment.apiUrl;
   private helmetsCache$: Observable<Helmet[]> | null = null;
 
   constructor(private http: HttpClient) {}

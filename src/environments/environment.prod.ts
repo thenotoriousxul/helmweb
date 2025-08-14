@@ -1,4 +1,5 @@
+
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3333' // Cambiar a la URL de producción cuando esté disponible
+  apiUrl: 'http://192.168.253.210:3333'
 }; 

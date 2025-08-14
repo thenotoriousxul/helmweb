@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError, shareReplay } from 'rxjs/operators';
 import { finalize } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: string;
@@ -118,7 +119,7 @@ export class AuthService {
 
   login(email: string, password: string): Observable<any> {
     console.log('AuthService: Iniciando login para:', email);
-    return this.http.post<any>('http://localhost:3333/login', { email, password }, { withCredentials: true }).pipe(
+    return this.http.post<any>(`${environment.apiUrl}/login`, { email, password }, { withCredentials: true }).pipe(
       map(response => {
         console.log('AuthService: Respuesta del servidor:', response);
         const user = response.data.user;
@@ -144,7 +145,7 @@ export class AuthService {
   }
 
   register(data: { fullName: string; email: string; password: string; codigo: string }): Observable<any> {
-    return this.http.post<any>('http://localhost:3333/register', data, { withCredentials: true }).pipe(
+    return this.http.post<any>(`${environment.apiUrl}/register`, data, { withCredentials: true }).pipe(
       map(response => {
         const user = response.data.user;
         this.userCache = user;
@@ -175,7 +176,7 @@ export class AuthService {
   }
 
   generateAccessCode(email: string): Observable<any> {
-    return this.http.post<any>('http://localhost:3333/access-code', { email }, { withCredentials: true }).pipe(
+    return this.http.post<any>(`${environment.apiUrl}/access-code`, { email }, { withCredentials: true }).pipe(
       map(response => response.data),
       catchError(error => {
         console.error('Access code generation error:', error);
@@ -202,7 +203,7 @@ export class AuthService {
 
     // Enviar logout al backend en segundo plano
     this.http
-      .post<any>('http://localhost:3333/logout', {}, { withCredentials: true })
+      .post<any>(`${environment.apiUrl}/logout`, {}, { withCredentials: true })
       .pipe(
         catchError((err) => {
           console.error('AuthService: Error en logout backend:', err)
@@ -214,7 +215,7 @@ export class AuthService {
 
   // Perfil
   getMe(): Observable<User> {
-    return this.http.get<any>('http://localhost:3333/me', { withCredentials: true }).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/me`, { withCredentials: true }).pipe(
       map(res => res.data),
       map((user) => {
         this.userCache = user;
@@ -242,7 +243,7 @@ export class AuthService {
     return this.inFlightMe$;
   }
   getProfile(): Observable<User> {
-    return this.http.get<any>('http://localhost:3333/profile', { withCredentials: true }).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/profile`, { withCredentials: true }).pipe(
       map(res => res.data),
       map((user) => {
         this.userCache = user;
@@ -254,13 +255,36 @@ export class AuthService {
   }
 
   updateProfile(data: Partial<User & { phone?: string; rfc?: string; address?: string; birthDate?: string }>): Observable<User> {
-    return this.http.put<any>('http://localhost:3333/profile', data, { withCredentials: true }).pipe(
+    return this.http.put<any>(`${environment.apiUrl}/profile`, data, { withCredentials: true }).pipe(
       map(res => res.data),
       map((user) => {
         this.userCache = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
         this.currentUserSubject.next(user);
         return user;
+      })
+    );
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.put<any>(`${environment.apiUrl}/change-password`, 
+      { currentPassword, newPassword }, 
+      { withCredentials: true }
+    ).pipe(
+      map(response => response.data || response),
+      catchError(error => {
+        console.error('Change password error:', error);
+        let errorMessage = 'Error al cambiar la contraseña';
+        
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.status === 400) {
+          errorMessage = 'Contraseña actual incorrecta';
+        } else if (error.status === 422) {
+          errorMessage = 'La nueva contraseña no cumple con los requisitos de seguridad';
+        }
+        
+        return throwError(() => new Error(errorMessage));
       })
     );
   }

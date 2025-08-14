@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../services/auth.service';
 import { ToastContainerComponent } from '../toast/toast.component';
+import { ToastService } from '../../services/toast.service';
 
 interface Equipment {
   id: string;
@@ -160,7 +161,7 @@ interface UserProfile {
         </div>
         
         <div class="modal-body">
-          <form (ngSubmit)="updatePassword()">
+          <form (ngSubmit)="updatePassword()" #passwordForm="ngForm">
             <div class="form-group">
               <label for="currentPassword">Contraseña Actual</label>
               <input 
@@ -169,6 +170,8 @@ interface UserProfile {
                 [(ngModel)]="passwordData.currentPassword" 
                 name="currentPassword"
                 placeholder="Ingresa tu contraseña actual"
+                autocomplete="current-password"
+                [disabled]="isUpdatingPassword"
                 required
               >
             </div>
@@ -180,9 +183,15 @@ interface UserProfile {
                 id="newPassword"
                 [(ngModel)]="passwordData.newPassword" 
                 name="newPassword"
-                placeholder="Ingresa la nueva contraseña"
+                placeholder="Ingresa la nueva contraseña (mín. 8 caracteres)"
+                autocomplete="new-password"
+                [disabled]="isUpdatingPassword"
+                minlength="8"
                 required
               >
+              <div class="password-requirements">
+                <small>La contraseña debe tener al menos 8 caracteres</small>
+              </div>
             </div>
             
             <div class="form-group">
@@ -193,17 +202,25 @@ interface UserProfile {
                 [(ngModel)]="passwordData.confirmPassword" 
                 name="confirmPassword"
                 placeholder="Confirma la nueva contraseña"
+                autocomplete="new-password"
+                [disabled]="isUpdatingPassword"
                 required
               >
             </div>
             
+            <div class="error-message" *ngIf="passwordError">
+              <i class="fas fa-exclamation-triangle"></i>
+              {{ passwordError }}
+            </div>
+            
             <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">
+              <button type="button" class="btn btn-secondary" (click)="closePasswordModal()" [disabled]="isUpdatingPassword">
                 Cancelar
               </button>
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i>
-                Actualizar Contraseña
+              <button type="submit" class="btn btn-primary" [disabled]="isUpdatingPassword || !passwordForm.valid">
+                <i class="fas fa-spinner fa-spin" *ngIf="isUpdatingPassword"></i>
+                <i class="fas fa-save" *ngIf="!isUpdatingPassword"></i>
+                {{ isUpdatingPassword ? 'Actualizando...' : 'Actualizar Contraseña' }}
               </button>
             </div>
           </form>
@@ -278,10 +295,14 @@ export class LayoutComponent implements OnInit {
     newPassword: '',
     confirmPassword: ''
   };
+  isUpdatingPassword = false;
+  passwordError = '';
 
   constructor(
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private toastService: ToastService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -366,12 +387,64 @@ export class LayoutComponent implements OnInit {
       newPassword: '',
       confirmPassword: ''
     };
+    this.passwordError = '';
+    this.isUpdatingPassword = false;
   }
 
   updatePassword() {
-    // Implementar lógica de cambio de contraseña
-    console.log('Cambiando contraseña:', this.passwordData);
-    this.closePasswordModal();
+    // Limpiar errores previos
+    this.passwordError = '';
+    
+    // Validaciones del lado del cliente
+    if (!this.passwordData.currentPassword) {
+      this.passwordError = 'La contraseña actual es requerida';
+      return;
+    }
+    
+    if (!this.passwordData.newPassword) {
+      this.passwordError = 'La nueva contraseña es requerida';
+      return;
+    }
+    
+    if (this.passwordData.newPassword.length < 8) {
+      this.passwordError = 'La nueva contraseña debe tener al menos 8 caracteres';
+      return;
+    }
+    
+    if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
+      this.passwordError = 'Las contraseñas no coinciden';
+      return;
+    }
+    
+    if (this.passwordData.currentPassword === this.passwordData.newPassword) {
+      this.passwordError = 'La nueva contraseña debe ser diferente a la actual';
+      return;
+    }
+    
+    // Realizar el cambio de contraseña
+    this.isUpdatingPassword = true;
+    
+    this.authService.changePassword(
+      this.passwordData.currentPassword,
+      this.passwordData.newPassword
+    ).subscribe({
+      next: (response) => {
+        console.log('Password change success:', response);
+        this.isUpdatingPassword = false;
+        this.cdr.detectChanges(); // Forzar detección de cambios
+        this.toastService.success('Contraseña actualizada exitosamente');
+        
+        // Delay para que el usuario vea el toast antes de cerrar el modal
+        setTimeout(() => {
+          this.closePasswordModal();
+        }, 1500);
+      },
+      error: (error) => {
+        console.error('Password change error:', error);
+        this.passwordError = error.message;
+        this.isUpdatingPassword = false;
+      }
+    });
   }
 
   getTotalStats() {
