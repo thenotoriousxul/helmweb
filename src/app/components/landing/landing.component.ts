@@ -27,6 +27,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   showPhoneModal = false;
   isAuthenticated = false;
   userRole = '';
+  mobileMenuOpen = false;
   sensorHistory = {
     temperature: [36.5, 36.8, 37.1, 36.9, 37.2, 36.7, 37.0, 36.6, 37.3, 36.8],
     movement: ['Normal', 'Movimiento', 'Normal', 'Caída', 'Normal', 'Inactivo', 'Normal', 'Movimiento', 'Normal', 'Caída'],
@@ -113,20 +114,35 @@ export class LandingComponent implements OnInit, OnDestroy {
     }
   }
 
+  get displayUserName(): string {
+    return this.authService.getCurrentUser()?.fullName || 'Usuario';
+  }
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+  }
+
   showLogin() {
     if (!this.isAuthenticated) {
+      this.closeMobileMenu();
       this.router.navigate(['/login']);
     }
   }
 
   showRegister() {
     if (!this.isAuthenticated) {
+      this.closeMobileMenu();
       this.router.navigate(['/register']);
     }
   }
 
   goToDashboard() {
     if (this.isAuthenticated) {
+      this.closeMobileMenu();
       this.router.navigate(['/equipments']);
     }
   }
@@ -134,6 +150,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout();
     this.checkAuthStatus();
+    this.closeMobileMenu();
     this.router.navigate(['/']);
   }
 

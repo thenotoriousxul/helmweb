@@ -8,7 +8,10 @@
       <div class="logo">
         <h2>Helm<span class="accent"></span></h2>
       </div>
-      <ul class="nav-links">
+      <button class="hamburger" (click)="toggleMobileMenu()" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links desktop-only">
         <li><a href="#features">Características</a></li>
         <li><a href="#testimonials">Casos de Éxito</a></li>
         <li><a href="#contact">Contacto</a></li>
@@ -42,6 +45,36 @@
     </nav>
   </div>
 </header>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-overlay" *ngIf="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+<div class="mobile-menu" [class.open]="mobileMenuOpen">
+  <div class="mobile-menu-header">
+    <h3>Helm</h3>
+    <button class="close-btn" (click)="closeMobileMenu()" aria-label="Cerrar menú">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <ul>
+    <li><a href="#features" (click)="closeMobileMenu()">Características</a></li>
+    <li><a href="#testimonials" (click)="closeMobileMenu()">Casos de Éxito</a></li>
+    <li><a href="#contact" (click)="closeMobileMenu()">Contacto</a></li>
+    <li *ngIf="!isAuthenticated"><a (click)="showLogin()">Iniciar Sesión</a></li>
+    <li *ngIf="isAuthenticated" class="mobile-user">
+      <div class="avatar"><i class="fas fa-user"></i></div>
+      <div class="user-info">
+        <div class="name">{{ displayUserName }}</div>
+        <div class="role">{{ userRole | titlecase }}</div>
+      </div>
+    </li>
+    <li *ngIf="isAuthenticated"><a (click)="goToDashboard()">Panel Principal</a></li>
+    <li *ngIf="isAuthenticated"><a (click)="logout()">Cerrar Sesión</a></li>
+  </ul>
+  <div class="mobile-menu-footer">
+    <small>&copy; 2024 Helm</small>
+  </div>
+  
+</div>
 
 <!-- Hero Section -->
 <section class="hero">
