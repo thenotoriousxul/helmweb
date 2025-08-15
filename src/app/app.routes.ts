@@ -12,6 +12,7 @@ import { EquipmentDetailComponent } from './components/equipment-detail/equipmen
 import { EquipmentEditComponent } from './components/equipment-edit/equipment-edit.component';
 import { authGuard, guestGuard } from './guards/auth.guard';
 import { MyHelmetComponent } from './components/my-helmet/my-helmet.component';
+import { HelmetReadingsComponent } from './components/helmet-readings/helmet-readings.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -24,6 +25,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'supervisors', pathMatch: 'full' },
       { path: 'equipments', component: EquipmentsComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
       { path: 'helmets', component: HelmetsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
+      { path: 'helmet-readings/:id', component: HelmetReadingsComponent, canActivate: [authGuard], data: { roles: ['admin', 'supervisor'] } },
       { path: 'my-helmet', component: MyHelmetComponent, canActivate: [authGuard], data: { roles: ['minero'] } },
       { path: 'miners', component: MinersComponent, canActivate: [authGuard], data: { roles: ['supervisor'] } },
       { path: 'supervisors', component: SupervisorsComponent, canActivate: [authGuard], data: { roles: ['admin'] } },

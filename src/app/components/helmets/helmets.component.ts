@@ -545,4 +545,8 @@ export class HelmetsComponent implements OnInit {
   isSensorsExpanded(helmetId: string): boolean {
     return !!this.expandedSensors[helmetId];
   }
+
+  viewReadings(helmet: Helmet): void {
+    this.router.navigate(['/helmet-readings', helmet.id]);
+  }
 } 
