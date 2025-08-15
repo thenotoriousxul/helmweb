@@ -59,7 +59,7 @@ import * as L from 'leaflet';
                 </div>
                 <div class="stat-content">
                   <span class="stat-label">Minero asignado</span>
-                  <span class="stat-value">{{ assignedMiner?.fullName || 'No asignado' }}</span>
+                  <span class="stat-value">{{ getAssignedMinerName() }}</span>
                 </div>
               </div>
 
@@ -1018,6 +1018,7 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
   private marker: L.Marker | null = null;
   private mapInitialized = false;
   currentLocation: { lat: number; lng: number } | null = null;
+  private mapUpdateScheduled = false;
   
   // Universidad Tecnológica de Torreón coordinates
   private readonly defaultLocation = {
@@ -1080,25 +1081,52 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   ngOnDestroy() {
+    // Cancel any scheduled map updates
+    this.mapUpdateScheduled = false;
+    
+    // Clean up map
     if (this.map) {
-      this.map.remove();
+      try {
+        // Remove all event listeners
+        this.map.off();
+        
+        // Remove map
+        this.map.remove();
+      } catch (e) {
+        console.warn('Error during map cleanup:', e);
+      }
+      
       this.map = null;
       this.mapInitialized = false;
     }
+    
+    // Clean up marker
+    if (this.marker) {
+      this.marker = null;
+    }
+    
+    // Reset location state
+    this.currentLocation = null;
   }
 
   loadHelmetData() {
     this.isLoading = true;
     
+    console.log('Loading helmet data for ID:', this.helmetId);
+    
     this.helmetService.getHelmetById(this.helmetId!).subscribe({
       next: (helmet) => {
+        console.log('Helmet data received:', helmet);
         this.helmet = helmet;
         this.isLoading = false;
         this.cdr.detectChanges();
         
         // Load assigned miner info if exists
         if (helmet.assignedToId) {
+          console.log('Loading assigned miner with ID:', helmet.assignedToId);
           this.loadAssignedMiner(helmet.assignedToId);
+        } else {
+          console.log('No assigned miner ID found');
         }
         
         // Load readings and charts
@@ -1116,6 +1144,7 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
   loadAssignedMiner(minerId: string) {
     this.mineroService.getMineroById(minerId).subscribe({
       next: (miner) => {
+        console.log('Assigned miner data received:', miner);
         this.assignedMiner = miner;
         this.cdr.detectChanges();
       },
@@ -1224,10 +1253,34 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
     }
   }
 
+  getAssignedMinerName(): string {
+    // Prioridad 1: assignedMiner cargado por separado
+    if (this.assignedMiner?.fullName) {
+      return this.assignedMiner.fullName;
+    }
+    
+    // Prioridad 2: assignedTo del helmet
+    if (this.helmet?.assignedTo) {
+      return this.helmet.assignedTo;
+    }
+    
+    // Prioridad 3: Si hay assignedToId pero no nombre, mostrar el ID
+    if (this.helmet?.assignedToId) {
+      return `Minero ID: ${this.helmet.assignedToId}`;
+    }
+    
+    // Sin asignación
+    return 'No asignado';
+  }
+
   formatDateTime(dateTime: string | undefined): string {
     if (!dateTime) return 'No disponible';
     try {
       const date = new Date(dateTime);
+      // Verificar si la fecha es válida
+      if (isNaN(date.getTime())) {
+        return 'Fecha inválida';
+      }
       return date.toLocaleString('es-ES', {
         year: 'numeric',
         month: 'short',
@@ -1244,6 +1297,10 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
     if (!dateTime) return 'No disponible';
     try {
       const date = new Date(dateTime);
+      // Verificar si la fecha es válida
+      if (isNaN(date.getTime())) {
+        return 'Fecha inválida';
+      }
       return date.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
@@ -1330,22 +1387,19 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
         
         // If coordinates are 0,0 or very close to 0, show "No disponible" and use default location
         if (Math.abs(lat) < 0.000001 && Math.abs(lng) < 0.000001) {
-          // Reset to default location for map
-          this.currentLocation = null;
-          this.updateMapToDefault();
+          // Reset to default location for map (but don't update immediately to avoid loops)
+          this.scheduleMapUpdate(null);
           return 'No disponible';
         }
         
-        // Update current location for the map with real coordinates
-        this.currentLocation = { lat, lng };
-        this.updateMapLocation();
+        // Update current location for the map with real coordinates (but don't update immediately to avoid loops)
+        this.scheduleMapUpdate({ lat, lng });
         
         return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
       }
       
       // No location data available, use default
-      this.currentLocation = null;
-      this.updateMapToDefault();
+      this.scheduleMapUpdate(null);
       return 'No disponible';
     }
     
@@ -1400,6 +1454,36 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
         }
       }, 500);
     }
+  }
+
+  private scheduleMapUpdate(location: { lat: number; lng: number } | null): void {
+    // Avoid multiple updates in the same cycle
+    if (this.mapUpdateScheduled) {
+      return;
+    }
+
+    this.mapUpdateScheduled = true;
+    
+    // Schedule update for next tick to avoid infinite loops
+    setTimeout(() => {
+      this.mapUpdateScheduled = false;
+      
+      if (location) {
+        // Only update if location actually changed
+        if (!this.currentLocation || 
+            this.currentLocation.lat !== location.lat || 
+            this.currentLocation.lng !== location.lng) {
+          this.currentLocation = location;
+          this.updateMapLocationSafe();
+        }
+      } else {
+        // Only update if we had a location before
+        if (this.currentLocation) {
+          this.currentLocation = null;
+          this.updateMapToDefaultSafe();
+        }
+      }
+    }, 0);
   }
 
   setupChartOptions(): void {
@@ -1593,14 +1677,6 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
         return;
       }
 
-      // Fix Leaflet default icon issue
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-      });
-
       const mapElement = document.getElementById('helmet-map');
       if (!mapElement) {
         console.warn('Map element not found during initialization');
@@ -1609,69 +1685,96 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
 
       console.log('Map element found:', mapElement);
 
-      // Clear any existing map
+      // Clear any existing map and reset state
       if (this.map) {
         console.log('Removing existing map...');
-        this.map.remove();
+        try {
+          this.map.remove();
+        } catch (e) {
+          console.warn('Error removing existing map:', e);
+        }
         this.map = null;
+        this.mapInitialized = false;
       }
 
-      // Clear the container
+      // Clear the container completely
       mapElement.innerHTML = '';
-
-      // Use current location if available, otherwise default location
-      const location = this.currentLocation || this.defaultLocation;
-      console.log('Using location:', location);
-
-      // Initialize map
-      console.log('Creating Leaflet map...');
-      this.map = L.map('helmet-map', {
-        center: [location.lat, location.lng],
-        zoom: 15,
-        zoomControl: true,
-        attributionControl: true,
-        preferCanvas: false
-      });
-
-      // Mark as initialized immediately
-      this.mapInitialized = true;
-
-      console.log('Map created, adding tile layer...');
-      // Use CartoDB Positron for better styling and reliability
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO',
-        subdomains: 'abcd',
-        maxZoom: 19
-      }).addTo(this.map);
-
-      console.log('Tile layer added, setting up final initialization...');
       
-      // Add event listeners for tile loading
-      this.map.on('load', () => {
-        console.log('Map loaded successfully');
-      });
-      
-      this.map.on('tileload', () => {
-        console.log('Tile loaded');
-      });
-      
-      this.map.on('tileerror', (e) => {
-        console.error('Tile error:', e);
-      });
+      // Remove any Leaflet-added classes that might interfere
+      mapElement.className = mapElement.className.replace(/leaflet-\S+/g, '');
 
-      // Force map to invalidate size after initialization
+      // Wait a bit to ensure DOM is clean
       setTimeout(() => {
-        if (this.map) {
-          console.log('Final map setup - invalidating size and adding marker...');
-          this.map.invalidateSize();
-          this.addMarker(location.lat, location.lng);
-          console.log('Map initialization completed successfully');
+        try {
+          // Fix Leaflet default icon issue
+          delete (L.Icon.Default.prototype as any)._getIconUrl;
+          L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          });
+
+          // Use current location if available, otherwise default location
+          const location = this.currentLocation || this.defaultLocation;
+          console.log('Using location:', location);
+
+          // Initialize map
+          console.log('Creating Leaflet map...');
+          this.map = L.map('helmet-map', {
+            center: [location.lat, location.lng],
+            zoom: 15,
+            zoomControl: true,
+            attributionControl: true,
+            preferCanvas: false
+          });
+
+          // Mark as initialized immediately after successful creation
+          this.mapInitialized = true;
+
+          console.log('Map created, adding tile layer...');
+          // Use CartoDB Positron for better styling and reliability
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+          }).addTo(this.map);
+
+          console.log('Tile layer added, setting up final initialization...');
+          
+          // Add event listeners for tile loading
+          this.map.on('load', () => {
+            console.log('Map loaded successfully');
+          });
+          
+          this.map.on('tileload', () => {
+            console.log('Tile loaded');
+          });
+          
+          this.map.on('tileerror', (e) => {
+            console.error('Tile error:', e);
+          });
+
+          // Force map to invalidate size after initialization
+          setTimeout(() => {
+            if (this.map && this.mapInitialized) {
+              console.log('Final map setup - invalidating size and adding marker...');
+              this.map.invalidateSize();
+              this.addMarker(location.lat, location.lng);
+              console.log('Map initialization completed successfully');
+            }
+          }, 500);
+
+        } catch (innerError) {
+          console.error('Error in delayed map initialization:', innerError);
+          this.mapInitialized = false;
+          this.map = null;
         }
-      }, 500);
+      }, 100);
 
     } catch (error) {
       console.error('Error initializing map:', error);
       this.mapInitialized = false;
+      this.map = null;
     }
   }
 
@@ -1739,6 +1842,44 @@ export class HelmetReadingsComponent implements OnInit, AfterViewInit, OnDestroy
       this.cdr.detectChanges();
     } catch (error) {
       console.error('Error updating map to default location:', error);
+    }
+  }
+
+  private updateMapLocationSafe(): void {
+    if (!this.map || !this.currentLocation) return;
+
+    try {
+      // Invalidate size first to ensure proper rendering
+      this.map.invalidateSize();
+      
+      // Update map view to new location
+      this.map.setView([this.currentLocation.lat, this.currentLocation.lng], 15);
+      
+      // Update marker
+      this.addMarker(this.currentLocation.lat, this.currentLocation.lng);
+      
+      // NO llamar detectChanges() aquí para evitar bucles infinitos
+    } catch (error) {
+      console.error('Error updating map location safely:', error);
+    }
+  }
+
+  private updateMapToDefaultSafe(): void {
+    if (!this.map) return;
+
+    try {
+      // Invalidate size first to ensure proper rendering
+      this.map.invalidateSize();
+      
+      // Update map view to default location (UTT)
+      this.map.setView([this.defaultLocation.lat, this.defaultLocation.lng], 15);
+      
+      // Update marker to default location
+      this.addMarker(this.defaultLocation.lat, this.defaultLocation.lng);
+      
+      // NO llamar detectChanges() aquí para evitar bucles infinitos
+    } catch (error) {
+      console.error('Error updating map to default location safely:', error);
     }
   }
 }

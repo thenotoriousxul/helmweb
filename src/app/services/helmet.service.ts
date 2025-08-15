@@ -175,7 +175,49 @@ export class HelmetService {
    */
   getHelmetById(id: string): Observable<Helmet> {
     return this.http.get<any>(`${this.apiUrl}/cascos/${id}`, { withCredentials: true }).pipe(
-      map(response => response.data),
+      map(response => {
+        const item = response.data;
+        if (!item) {
+          throw new Error('Helmet not found');
+        }
+        
+        // Mapear igual que en getAllHelmets para consistencia
+        return {
+          id: item.id,
+          uuid: item.physicalId || item.uuid || '',
+          serialNumber: item.serial || item.serialNumber || '',
+          status: (item.isActive === 1 || item.isActive === true) ? ((item.asignadoMinero === 1 || item.asignadoMinero === true) ? 'activo-asignado' : 'activo-sin-asignar') : 'inactivo',
+          assignedTo: item.minero ? item.minero.fullName : undefined,
+          assignedToId: (item.minero ? item.minero.id : undefined) || item.mineroId || undefined,
+          assignedToEmail: item.minero ? item.minero.email : undefined,
+          equipmentId: undefined, // Ajustar si hay campo en backend
+          equipmentName: undefined, // Ajustar si hay campo en backend
+          supervisorId: item.supervisorId,
+          lastHeartbeat: item.updatedAt || '',
+          batteryLevel: undefined, // Ajustar si hay campo en backend
+          temperature: undefined, // Ajustar si hay campo en backend
+          location: undefined, // Ajustar si hay campo en backend
+          sensors: item.sensors ? item.sensors.map((sensor: any) => ({
+            id: sensor.id,
+            cascoId: sensor.cascoId,
+            type: sensor.type,
+            name: sensor.name,
+            isActive: sensor.isActive,
+            minValue: sensor.minValue,
+            maxValue: sensor.maxValue,
+            unit: sensor.unit,
+            sampleRate: sensor.sampleRate,
+            alertThreshold: sensor.alertThreshold,
+            createdAt: sensor.createdAt,
+            updatedAt: sensor.updatedAt
+          })) : [],
+          // Nuevos campos para mostrar IDs y fechas
+          physicalId: item.physicalId,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          fechaActivacion: item.fechaActivacion
+        } as Helmet;
+      }),
       catchError(error => {
         console.error('Error fetching helmet:', error);
         throw error;
