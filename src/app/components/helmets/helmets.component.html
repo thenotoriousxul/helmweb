@@ -95,7 +95,7 @@
                 <span class="detail-label">ID Físico:</span>
                 <span class="detail-value">{{ helmet.physicalId }}</span>
               </div>
-              <div class="detail-item" *ngIf="helmet.supervisorId">
+              <div class="detail-item" *ngIf="helmet.supervisorId && !authService.isSupervisor()">
                 <span class="detail-label">Supervisor:</span>
                 <span class="detail-value">{{ getSupervisorNameById(helmet.supervisorId) }}</span>
               </div>
@@ -128,47 +128,40 @@
             </div>
           </div>
 
-          <!-- Sensores -->
-          <div class="sensors-section" *ngIf="helmet.sensors && helmet.sensors.length > 0">
-            <h4 class="section-title">
-              <i class="fas fa-microchip"></i>
-              Sensores ({{ helmet.sensors.length }})
-            </h4>
-            <div class="sensors-grid">
-              <div class="sensor-card" *ngFor="let sensor of helmet.sensors" [class.active]="sensor.isActive">
-                <div class="sensor-header">
-                  <span class="sensor-name">{{ sensor.name }}</span>
-                  <span class="sensor-status" [class.active]="sensor.isActive">
+          <!-- IDs de Sensores -->
+          <div class="sensor-ids-section" *ngIf="helmet.sensors && helmet.sensors.length > 0">
+              <h4 class="section-title">
+                <i class="fas fa-microchip"></i>
+                Sensores del Casco ({{ helmet.sensors.length }})
+                <button 
+                  class="toggle-sensors-btn" 
+                  (click)="toggleSensors(helmet.id)"
+                  [title]="isSensorsExpanded(helmet.id) ? 'Ocultar sensores' : 'Mostrar sensores'"
+                >
+                  <i class="fas fa-eye" [class.fa-eye]="!isSensorsExpanded(helmet.id)" [class.fa-eye-slash]="isSensorsExpanded(helmet.id)"></i>
+                </button>
+              </h4>
+              <div class="sensor-ids-list" *ngIf="isSensorsExpanded(helmet.id)">
+                <div class="sensor-id-item" *ngFor="let sensor of helmet.sensors; let i = index">
+                  <div class="sensor-info">
+                    <span class="sensor-number">{{ i + 1 }}.</span>
+                    <div class="sensor-details">
+                      <span class="sensor-name">{{ sensor.name }}</span>
+                      <span class="sensor-id-value">ID: {{ sensor.id }}</span>
+                      <span class="sensor-unit" *ngIf="sensor.unit">({{ sensor.unit }})</span>
+                    </div>
+                  </div>
+                  <span class="sensor-type-badge" [class]="'type-' + sensor.type">
+                    {{ getSensorTypeLabel(sensor.type) }}
+                  </span>
+                  <span class="sensor-status" [class.active]="sensor.isActive" [class.inactive]="!sensor.isActive">
                     <i class="fas" [class.fa-check-circle]="sensor.isActive" [class.fa-times-circle]="!sensor.isActive"></i>
                     {{ sensor.isActive ? 'Activo' : 'Inactivo' }}
                   </span>
                 </div>
-                <div class="sensor-details">
-                  <div class="sensor-detail">
-                    <span class="label">ID:</span>
-                    <span class="value sensor-id">{{ sensor.id }}</span>
-                  </div>
-                  <div class="sensor-detail">
-                    <span class="label">Tipo:</span>
-                    <span class="value">{{ getSensorTypeLabel(sensor.type) }}</span>
-                  </div>
-                  <div class="sensor-detail">
-                    <span class="label">Unidad:</span>
-                    <span class="value">{{ sensor.unit }}</span>
-                  </div>
-                  <div class="sensor-detail" *ngIf="sensor.alertThreshold">
-                    <span class="label">Umbral:</span>
-                    <span class="value">{{ sensor.alertThreshold }} {{ sensor.unit }}</span>
-                  </div>
-                  <div class="sensor-detail">
-                    <span class="label">Frecuencia:</span>
-                    <span class="value">{{ sensor.sampleRate }}ms</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
-        </div>
         
         <div class="card-actions">
           <button class="btn btn-primary" (click)="showDetail(helmet)">
@@ -339,36 +332,7 @@
         <div class="detail-row"><strong>Temperatura:</strong> {{ detailHelmetData.temperature || 0 }}°C</div>
         <!-- Se eliminan Batería y Ubicación por no formar parte de los sensores activos -->
 
-        <div style="margin-top: 1rem;">
-          <h4>Lecturas de Sensores (última hora)</h4>
-          <div *ngIf="(detailHelmetDataReadings?.length || 0) > 0; else noReadings">
-            <div class="table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Hora (Local)</th>
-                    <th>Sensor</th>
-                    <th>Valor</th>
-                    <th>Unidad</th>
-                    <th>Alerta</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let r of detailHelmetDataReadings">
-                    <td>{{ r.timestampLocal || r.createdAtLocal }}</td>
-                    <td>{{ r.sensorId }}</td>
-                    <td>{{ r.value }}</td>
-                    <td>{{ r.unit }}</td>
-                    <td>{{ r.isAlert ? 'Sí' : 'No' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <ng-template #noReadings>
-            <div style="padding: .5rem 0; color: #8892b0;">Sin lecturas recientes</div>
-          </ng-template>
-        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
         </div>

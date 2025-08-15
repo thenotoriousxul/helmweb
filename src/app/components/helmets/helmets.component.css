@@ -1038,6 +1038,7 @@
 .section-title {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -1045,6 +1046,33 @@
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+.toggle-sensors-btn {
+  background: rgba(100, 255, 218, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  color: #64ffda;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 32px;
+  height: 28px;
+  justify-content: center;
+}
+
+.toggle-sensors-btn:hover {
+  background: rgba(100, 255, 218, 0.2);
+  border-color: rgba(100, 255, 218, 0.5);
+  transform: translateY(-1px);
+}
+
+.toggle-sensors-btn:active {
+  transform: translateY(0);
 }
 
 .ids-section,
@@ -1152,4 +1180,157 @@
   border-radius: 3px;
   color: #64ffda;
   word-break: break-all;
+}
+
+/* Sensor IDs Section */
+.sensor-ids-section {
+  margin-bottom: 1.5rem;
+}
+
+.sensor-ids-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sensor-id-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: rgba(23, 42, 69, 0.3);
+  border: 1px solid rgba(61, 244, 244, 0.2);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sensor-id-item:hover {
+  background: rgba(61, 244, 244, 0.1);
+  border-color: rgba(61, 244, 244, 0.3);
+}
+
+.sensor-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.sensor-number {
+  font-weight: 700;
+  color: #3df4f4;
+  min-width: 20px;
+}
+
+.sensor-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sensor-name {
+  font-weight: 600;
+  color: #ccd6f6;
+  font-size: 0.9rem;
+}
+
+.sensor-id-value {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: #8892b0;
+  background: rgba(61, 244, 244, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.sensor-unit {
+  font-size: 0.8rem;
+  color: #64ffda;
+  font-style: italic;
+}
+
+.sensor-type-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sensor-type-badge.type-gps {
+  background: rgba(61, 244, 244, 0.2);
+  color: #3df4f4;
+  border: 1px solid rgba(61, 244, 244, 0.3);
+}
+
+.sensor-type-badge.type-heart_rate {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.sensor-type-badge.type-body_temperature {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.sensor-type-badge.type-gas {
+  background: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.3);
+}
+
+.sensor-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sensor-status.active {
+  color: #64ffda;
+}
+
+.sensor-status.inactive {
+  color: #8892b0;
+}
+
+.sensor-status i {
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sensor-id-item {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .sensor-info {
+    width: 100%;
+  }
+  
+  .sensor-details {
+    flex: 1;
+  }
+  
+  .sensor-id-value {
+    word-break: break-all;
+  }
 }

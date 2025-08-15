@@ -37,6 +37,7 @@ export class HelmetsComponent implements OnInit {
   detailHelmetDataReadings: SensorReading[] = [];
   showEditModal = false;
   editHelmetData: Partial<Helmet> = {};
+  expandedSensors: { [helmetId: string]: boolean } = {};
   originalEditHelmetData: Partial<Helmet> = {};
   showDeleteModal = false;
   helmetToDelete: Helmet | null = null;
@@ -535,5 +536,13 @@ export class HelmetsComponent implements OnInit {
   getUnassignedCount(): number {
     const value = (this.helmetStats.active || 0) - (this.helmetStats.assigned || 0)
     return value < 0 ? 0 : value
+  }
+
+  toggleSensors(helmetId: string): void {
+    this.expandedSensors[helmetId] = !this.expandedSensors[helmetId];
+  }
+
+  isSensorsExpanded(helmetId: string): boolean {
+    return !!this.expandedSensors[helmetId];
   }
 } 
