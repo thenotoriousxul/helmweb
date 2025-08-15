@@ -123,9 +123,13 @@ export class AuthService {
       map(response => {
         console.log('AuthService: Respuesta del servidor:', response);
         const user = response.data.user;
+        const accessToken = response.data.accessToken;
         console.log('AuthService: Usuario extraído:', user);
         this.userCache = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
+        if (accessToken) {
+          localStorage.setItem('accessToken', accessToken);
+        }
         this.currentUserSubject.next(user);
         console.log('AuthService: Usuario guardado en cache y localStorage');
         return user;
@@ -352,6 +356,10 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return null;
+    try {
+      return localStorage.getItem('accessToken');
+    } catch {
+      return null;
+    }
   }
 } 
