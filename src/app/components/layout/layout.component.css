@@ -261,11 +261,10 @@
 
 /* Hamburger Button */
 .hamburger-btn {
-  display: none;
   position: fixed;
   top: 1rem;
   left: 1rem;
-  z-index: 999;
+  z-index: 1002;
   background: rgba(61, 244, 244, 0.1);
   border: 1px solid rgba(61, 244, 244, 0.2);
   color: #3df4f4;
@@ -276,12 +275,21 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: block;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .hamburger-btn:hover {
   background: rgba(61, 244, 244, 0.2);
   border-color: rgba(61, 244, 244, 0.4);
   transform: scale(1.05);
+}
+
+/* Show hamburger when sidebar is closed */
+.main-content.sidebar-closed .hamburger-btn {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Modal Styles */
@@ -490,14 +498,13 @@
   .main-content {
     margin-left: 0;
     padding: 1.5rem;
+    padding-top: 4rem;
   }
   
+  /* In mobile, always show hamburger button */
   .hamburger-btn {
-    display: block;
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 999;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 }
 
@@ -526,6 +533,8 @@
   }
   
   .hamburger-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
     top: 0.75rem;
     left: 0.75rem;
     padding: 0.625rem;

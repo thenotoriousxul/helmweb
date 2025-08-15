@@ -67,8 +67,8 @@
           <div class="helmet-info">
             <h3>{{ helmet.serialNumber }}</h3>
             <span class="uuid-text">{{ helmet.uuid }}</span>
-            <span class="assigned-to" *ngIf="helmet.assignedTo">{{ helmet.assignedTo }}</span>
-            <span class="not-assigned" *ngIf="!helmet.assignedTo">Sin asignar</span>
+            <span class="assigned-to" *ngIf="helmet.assignedTo && !authService.isAdmin()">{{ helmet.assignedTo }}</span>
+            <span class="not-assigned" *ngIf="!helmet.assignedTo && !authService.isAdmin()">Sin asignar</span>
             <span class="assigned-supervisor" *ngIf="authService.isAdmin() && helmet.supervisorId">
               Supervisor: {{ getSupervisorNameById(helmet.supervisorId) }}
             </span>
@@ -80,18 +80,92 @@
         
         <div class="card-body">
           
-          <div class="helmet-details">
-            <div class="detail-item" *ngIf="helmet.equipmentName">
-              <span class="detail-label">Equipo:</span>
-              <span class="detail-value">{{ helmet.equipmentName }}</span>
+          <!-- IDs del Casco -->
+          <div class="ids-section">
+            <h4 class="section-title">
+              <i class="fas fa-id-card"></i>
+              Identificadores
+            </h4>
+            <div class="helmet-details">
+              <div class="detail-item">
+                <span class="detail-label">ID del Casco:</span>
+                <span class="detail-value id-value">{{ helmet.id }}</span>
+              </div>
+              <div class="detail-item" *ngIf="helmet.physicalId">
+                <span class="detail-label">ID Físico:</span>
+                <span class="detail-value">{{ helmet.physicalId }}</span>
+              </div>
+              <div class="detail-item" *ngIf="helmet.supervisorId">
+                <span class="detail-label">Supervisor:</span>
+                <span class="detail-value">{{ getSupervisorNameById(helmet.supervisorId) }}</span>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Última señal:</span>
-              <span class="detail-value">{{ helmet.lastHeartbeat || 'N/A' }}</span>
+          </div>
+
+          <!-- Información General -->
+          <div class="general-info-section">
+            <h4 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Información General
+            </h4>
+            <div class="helmet-details">
+              <div class="detail-item" *ngIf="helmet.equipmentName">
+                <span class="detail-label">Equipo:</span>
+                <span class="detail-value">{{ helmet.equipmentName }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Última señal:</span>
+                <span class="detail-value">{{ helmet.lastHeartbeat || 'N/A' }}</span>
+              </div>
+              <div class="detail-item" *ngIf="helmet.createdAt">
+                <span class="detail-label">Creado:</span>
+                <span class="detail-value">{{ formatDate(helmet.createdAt) }}</span>
+              </div>
+              <div class="detail-item" *ngIf="helmet.fechaActivacion">
+                <span class="detail-label">Activado:</span>
+                <span class="detail-value">{{ formatDate(helmet.fechaActivacion) }}</span>
+              </div>
             </div>
-            <div class="detail-item" *ngIf="helmet.sensors?.heartRate">
-              <span class="detail-label">Frecuencia cardíaca:</span>
-              <span class="detail-value">{{ helmet.sensors?.heartRate || 0 }} bpm</span>
+          </div>
+
+          <!-- Sensores -->
+          <div class="sensors-section" *ngIf="helmet.sensors && helmet.sensors.length > 0">
+            <h4 class="section-title">
+              <i class="fas fa-microchip"></i>
+              Sensores ({{ helmet.sensors.length }})
+            </h4>
+            <div class="sensors-grid">
+              <div class="sensor-card" *ngFor="let sensor of helmet.sensors" [class.active]="sensor.isActive">
+                <div class="sensor-header">
+                  <span class="sensor-name">{{ sensor.name }}</span>
+                  <span class="sensor-status" [class.active]="sensor.isActive">
+                    <i class="fas" [class.fa-check-circle]="sensor.isActive" [class.fa-times-circle]="!sensor.isActive"></i>
+                    {{ sensor.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+                <div class="sensor-details">
+                  <div class="sensor-detail">
+                    <span class="label">ID:</span>
+                    <span class="value sensor-id">{{ sensor.id }}</span>
+                  </div>
+                  <div class="sensor-detail">
+                    <span class="label">Tipo:</span>
+                    <span class="value">{{ getSensorTypeLabel(sensor.type) }}</span>
+                  </div>
+                  <div class="sensor-detail">
+                    <span class="label">Unidad:</span>
+                    <span class="value">{{ sensor.unit }}</span>
+                  </div>
+                  <div class="sensor-detail" *ngIf="sensor.alertThreshold">
+                    <span class="label">Umbral:</span>
+                    <span class="value">{{ sensor.alertThreshold }} {{ sensor.unit }}</span>
+                  </div>
+                  <div class="sensor-detail">
+                    <span class="label">Frecuencia:</span>
+                    <span class="value">{{ sensor.sampleRate }}ms</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -113,7 +187,7 @@
           
           <button 
             class="btn btn-warning" 
-            *ngIf="helmet.status === 'activo-sin-asignar' && canModifyHelmet()"
+            *ngIf="helmet.status === 'activo-sin-asignar' && canModifyHelmet() && !authService.isAdmin()"
             (click)="assignHelmet(helmet)"
           >
             <i class="fas fa-user-plus"></i>
@@ -122,7 +196,7 @@
           
           <button 
             class="btn btn-info" 
-            *ngIf="helmet.status === 'activo-asignado' && canModifyHelmet()"
+            *ngIf="helmet.status === 'activo-asignado' && canModifyHelmet() && !authService.isAdmin()"
             (click)="unassignHelmet(helmet)"
           >
             <i class="fas fa-user-minus"></i>

@@ -503,6 +503,35 @@ export class HelmetsComponent implements OnInit {
     ];
   }
 
+  formatDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Fecha inválida';
+    }
+  }
+
+  getSensorTypeLabel(type: string): string {
+    const labels: { [key: string]: string } = {
+      'gps': 'GPS',
+      'heart_rate': 'Ritmo Cardíaco',
+      'body_temperature': 'Temperatura Corporal',
+      'gas': 'Detector de Gas',
+      'accelerometer': 'Acelerómetro',
+      'gyroscope': 'Giroscopio',
+      'battery': 'Batería'
+    };
+    return labels[type] || type;
+  }
+
   getUnassignedCount(): number {
     const value = (this.helmetStats.active || 0) - (this.helmetStats.assigned || 0)
     return value < 0 ? 0 : value

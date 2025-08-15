@@ -1033,3 +1033,123 @@
 }
 
 /* (Eliminado) Estados de carga con spinner */
+
+/* Estilos para las nuevas secciones de IDs y Sensores */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64ffda;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+.ids-section,
+.general-info-section,
+.sensors-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.id-value {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  background: rgba(100, 255, 218, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: #64ffda;
+  word-break: break-all;
+}
+
+.sensors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.sensor-card {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.sensor-card.active {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.sensor-card:not(.active) {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.sensor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.sensor-name {
+  font-weight: 600;
+  color: #ccd6f6;
+  font-size: 0.9rem;
+}
+
+.sensor-status {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.sensor-status.active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.sensor-details {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sensor-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.sensor-detail .label {
+  color: #8892b0;
+  font-weight: 500;
+}
+
+.sensor-detail .value {
+  color: #ccd6f6;
+  font-weight: 400;
+}
+
+.sensor-id {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  background: rgba(100, 255, 218, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  color: #64ffda;
+  word-break: break-all;
+}

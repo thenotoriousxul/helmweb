@@ -4,6 +4,21 @@ import { HttpClient } from '@angular/common/http';
 import { map, catchError, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
+export interface Sensor {
+  id: string;
+  cascoId: string;
+  type: 'gps' | 'heart_rate' | 'body_temperature' | 'gas' | 'accelerometer' | 'gyroscope' | 'battery';
+  name: string;
+  isActive: boolean;
+  minValue?: number;
+  maxValue?: number;
+  unit: string;
+  sampleRate: number;
+  alertThreshold?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Helmet {
   id: string;
   uuid: string;
@@ -19,12 +34,12 @@ export interface Helmet {
   batteryLevel?: number;
   temperature?: number;
   location?: string;
-  sensors?: {
-    gps: { lat: number; lng: number };
-    temperature: number;
-    heartRate: number;
-    acceleration: { x: number; y: number; z: number };
-  };
+  sensors?: Sensor[];
+  // Datos adicionales para mostrar IDs
+  physicalId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  fechaActivacion?: string;
 }
 
 export interface HelmetStats {
@@ -66,7 +81,25 @@ export class HelmetService {
           batteryLevel: undefined, // Ajustar si hay campo en backend
           temperature: undefined, // Ajustar si hay campo en backend
           location: undefined, // Ajustar si hay campo en backend
-          sensors: undefined // Ajustar si hay campo en backend
+          sensors: item.sensors ? item.sensors.map((sensor: any) => ({
+            id: sensor.id,
+            cascoId: sensor.cascoId,
+            type: sensor.type,
+            name: sensor.name,
+            isActive: sensor.isActive,
+            minValue: sensor.minValue,
+            maxValue: sensor.maxValue,
+            unit: sensor.unit,
+            sampleRate: sensor.sampleRate,
+            alertThreshold: sensor.alertThreshold,
+            createdAt: sensor.createdAt,
+            updatedAt: sensor.updatedAt
+          })) : [],
+          // Nuevos campos para mostrar IDs y fechas
+          physicalId: item.physicalId,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          fechaActivacion: item.fechaActivacion
         }))),
         catchError(error => {
           console.error('Error fetching helmets:', error);
@@ -83,6 +116,58 @@ export class HelmetService {
    */
   clearCache(): void {
     this.helmetsCache$ = null;
+  }
+
+  /**
+   * Obtiene el casco asignado al minero actual (solo para mineros)
+   */
+  getMyHelmet(): Observable<Helmet | null> {
+    return this.http.get<any>(`${this.apiUrl}/minero/my-helmet`, { withCredentials: true }).pipe(
+      map(response => {
+        if (!response.data) {
+          return null;
+        }
+        const item = response.data;
+        return {
+          id: item.id,
+          uuid: item.physicalId || item.uuid || '',
+          serialNumber: item.serial || item.serialNumber || '',
+          status: (item.isActive === 1 || item.isActive === true) ? ((item.asignadoMinero === 1 || item.asignadoMinero === true) ? 'activo-asignado' : 'activo-sin-asignar') : 'inactivo' as Helmet['status'],
+          assignedTo: item.minero ? item.minero.fullName : undefined,
+          assignedToId: (item.minero ? item.minero.id : undefined) || item.mineroId || undefined,
+          assignedToEmail: item.minero ? item.minero.email : undefined,
+          equipmentId: undefined,
+          equipmentName: undefined,
+          supervisorId: item.supervisorId,
+          lastHeartbeat: item.updatedAt || '',
+          batteryLevel: undefined,
+          temperature: undefined,
+          location: undefined,
+          sensors: item.sensors ? item.sensors.map((sensor: any) => ({
+            id: sensor.id,
+            cascoId: sensor.cascoId,
+            type: sensor.type,
+            name: sensor.name,
+            isActive: sensor.isActive,
+            minValue: sensor.minValue,
+            maxValue: sensor.maxValue,
+            unit: sensor.unit,
+            sampleRate: sensor.sampleRate,
+            alertThreshold: sensor.alertThreshold,
+            createdAt: sensor.createdAt,
+            updatedAt: sensor.updatedAt
+          })) : [],
+          physicalId: item.physicalId,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          fechaActivacion: item.fechaActivacion
+        };
+      }),
+      catchError(error => {
+        console.error('Error fetching my helmet:', error);
+        return of(null);
+      })
+    );
   }
 
   /**

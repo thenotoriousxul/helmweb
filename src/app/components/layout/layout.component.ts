@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -142,8 +142,8 @@ interface UserProfile {
       <!-- Main Content -->
       <main class="main-content" [class.sidebar-closed]="!sidebarOpen">
         <!-- Hamburger Menu Button -->
-        <button class="hamburger-btn" *ngIf="!sidebarOpen" (click)="openSidebar()">
-          <i class="fas fa-bars"></i>
+        <button class="hamburger-btn" (click)="toggleSidebar()">
+          <i class="fas" [class.fa-bars]="!sidebarOpen" [class.fa-times]="sidebarOpen"></i>
         </button>
         <router-outlet></router-outlet>
         <app-toast-container></app-toast-container>
@@ -286,10 +286,10 @@ export class LayoutComponent implements OnInit {
     avatar: ''
   };
 
-  activeSidebarItem = 'equipments'; // Changed default to equipments
+  activeSidebarItem = ''; // Will be set based on user role
   showProfileDropdown = false;
   showPasswordModal = false;
-  sidebarOpen = true;
+  sidebarOpen = window.innerWidth > 1024;
   passwordData = {
     currentPassword: '',
     newPassword: '',
@@ -309,6 +309,7 @@ export class LayoutComponent implements OnInit {
     console.log('Layout: ngOnInit iniciado');
     this.loadUserProfile();
     this.setActiveSidebarItemFromRoute();
+    this.setDefaultActiveSidebarItem();
     console.log('Layout: Componente inicializado correctamente');
   }
 
@@ -322,6 +323,28 @@ export class LayoutComponent implements OnInit {
 
   openSidebar() {
     this.sidebarOpen = true;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    // En pantallas grandes, mantener el sidebar abierto por defecto
+    // En pantallas pequeñas, cerrarlo por defecto
+    if (event.target.innerWidth > 1024) {
+      this.sidebarOpen = true;
+    }
+  }
+
+  setDefaultActiveSidebarItem() {
+    // Solo establecer el item por defecto si no hay uno activo
+    if (!this.activeSidebarItem) {
+      if (this.authService.isMinero()) {
+        this.activeSidebarItem = 'my-helmet';
+      } else if (this.authService.canViewAllEquipments()) {
+        this.activeSidebarItem = 'equipments';
+      } else if (this.authService.isAdmin()) {
+        this.activeSidebarItem = 'supervisors';
+      }
+    }
   }
 
   loadUserProfile() {
