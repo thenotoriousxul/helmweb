@@ -1085,7 +1085,7 @@ export class MyHelmetComponent implements OnInit {
     const nameMap: { [key: string]: string } = {
       'gps': 'GPS',
       'heart_rate': 'Frecuencia Cardíaca',
-      'body_temperature': 'Temperatura Corporal',
+      'body_temperature': 'Temperatura',
       'gas': 'Gas',
       'accelerometer': 'Acelerómetro',
       'gyroscope': 'Giroscopio',
