@@ -41,11 +41,11 @@ export const authGuard: CanActivateFn = (route, state) => {
         if (user.role === 'minero') {
           return router.createUrlTree(['/my-helmet']);
         } else if (user.role === 'supervisor') {
-          return router.createUrlTree(['/equipments']);
+          return router.createUrlTree(['/helmets']);
         } else if (user.role === 'admin') {
           return router.createUrlTree(['/supervisors']);
         }
-        return router.createUrlTree(['/equipments']);
+        return router.createUrlTree(['/helmets']);
       }
       
       console.log('AuthGuard: Acceso permitido');
@@ -72,11 +72,11 @@ export const guestGuard = (route: any, state: any) => {
     if (user?.role === 'minero') {
       return router.createUrlTree(['/my-helmet']);
     } else if (user?.role === 'supervisor') {
-      return router.createUrlTree(['/equipments']);
+      return router.createUrlTree(['/helmets']);
     } else if (user?.role === 'admin') {
       return router.createUrlTree(['/supervisors']);
     }
-    return router.createUrlTree(['/equipments']);
+    return router.createUrlTree(['/helmets']);
   }
 
   console.log('GuestGuard: Acceso permitido para invitados');

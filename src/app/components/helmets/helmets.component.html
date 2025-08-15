@@ -169,7 +169,11 @@
             Ver Detalle
           </button>
           
-          <button class="btn btn-info" (click)="viewReadings(helmet)">
+          <button 
+            class="btn btn-info" 
+            *ngIf="authService.isSupervisor()"
+            (click)="viewReadings(helmet)"
+          >
             <i class="fas fa-chart-line"></i>
             Ver Lecturas
           </button>
