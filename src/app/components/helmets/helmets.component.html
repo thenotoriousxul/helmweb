@@ -154,10 +154,7 @@
                   <span class="sensor-type-badge" [class]="'type-' + sensor.type">
                     {{ getSensorTypeLabel(sensor.type) }}
                   </span>
-                  <span class="sensor-status" [class.active]="sensor.isActive" [class.inactive]="!sensor.isActive">
-                    <i class="fas" [class.fa-check-circle]="sensor.isActive" [class.fa-times-circle]="!sensor.isActive"></i>
-                    {{ sensor.isActive ? 'Activo' : 'Inactivo' }}
-                  </span>
+
                 </div>
               </div>
             </div>

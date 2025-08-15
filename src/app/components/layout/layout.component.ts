@@ -74,7 +74,7 @@ interface UserProfile {
                 [class.active]="activeSidebarItem === 'equipments'"
                 *ngIf="authService.canViewAllEquipments()">
               <a (click)="setActiveSidebarItem('equipments')">
-                <i class="fas fa-hard-hat"></i>
+              <i class="fas fa-shield-alt"></i>
                 <span>{{ authService.isMinero() ? 'Mi Equipo' : 'Equipos' }}</span>
               </a>
             </li>
@@ -84,7 +84,7 @@ interface UserProfile {
                 [class.active]="activeSidebarItem === 'helmets'"
                 *ngIf="authService.canViewHelmets()">
               <a (click)="setActiveSidebarItem('helmets')">
-                <i class="fas fa-shield-alt"></i>
+                <i class="fas fa-hard-hat"></i>
                 <span>Cascos</span>
               </a>
             </li>
