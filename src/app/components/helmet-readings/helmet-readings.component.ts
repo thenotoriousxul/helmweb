@@ -181,48 +181,6 @@ import * as L from 'leaflet';
         </div>
 
         <!-- Charts Section -->
-        <div class="charts-card" *ngIf="helmet">
-          <div class="card-header">
-            <div class="header-left">
-              <div class="header-icon">
-                <i class="fas fa-chart-area"></i>
-              </div>
-              <div class="header-text">
-                <h3>Gráficas de Sensores</h3>
-                <p>Tendencias históricas de los datos</p>
-              </div>
-            </div>
-            <button class="refresh-btn" (click)="refreshCharts()" [disabled]="isLoadingCharts">
-              <i class="fas fa-sync-alt" [class.spinning]="isLoadingCharts"></i>
-              Actualizar
-            </button>
-          </div>
-
-          <div class="chart-content">
-            <div *ngIf="isLoadingCharts" class="loading-state">
-              <div class="loading-spinner"></div>
-              <p>Cargando gráficas...</p>
-            </div>
-
-            <div *ngIf="!isLoadingCharts && chartData" class="chart-container">
-              <canvas 
-                baseChart
-                [data]="chartData"
-                [options]="chartOptions"
-                [type]="chartType">
-              </canvas>
-            </div>
-
-            <div *ngIf="!isLoadingCharts && !chartData" class="no-chart-data">
-              <i class="fas fa-chart-line"></i>
-              <p>No hay datos disponibles para mostrar gráficas</p>
-              <button class="retry-btn" (click)="refreshCharts()">
-                <i class="fas fa-redo"></i>
-                Intentar de nuevo
-              </button>
-            </div>
-          </div>
-        </div>
       </section>
 
       <!-- Error State -->
